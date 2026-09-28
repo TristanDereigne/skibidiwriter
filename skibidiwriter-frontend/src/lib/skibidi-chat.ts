@@ -39,7 +39,6 @@ class SkibidiChat {
     };
   };
 
-  /** Returns false if the socket isn't connected and the event was dropped. */
   send(event: ClientEvent): boolean {
     if (this.#ws?.readyState !== WebSocket.OPEN) return false;
 

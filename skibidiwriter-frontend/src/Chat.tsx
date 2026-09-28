@@ -35,7 +35,7 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller";
-import { type ChatStatus, useSkibidiChat } from "@/lib/skibidi-chat";
+import { useSkibidiChat, type ChatStatus } from "@/lib/skibidi-chat";
 import { format } from "date-fns";
 import { MessagesSquareIcon, SendIcon } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
@@ -68,10 +68,7 @@ export default function Chat() {
         )}
       </CardContent>
       <CardFooter>
-        <ChatComposer
-          disabled={status !== "connected"}
-          onSend={sendMessage}
-        />
+        <ChatComposer disabled={status !== "connected"} onSend={sendMessage} />
       </CardFooter>
     </Card>
   );
@@ -135,8 +132,10 @@ function ChatComposer({
     ev.preventDefault();
     if (!content || disabled) return;
 
-    // Keep the draft if the socket dropped between render and submit.
-    if (onSend(content)) setDraft("");
+    const success = onSend(content);
+    if (success) {
+      setDraft("");
+    }
   };
 
   return (
