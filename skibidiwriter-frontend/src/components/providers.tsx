@@ -4,7 +4,7 @@ import { TooltipProvider } from "./ui/tooltip";
 
 const queryClient = new QueryClient();
 
-export default function Providers({ children }: PropsWithChildren) {
+export default function Providers({ children }: Readonly<PropsWithChildren>) {
   return (
     <TooltipProvider>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
