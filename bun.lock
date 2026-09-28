@@ -11,6 +11,7 @@
         "drizzle-orm": "^1.0.0-rc.4",
         "hono": "^4.13.9",
         "pg": "^8.23.0",
+        "skibidiwriter-shared": "workspace:*",
         "zod": "^4.6.5",
       },
       "devDependencies": {
@@ -58,6 +59,18 @@
         "skibidiwriter-backend": "workspace:*",
         "typescript": "~6.0.2",
         "vite": "^8.3.0",
+      },
+    },
+    "skibidiwriter-shared": {
+      "name": "skibidiwriter-shared",
+      "dependencies": {
+        "zod": "^4.6.5",
+      },
+      "devDependencies": {
+        "@types/bun": "latest",
+      },
+      "peerDependencies": {
+        "typescript": "~6.0.2",
       },
     },
   },
@@ -1023,6 +1036,8 @@
     "skibidiwriter-backend": ["skibidiwriter-backend@workspace:skibidiwriter-backend"],
 
     "skibidiwriter-frontend": ["skibidiwriter-frontend@workspace:skibidiwriter-frontend"],
+
+    "skibidiwriter-shared": ["skibidiwriter-shared@workspace:skibidiwriter-shared"],
 
     "slash": ["slash@3.0.0", "", {}, "sha512-g9Q1haeby36OSStwb4ntCGGGaKsaVSjQ68fBxoQcutl5fS1vuY18H3wSt3jFyFtrkx+Kz0V1G85A4MyAdDMi2Q=="],
 
