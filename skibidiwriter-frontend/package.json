@@ -1,5 +1,5 @@
 {
-  "name": "@skibidiwriter/frontend",
+  "name": "skibidiwriter-frontend",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -20,6 +20,7 @@
     "cn": "^0.4.0",
     "date-fns": "^4.4.0",
     "embla-carousel-react": "^8.6.0",
+    "hono": "^4.13.10",
     "input-otp": "^1.5.0",
     "lucide-react": "^1.48.0",
     "react": "^19.2.8",
@@ -38,6 +39,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "skibidiwriter-backend": "workspace:*"
   }
 }

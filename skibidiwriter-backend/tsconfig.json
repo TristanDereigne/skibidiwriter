@@ -8,7 +8,8 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "skipLibCheck": true,
-    "noEmit": true,
+    "noEmit": false,
+    "composite": true,
     "paths": {
       "@/*": ["./src/*"]
     }

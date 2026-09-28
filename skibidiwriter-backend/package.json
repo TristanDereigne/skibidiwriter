@@ -1,15 +1,14 @@
 {
-  "name": "@skibidiwriter/backend",
+  "name": "skibidiwriter-backend",
   "type": "module",
-  "types": "./dist/index.d.ts",
+  "types": "./src/index.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts"
+      "types": "./src/index.ts"
     }
   },
   "scripts": {
-    "dev": "concurrently \"nodemon --watch src/models -e ts --exec bun db:push\" \"bun types:watch\" \"bun run --hot src/index.ts\"",
-    "types:watch": "tsc -p tsconfig.types.json --watch",
+    "dev": "concurrently \"nodemon --watch src/models -e ts --exec bun db:push\" \"bun run --hot src/index.ts\"",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
