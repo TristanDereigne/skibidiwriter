@@ -2,15 +2,9 @@
   "name": "skibidiwriter-shared",
   "private": true,
   "type": "module",
-  "scripts": {
-    "build": "bun build ./src/index.ts --outdir ./dist --target bun",
-    "build:watch": "bun build ./src/index.ts --outdir ./dist --target bun --watch"
-  },
+  "types": "./src/index.ts",
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
+    ".": "./src/index.ts"
   },
   "devDependencies": {
     "@types/bun": "latest",

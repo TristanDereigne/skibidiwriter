@@ -3,11 +3,10 @@ import { upgradeWebSocket } from "@hono/bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { WSContext, WSMessageReceive } from "hono/ws";
+import type { MessageDTO, ServerEvent } from "skibidiwriter-shared";
 import {
   ClientEventSchema,
   ClientEventType,
-  MessageDTO,
-  type ServerEvent,
   ServerEventType,
 } from "skibidiwriter-shared";
 import { exampleController } from "./example.controller";
@@ -32,12 +31,15 @@ function handleWSMessage(
 ): void {
   sockets.push(ws);
 
-  const { data, success } = ClientEventSchema.safeParse(rawEvent);
+  const { data, success, error } = ClientEventSchema.safeParse(
+    JSON.parse(rawEvent.data.toString()),
+  );
   if (!success) {
+    console.warn(error);
     ws.send(
       JSON.stringify({
         type: ServerEventType.Error,
-        message: "Invalid data received",
+        message: "Invalid data received: " + error.message,
       } satisfies ServerEvent),
     );
     return;

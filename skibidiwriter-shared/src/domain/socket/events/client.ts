@@ -1,5 +1,5 @@
-import { MESSAGE_MAX_LENGTH } from "@/domain/messages/constants";
 import z from "zod";
+import { MESSAGE_MAX_LENGTH } from "../../messages/constants";
 
 export enum ClientEventType {
   Message_Create = "message_create",

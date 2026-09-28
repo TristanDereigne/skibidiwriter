@@ -1,4 +1,4 @@
-import type { MessageDTO } from "@/domain/messages/dtos";
+import type { MessageDTO } from "../../messages/dtos";
 
 export enum ServerEventType {
   Message_New = "message_new",
