@@ -8,7 +8,7 @@
     }
   },
   "scripts": {
-    "dev": "concurrently \"nodemon --watch src/models -e ts --exec bun db:push\" \"bun run --hot src/index.ts\"",
+    "dev": "concurrently --names drizzle,app -c cyan,green \"nodemon --watch src/models -e ts --exec bun db:push\" \"bun run --hot src/index.ts\"",
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
