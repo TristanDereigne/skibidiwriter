@@ -109,7 +109,6 @@ class SkibidiChat {
 
 const chat = new SkibidiChat();
 
-// Without this, every HMR update of this module would open another socket.
 import.meta.hot?.dispose(() => chat.close());
 
 export function useSkibidiChat() {
