@@ -1,0 +1,31 @@
+{
+  "name": "@skibidiwriter/backend",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "concurrently \"nodemon --watch src/models -e ts --exec bun db:push\" \"bun types:watch\" \"bun run --hot src/index.ts\"",
+    "types:watch": "tsc -p tsconfig.types.json --watch",
+    "db:push": "drizzle-kit push"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.4",
+    "drizzle-orm": "^1.0.0-rc.4",
+    "hono": "^4.13.9",
+    "pg": "^8.23.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.23.1",
+    "concurrently": "^10.0.5",
+    "drizzle-kit": "^1.0.0-rc.4",
+    "nodemon": "^3.1.14",
+    "tsc-alias": "^1.9.5",
+    "tsx": "^4.23.15"
+  }
+}
