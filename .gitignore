@@ -1,4 +1,5 @@
 /.idea/
+.idea/
 /skibidiwriter-backend/node_modules/
 /skibidiwriter-frontend/node_modules/
 /skibidiwriter-backend/.env.local
