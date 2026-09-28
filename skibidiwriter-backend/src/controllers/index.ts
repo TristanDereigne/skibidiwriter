@@ -1,71 +1,11 @@
 import { env } from "@/libs/env";
-import { upgradeWebSocket } from "@hono/bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { WSContext, WSMessageReceive } from "hono/ws";
-import type { MessageDTO, ServerEvent } from "skibidiwriter-shared";
-import {
-  ClientEventSchema,
-  ClientEventType,
-  ServerEventType,
-} from "skibidiwriter-shared";
+import { chatSocket } from "./chat.controller";
 import { exampleController } from "./example.controller";
 
 export const app = new Hono()
   .use("*", cors({ origin: env.FRONTEND_URL, credentials: true }))
-  .get(
-    "/ws",
-    upgradeWebSocket((ctx) => ({
-      onMessage: handleWSMessage,
-    })),
-  )
+  .get("/ws", chatSocket)
   .all("/", (ctx) => ctx.text("SkibidiWriter 🚽"))
   .route("/examples", exampleController);
-
-const sockets: WSContext[] = [];
-const messages: MessageDTO[] = [];
-
-function handleWSMessage(
-  rawEvent: MessageEvent<WSMessageReceive>,
-  ws: WSContext,
-): void {
-  sockets.push(ws);
-
-  const { data, success, error } = ClientEventSchema.safeParse(
-    JSON.parse(rawEvent.data.toString()),
-  );
-  if (!success) {
-    console.warn(error);
-    ws.send(
-      JSON.stringify({
-        type: ServerEventType.Error,
-        message: "Invalid data received: " + error.message,
-      } satisfies ServerEvent),
-    );
-    return;
-  }
-
-  switch (data.type) {
-    case ClientEventType.Message_Create: {
-      const message: MessageDTO = {
-        id: crypto.randomUUID(),
-        content: data.content,
-      };
-
-      messages.push(message);
-
-      broadcast({
-        type: ServerEventType.Message_New,
-        message,
-      });
-
-      break;
-    }
-  }
-}
-
-function broadcast(event: ServerEvent) {
-  for (const socket of sockets) {
-    socket.send(JSON.stringify(event));
-  }
-}

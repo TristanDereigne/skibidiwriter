@@ -1,16 +1,23 @@
 import type { MessageDTO } from "../../messages/dtos";
 
-export enum ServerEventType {
-  Message_New = "message_new",
-  Error = "error",
-}
+export const ServerEventType = {
+  Message_History: "message_history",
+  Message_New: "message_new",
+  Error: "error",
+} as const;
+export type ServerEventType =
+  (typeof ServerEventType)[keyof typeof ServerEventType];
 
 export type ServerEvent =
   | {
-      type: ServerEventType.Message_New;
+      type: typeof ServerEventType.Message_History;
+      messages: MessageDTO[];
+    }
+  | {
+      type: typeof ServerEventType.Message_New;
       message: MessageDTO;
     }
   | {
-      type: ServerEventType.Error;
+      type: typeof ServerEventType.Error;
       message: string;
     };
