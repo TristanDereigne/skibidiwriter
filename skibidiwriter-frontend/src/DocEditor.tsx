@@ -1,6 +1,15 @@
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useLayoutEffect, useRef } from "react";
 import { diffText, mapCursor } from "skibidiwriter-shared";
 import { useSkibidiDocument } from "./lib/document";
+import { CONNECTION_STATUS_LABELS } from "./lib/realtime";
 
 export default function DocEditor() {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -20,13 +29,24 @@ export default function DocEditor() {
   }, [text]);
 
   return (
-    <div className="aspect-[1/sqrt(2)] max-w-1/3 border mx-auto p-1">
-      <textarea
-        ref={textareaRef}
-        className="size-full resize-none outline-none"
-        onInput={(event) => edit(event.currentTarget.value)}
-      />
-      {status !== "connected" && <p>Offline, changes will sync on reconnect</p>}
-    </div>
+    <Card className="mx-auto h-[32rem] w-full max-w-2xl">
+      <CardHeader>
+        <CardTitle>Skibidi document</CardTitle>
+        <CardAction>
+          <Badge variant={status === "connected" ? "secondary" : "outline"}>
+            {CONNECTION_STATUS_LABELS[status]}
+          </Badge>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="min-h-0 flex-1">
+        <textarea
+          ref={textareaRef}
+          aria-label="Document"
+          placeholder="Start writing…"
+          className="size-full resize-none bg-transparent text-sm leading-relaxed outline-none placeholder:text-muted-foreground"
+          onInput={(event) => edit(event.currentTarget.value)}
+        />
+      </CardContent>
+    </Card>
   );
 }

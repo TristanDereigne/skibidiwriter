@@ -7,9 +7,11 @@ import Examples from "./Examples";
 export default function App() {
   return (
     <Providers>
-      <DocEditor />
-      <Chat />
-      <Examples />
+      <main className="flex flex-col gap-6 p-6">
+        <DocEditor />
+        <Chat />
+        <Examples />
+      </main>
       <Toaster />
     </Providers>
   );

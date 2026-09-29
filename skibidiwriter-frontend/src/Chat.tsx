@@ -33,13 +33,7 @@ import { SendIcon } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 import { MESSAGE_MAX_LENGTH, type MessageDTO } from "skibidiwriter-shared";
 import { useSkibidiChat } from "./lib/chat";
-import type { ConnectionStatus } from "./lib/realtime";
-
-const STATUS_LABELS: Record<ConnectionStatus, string> = {
-  connecting: "Connecting…",
-  connected: "Connected",
-  disconnected: "Reconnecting…",
-};
+import { CONNECTION_STATUS_LABELS } from "./lib/realtime";
 
 export default function Chat() {
   const { status, messages, sendMessage } = useSkibidiChat();
@@ -50,7 +44,7 @@ export default function Chat() {
         <CardTitle>Skibidi chat</CardTitle>
         <CardAction>
           <Badge variant={status === "connected" ? "secondary" : "outline"}>
-            {STATUS_LABELS[status]}
+            {CONNECTION_STATUS_LABELS[status]}
           </Badge>
         </CardAction>
       </CardHeader>
