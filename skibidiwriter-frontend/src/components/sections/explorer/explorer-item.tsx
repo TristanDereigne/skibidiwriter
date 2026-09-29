@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/context-menu";
 import { PencilIcon, Trash2Icon, type LucideIcon } from "lucide-react";
 import { useState } from "react";
+import InlineNameInput from "@/components/layout/inline-name-input";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
-import ExplorerNameInput from "./explorer-name-input";
 
 interface Props {
   icon: LucideIcon;
@@ -59,7 +59,8 @@ export default function ExplorerItem({
           </button>
           <div className="w-full">
             {renaming ? (
-              <ExplorerNameInput
+              <InlineNameInput
+                className="text-center"
                 name={name}
                 label={nameLabel}
                 onCommit={onRename}

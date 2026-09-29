@@ -13,13 +13,13 @@ import { Label } from "../../components/ui/label.tsx";
 import { Input } from "../../components/ui/input.tsx";
 import { Button } from "../../components/ui/button.tsx";
 import { z } from "zod";
-import { useState, type SetStateAction } from "react";
-import { useAuth } from "../../hooks/useAuth.tsx";
+import {useState, type SetStateAction, useContext} from "react";
+import { AuthContext } from '@/context/AuthContext.tsx'
 
 export const RegisterPage = () => {
-  let navigate = useNavigate();
 
-  const auth = useAuth();
+  let navigate = useNavigate();
+  const authContext = useContext(AuthContext);
 
   const registerSchema = z.object({
     email: z.email("Format d'email invalide"),
@@ -31,7 +31,7 @@ export const RegisterPage = () => {
         /\w/,
         "Le pseudo ne peut contenir que des lettres, chiffres et underscore",
       ),
-    password: z.string().min(6, "6 caractères minimum"),
+    password: z.string().min(8, "8 caractères minimum").max(32, "32 caractères maximum"),
   });
 
   const [email, setEmail] = useState("");
@@ -58,6 +58,7 @@ export const RegisterPage = () => {
       setVerifyPassword(e.target.value);
     }
   };
+
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
@@ -81,9 +82,7 @@ export const RegisterPage = () => {
     setErrors({});
     console.log("Données valides :", result.data);
 
-    await auth.signUp(email, password, pseudo).then((result) => {
-      console.log(result);
-    });
+    authContext?.register(email, password, pseudo);
   };
 
   return (

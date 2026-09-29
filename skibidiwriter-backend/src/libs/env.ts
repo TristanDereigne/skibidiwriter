@@ -10,6 +10,7 @@ const schema = z.object({
   PORT: z.coerce.number(),
   DATABASE_URL: z.url(),
   FRONTEND_URL: z.url(),
+  FRONTEND_URL_NO_SLASH: z.url(),
 });
 
 export const env = schema.parse(process.env);

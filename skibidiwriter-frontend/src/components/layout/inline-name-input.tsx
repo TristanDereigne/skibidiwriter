@@ -1,16 +1,19 @@
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { useEffect, useRef, useState } from "react";
 
 interface Props {
   name: string;
   label: string;
+  className?: string;
   onCommit: (name: string) => void;
   onDone: () => void;
 }
 
-export default function ExplorerNameInput({
+export default function InlineNameInput({
   name: initialName,
   label,
+  className,
   onCommit,
   onDone,
 }: Readonly<Props>) {
@@ -43,7 +46,7 @@ export default function ExplorerNameInput({
       aria-label={label}
       value={name}
       maxLength={255}
-      className="h-6 px-1 text-center text-sm font-medium md:text-sm"
+      className={cn("h-6 px-1 text-sm font-medium md:text-sm", className)}
       onChange={(event) => setName(event.target.value)}
       onClick={(event) => event.stopPropagation()}
       onBlur={() => finish(true)}

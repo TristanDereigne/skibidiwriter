@@ -6,17 +6,27 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import InlineNameInput from "./inline-name-input";
 import { explorerPath } from "@/lib/paths";
-import { Fragment } from "react";
+import { cn } from "@/lib/utils";
+import { Fragment, useState } from "react";
 import { Link } from "react-router";
 import type { FolderDTO } from "skibidiwriter-shared";
 
 interface Props {
   folders: FolderDTO[];
   current?: string;
+  /** Makes the current crumb editable in place. */
+  onRename?: (name: string) => void;
 }
 
-export default function TrailBreadcrumb({ folders, current }: Readonly<Props>) {
+export default function TrailBreadcrumb({
+  folders,
+  current,
+  onRename,
+}: Readonly<Props>) {
+  const [renaming, setRenaming] = useState(false);
+
   const trail = [
     { id: null, name: "Documents" },
     ...folders,
@@ -38,9 +48,26 @@ export default function TrailBreadcrumb({ folders, current }: Readonly<Props>) {
           </Fragment>
         ))}
         <BreadcrumbItem className="min-w-0">
-          <BreadcrumbPage className="truncate font-semibold">
-            {last.name}
-          </BreadcrumbPage>
+          {renaming && onRename ? (
+            <InlineNameInput
+              className="w-56"
+              name={last.name}
+              label="Document name"
+              onCommit={onRename}
+              onDone={() => setRenaming(false)}
+            />
+          ) : (
+            <BreadcrumbPage
+              className={cn(
+                "truncate font-semibold",
+                onRename && "cursor-text rounded px-1 hover:bg-muted",
+              )}
+              onClick={onRename && (() => setRenaming(true))}
+              title={onRename && "Click to rename"}
+            >
+              {last.name}
+            </BreadcrumbPage>
+          )}
         </BreadcrumbItem>
       </BreadcrumbList>
     </Breadcrumb>
