@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createContext, useState } from "react";
-import {useAuth} from "@/hooks/use-auth.ts";
+import { useAuth } from "@/hooks/use-auth.ts";
 
 type AuthContextType = {
   user: string | null;
@@ -13,16 +13,15 @@ type AuthContextType = {
 export const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-
   const auth = useAuth();
 
   const [user, setUser] = useState<string | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  const register = async (email:string, password:string, pseudo: string) => {
+  const register = async (email: string, password: string, pseudo: string) => {
     try {
-      const signUpResult = await auth.signUp(email, password, pseudo)
-      if(signUpResult) {
+      const signUpResult = await auth.signUp(email, password, pseudo);
+      if (signUpResult) {
         const signInResult = await auth.signIn(email, password);
         if (signInResult) {
           setUser(signInResult.user.name);
@@ -37,12 +36,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const login = async (email:string, password:string) => {
+  const login = async (email: string, password: string) => {
     try {
-      const signInResult = await auth.signIn(email, password)
-      if(signInResult) {
-          setUser(signInResult.user.name);
-          setIsLoggedIn(true);
+      const signInResult = await auth.signIn(email, password);
+      if (signInResult) {
+        setUser(signInResult.user.name);
+        setIsLoggedIn(true);
       }
     } catch (error) {
       console.error("Failed to login :", error.message);
@@ -53,17 +52,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const isUserLoggedin = async () => {
-    const isSignedIn = await auth.isSignIn()
-    if(isSignedIn) {
+    const isSignedIn = await auth.isSignIn();
+    if (isSignedIn) {
       setIsLoggedIn(true);
     } else {
       setIsLoggedIn(false);
     }
     return isLoggedIn;
-  }
+  };
 
   return (
-    <AuthContext.Provider value={{ user, isUserLoggedin, register, login, isLoggedIn }}>
+    <AuthContext.Provider
+      value={{ user, isUserLoggedin, register, login, isLoggedIn }}
+    >
       {children}
     </AuthContext.Provider>
   );
