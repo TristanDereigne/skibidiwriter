@@ -16,8 +16,6 @@ const clients = new Set<WSContext>();
 const messages: MessageDTO[] = [];
 
 export const chatSocket = upgradeWebSocket(() => {
-  // Hono creates a new WSContext for every event, so the one from onOpen is
-  // kept to identify this connection in `clients`.
   let client: WSContext | undefined;
 
   return {

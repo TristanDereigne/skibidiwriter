@@ -3,6 +3,7 @@ import type { MessageDTO } from "../../messages/dtos";
 export const ServerEventType = {
   Message_History: "message_history",
   Message_New: "message_new",
+  Document_Snapshot: "document_snapshot",
   Error: "error",
 } as const;
 export type ServerEventType =
@@ -16,6 +17,10 @@ export type ServerEvent =
   | {
       type: typeof ServerEventType.Message_New;
       message: MessageDTO;
+    }
+  | {
+      type: typeof ServerEventType.Document_Snapshot;
+      content: string;
     }
   | {
       type: typeof ServerEventType.Error;

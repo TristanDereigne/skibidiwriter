@@ -28,13 +28,14 @@ import {
   MessageScrollerProvider,
   MessageScrollerViewport,
 } from "@/components/ui/message-scroller";
-import { useSkibidiChat, type ChatStatus } from "@/lib/skibidi-chat";
 import { format } from "date-fns";
 import { SendIcon } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 import { MESSAGE_MAX_LENGTH, type MessageDTO } from "skibidiwriter-shared";
+import { useSkibidiChat } from "./lib/chat";
+import type { ConnectionStatus } from "./lib/realtime";
 
-const STATUS_LABELS: Record<ChatStatus, string> = {
+const STATUS_LABELS: Record<ConnectionStatus, string> = {
   connecting: "Connecting…",
   connected: "Connected",
   disconnected: "Reconnecting…",
