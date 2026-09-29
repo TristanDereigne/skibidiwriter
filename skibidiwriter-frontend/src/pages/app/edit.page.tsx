@@ -4,12 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useDocuments } from "@/hooks/use-documents";
 import { CONNECTION_STATUS_LABELS, useConnectionStatus } from "@/lib/realtime";
-import { ArrowLeftIcon } from "lucide-react";
+import { ArrowLeftIcon, LoaderCircleIcon } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 export const EditPage = () => {
   const { documentId } = useParams();
-  const { data } = useDocuments();
+  const { isLoading, data } = useDocuments();
   const status = useConnectionStatus();
 
   const name = data?.find((document) => document.id === documentId)?.name;
@@ -26,7 +26,14 @@ export const EditPage = () => {
           <ArrowLeftIcon />
         </Button>
         <h1 className="flex-1 truncate text-lg font-semibold tracking-tight">
-          {name ?? "Document"}
+          {isLoading ? (
+            <div className="flex text-muted-foreground shimmer gap-1 items-center">
+              <span>Loading</span>
+              <LoaderCircleIcon className="animate-spin size-4" />
+            </div>
+          ) : (
+            (name ?? "Document")
+          )}
         </h1>
         <Badge variant={status === "connected" ? "secondary" : "outline"}>
           {CONNECTION_STATUS_LABELS[status]}
