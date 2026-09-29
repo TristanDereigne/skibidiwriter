@@ -52,7 +52,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const isUserLoggedin = () => {
+  const isUserLoggedin = async () => {
+    const isSignedIn = await auth.isSignIn()
+    if(isSignedIn) {
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
     return isLoggedIn;
   }
 
