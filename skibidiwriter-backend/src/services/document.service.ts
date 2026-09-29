@@ -58,7 +58,7 @@ async function operations(id: string): Promise<DocumentOperation[] | null> {
 
 async function apply(
   id: string,
-  incoming: DocumentOperation[]
+  incoming: DocumentOperation[],
 ): Promise<DocumentOperation[] | null> {
   const document = await open(id);
   if (!document) return null;
@@ -69,7 +69,7 @@ async function apply(
     clearTimeout(document.persistTimer);
     document.persistTimer = setTimeout(
       () => void persist(id, document),
-      PERSIST_DELAY
+      PERSIST_DELAY,
     );
   }
 

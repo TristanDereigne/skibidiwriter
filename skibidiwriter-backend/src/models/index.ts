@@ -7,13 +7,7 @@ export const relations = defineRelations({
   user,
   session,
   account,
-  verification
+  verification,
 });
 
-export {
-  documentTable,
-  user,
-  session,
-  account,
-  verification
-};
+export { documentTable, user, session, account, verification };
