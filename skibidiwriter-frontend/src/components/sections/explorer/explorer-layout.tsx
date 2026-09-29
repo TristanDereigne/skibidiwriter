@@ -7,7 +7,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
-import ExplorerHeaderActions from "./explorer-header-actions";
+import ExplorerHeaderActions from "./header-actions";
 import { useExplorer } from "./use-explorer";
 
 export default function ExplorerLayout({
