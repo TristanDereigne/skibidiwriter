@@ -8,11 +8,11 @@ import { ArrowLeftIcon } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 export const EditPage = () => {
-  const { id } = useParams();
+  const { documentId } = useParams();
   const { data } = useDocuments();
   const status = useConnectionStatus();
 
-  const name = data?.find((document) => document.id === id)?.name;
+  const name = data?.find((document) => document.id === documentId)?.name;
 
   return (
     <div className="flex h-full min-h-screen w-full flex-col">
