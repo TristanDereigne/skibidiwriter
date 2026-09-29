@@ -9,3 +9,5 @@
 node_modules/
 /skibidiwriter-backend/bun.lock
 /skibidiwriter-frontend/bun.lock
+
+*.tsbuildinfo
