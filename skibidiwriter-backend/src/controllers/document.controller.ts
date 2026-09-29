@@ -24,7 +24,7 @@ export const documentController = new Hono()
   })
   .post("/", async (ctx) => {
     const body = CreateDocumentSchema.safeParse(
-      await ctx.req.json().catch(() => null)
+      await ctx.req.json().catch(() => null),
     );
     if (!body.success) return ctx.json({ error: "Invalid document" }, 400);
 
@@ -46,12 +46,12 @@ export const documentController = new Hono()
 
       const row = await documentService.rename(
         id.data,
-        ctx.req.valid("json").name
+        ctx.req.valid("json").name,
       );
       if (!row) return ctx.json({ error: "Document not found" }, 404);
 
       return ctx.json(toDTO(row), 200);
-    }
+    },
   )
   .delete("/:id", async (ctx) => {
     const id = z.uuid().safeParse(ctx.req.param("id"));
