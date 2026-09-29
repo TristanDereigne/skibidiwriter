@@ -15,10 +15,14 @@ export default function App() {
 
   return (
     <Providers>
-      <AppHeader actions={headerContext?.headerActions}>
-        {headerContext?.headerChildren}
-      </AppHeader>
-      <Outlet />
+      <div className="flex h-svh flex-col">
+        <AppHeader actions={headerContext?.headerActions}>
+          {headerContext?.headerChildren}
+        </AppHeader>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <Outlet />
+        </div>
+      </div>
       <Toaster />
     </Providers>
   );
