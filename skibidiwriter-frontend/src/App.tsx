@@ -1,10 +1,10 @@
 import Providers from "./components/providers";
-import Examples from "./Examples";
+import {Outlet} from "react-router";
 
 export default function App() {
   return (
     <Providers>
-      <Examples />
+      <Outlet />
     </Providers>
   );
 }
