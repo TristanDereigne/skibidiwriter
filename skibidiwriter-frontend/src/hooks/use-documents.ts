@@ -31,3 +31,34 @@ export function useCreateDocument() {
       queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY }),
   });
 }
+
+export function useRenameDocument() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const res = await api.documents[":id"].$patch({
+        param: { id },
+        json: { name },
+      });
+      if (!res.ok) throw new Error("Failed to rename document");
+
+      return await res.json();
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY }),
+  });
+}
+
+export function useDeleteDocument() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const res = await api.documents[":id"].$delete({ param: { id } });
+      if (!res.ok) throw new Error("Failed to delete document");
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY }),
+  });
+}
