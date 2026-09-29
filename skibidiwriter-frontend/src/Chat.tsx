@@ -9,13 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "@/components/ui/empty";
-import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
@@ -37,7 +30,7 @@ import {
 } from "@/components/ui/message-scroller";
 import { useSkibidiChat, type ChatStatus } from "@/lib/skibidi-chat";
 import { format } from "date-fns";
-import { MessagesSquareIcon, SendIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
 import { MESSAGE_MAX_LENGTH, type MessageDTO } from "skibidiwriter-shared";
 
@@ -61,30 +54,12 @@ export default function Chat() {
         </CardAction>
       </CardHeader>
       <CardContent className="min-h-0 flex-1">
-        {messages.length === 0 ? (
-          <ChatEmpty />
-        ) : (
-          <ChatMessages messages={messages} />
-        )}
+        <ChatMessages messages={messages} />
       </CardContent>
       <CardFooter>
         <ChatComposer disabled={status !== "connected"} onSend={sendMessage} />
       </CardFooter>
     </Card>
-  );
-}
-
-function ChatEmpty() {
-  return (
-    <Empty className="h-full">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <MessagesSquareIcon />
-        </EmptyMedia>
-        <EmptyTitle>No messages yet</EmptyTitle>
-        <EmptyDescription>Be the first to say something.</EmptyDescription>
-      </EmptyHeader>
-    </Empty>
   );
 }
 
