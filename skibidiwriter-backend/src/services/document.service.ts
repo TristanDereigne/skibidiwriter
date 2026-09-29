@@ -1,5 +1,5 @@
 import { db } from "@/libs/db";
-import { documentTable } from "@/models";
+import { documentTable } from "@/models/document.model";
 import { eq } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 

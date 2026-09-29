@@ -14,7 +14,7 @@ import { Input } from "../../components/ui/input.tsx";
 import { Button } from "../../components/ui/button.tsx";
 import { z } from "zod";
 import { useState, type SetStateAction } from "react";
-import { useAuth } from "../../hooks/useAuth.tsx";
+import { useAuth } from "@/hooks/use-auth.ts";
 
 export const LoginPage = () => {
   let navigate = useNavigate();
