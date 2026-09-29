@@ -1,3 +1,5 @@
+import AppHeader from "@/components/layout/app-header";
+import TrailBreadcrumb from "@/components/layout/trail-breadcrumb";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -5,44 +7,44 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Separator } from "@/components/ui/separator";
 import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
-import ExplorerBreadcrumb from "./explorer-breadcrumb";
 import { useExplorer } from "./use-explorer";
 
 export default function ExplorerLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const { createDocument, createFolder } = useExplorer();
+  const { path, createDocument, createFolder } = useExplorer();
 
   return (
     <div className="flex h-full w-full flex-col">
-      <header className="flex h-12 items-center gap-2 px-6">
-        <ExplorerBreadcrumb />
-        <div className="ml-auto flex items-center">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-muted-foreground"
-            aria-label="New folder"
-            title="New folder"
-            onClick={createFolder}
-          >
-            <FolderPlusIcon />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-muted-foreground"
-            aria-label="New document"
-            title="New document"
-            onClick={createDocument}
-          >
-            <FilePlusIcon />
-          </Button>
-        </div>
-      </header>
-      <Separator />
+      <AppHeader
+        actions={
+          <>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground"
+              aria-label="New folder"
+              title="New folder"
+              onClick={createFolder}
+            >
+              <FolderPlusIcon />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground"
+              aria-label="New document"
+              title="New document"
+              onClick={createDocument}
+            >
+              <FilePlusIcon />
+            </Button>
+          </>
+        }
+      >
+        <TrailBreadcrumb folders={path} />
+      </AppHeader>
       <ContextMenu>
         <ContextMenuTrigger
           render={<main className="flex-1 overflow-auto p-6" />}

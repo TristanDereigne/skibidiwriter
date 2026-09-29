@@ -9,18 +9,25 @@ import {
 import { explorerPath } from "@/lib/paths";
 import { Fragment } from "react";
 import { Link } from "react-router";
-import { useExplorer } from "./use-explorer";
+import type { FolderDTO } from "skibidiwriter-shared";
 
-export default function ExplorerBreadcrumb() {
-  const { path } = useExplorer();
+interface Props {
+  folders: FolderDTO[];
+  current?: string;
+}
 
-  const crumbs = [{ id: null, name: "Documents" }, ...path];
-  const current = crumbs[crumbs.length - 1]!;
+export default function TrailBreadcrumb({ folders, current }: Readonly<Props>) {
+  const trail = [
+    { id: null, name: "Documents" },
+    ...folders,
+    ...(current === undefined ? [] : [{ id: "current", name: current }]),
+  ];
+  const last = trail[trail.length - 1]!;
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList className="text-sm">
-        {crumbs.slice(0, -1).map((crumb) => (
+    <Breadcrumb className="min-w-0">
+      <BreadcrumbList className="flex-nowrap text-sm">
+        {trail.slice(0, -1).map((crumb) => (
           <Fragment key={crumb.id ?? "root"}>
             <BreadcrumbItem>
               <BreadcrumbLink render={<Link to={explorerPath(crumb.id)} />}>
@@ -30,9 +37,9 @@ export default function ExplorerBreadcrumb() {
             <BreadcrumbSeparator />
           </Fragment>
         ))}
-        <BreadcrumbItem>
-          <BreadcrumbPage className="font-semibold">
-            {current.name}
+        <BreadcrumbItem className="min-w-0">
+          <BreadcrumbPage className="truncate font-semibold">
+            {last.name}
           </BreadcrumbPage>
         </BreadcrumbItem>
       </BreadcrumbList>
