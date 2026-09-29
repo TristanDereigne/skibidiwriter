@@ -1,24 +1,19 @@
-import { api } from "@/lib/api";
-import type { Button } from "@base-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import {
+  DEFAULT_DOCUMENT_NAME,
+  useCreateDocument,
+  useDocuments,
+} from "@/hooks/use-documents";
 import { PlusIcon } from "lucide-react";
-import { Separator } from "react-resizable-panels";
 
 export default function ExplorerLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   const createDocument = useCreateDocument();
-  const { data } = useQuery({
-    queryKey: DOCUMENTS_QUERY_KEY,
-    queryFn: async () => {
-      const res = await api.documents.$get();
-      if (!res.ok) return null;
+  const { data } = useDocuments();
 
-      return await res.json();
-    },
-  });
-
-  const create = () => createDocument.mutate(DEFAULT_NAME);
+  const create = () => createDocument.mutate(DEFAULT_DOCUMENT_NAME);
 
   return (
     <div className="flex h-full w-full flex-col">
