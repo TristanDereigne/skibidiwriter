@@ -18,13 +18,12 @@ export default function Examples() {
 
   return (
     <div>
-      {data &&
-        data.map((example) => (
+      {data?.map((example) => (
           <div key={example.id}>
             <h1>{example.id}</h1>
             <p>{example.name}</p>
           </div>
-        ))}
+      ))}
     </div>
   );
 }
