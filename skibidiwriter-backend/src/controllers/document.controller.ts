@@ -1,51 +1,56 @@
+import { IdParamSchema, validate } from "@/libs/validation";
 import documentService from "@/services/document.service";
+import folderService from "@/services/folder.service";
 import { Hono } from "hono";
-import { validator } from "hono/validator";
 import {
   CreateDocumentSchema,
-  RenameDocumentSchema,
+  RenameSchema,
   type DocumentDTO,
 } from "skibidiwriter-shared";
 import z from "zod";
 
-function toDTO(row: { id: string; name: string; updatedAt: Date }) {
+const ListQuerySchema = z.object({ folderId: z.uuid().optional() });
+
+function toDTO(row: Omit<DocumentDTO, "updatedAt"> & { updatedAt: Date }) {
   return {
     id: row.id,
     name: row.name,
+    folderId: row.folderId,
     updatedAt: row.updatedAt.toISOString(),
   } satisfies DocumentDTO;
 }
 
 export const documentController = new Hono()
-  .get("/", async (ctx) => {
-    const rows = await documentService.findAll();
+  .get("/", validate("query", ListQuerySchema), async (ctx) => {
+    const { folderId = null } = ctx.req.valid("query");
+    const rows = await documentService.findInFolder(folderId);
 
     return ctx.json(rows.map(toDTO));
   })
-  .post("/", async (ctx) => {
-    const body = CreateDocumentSchema.safeParse(
-      await ctx.req.json().catch(() => null),
-    );
-    if (!body.success) return ctx.json({ error: "Invalid document" }, 400);
+  .get("/:id", validate("param", IdParamSchema), async (ctx) => {
+    const row = await documentService.findById(ctx.req.valid("param").id);
+    if (!row) return ctx.json({ error: "Document not found" }, 404);
 
-    const row = await documentService.create(body.data.name);
+    return ctx.json(toDTO(row), 200);
+  })
+  .post("/", validate("json", CreateDocumentSchema), async (ctx) => {
+    const { name, folderId } = ctx.req.valid("json");
+
+    if (folderId && !(await folderService.exists(folderId))) {
+      return ctx.json({ error: "Folder not found" }, 404);
+    }
+
+    const row = await documentService.create(name, folderId);
 
     return ctx.json(toDTO(row), 201);
   })
   .patch(
     "/:id",
-    validator("json", (value, ctx) => {
-      const body = RenameDocumentSchema.safeParse(value);
-      if (!body.success) return ctx.json({ error: "Invalid document" }, 400);
-
-      return body.data;
-    }),
+    validate("param", IdParamSchema),
+    validate("json", RenameSchema),
     async (ctx) => {
-      const id = z.uuid().safeParse(ctx.req.param("id"));
-      if (!id.success) return ctx.json({ error: "Invalid document id" }, 400);
-
       const row = await documentService.rename(
-        id.data,
+        ctx.req.valid("param").id,
         ctx.req.valid("json").name,
       );
       if (!row) return ctx.json({ error: "Document not found" }, 404);
@@ -53,11 +58,8 @@ export const documentController = new Hono()
       return ctx.json(toDTO(row), 200);
     },
   )
-  .delete("/:id", async (ctx) => {
-    const id = z.uuid().safeParse(ctx.req.param("id"));
-    if (!id.success) return ctx.json({ error: "Invalid document id" }, 400);
-
-    const row = await documentService.remove(id.data);
+  .delete("/:id", validate("param", IdParamSchema), async (ctx) => {
+    const row = await documentService.remove(ctx.req.valid("param").id);
     if (!row) return ctx.json({ error: "Document not found" }, 404);
 
     return ctx.body(null, 204);

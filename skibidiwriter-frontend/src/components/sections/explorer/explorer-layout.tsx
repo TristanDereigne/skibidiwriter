@@ -1,46 +1,25 @@
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
+import AppHeader from "@/components/layout/app-header";
+import TrailBreadcrumb from "@/components/layout/trail-breadcrumb";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useDocuments } from "@/hooks/use-documents";
-import { FilePlusIcon } from "lucide-react";
-
-interface Props {
-  children: React.ReactNode;
-  onCreate: () => void;
-}
+import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
+import ExplorerHeaderActions from "./explorer-header-actions";
+import { useExplorer } from "./use-explorer";
 
 export default function ExplorerLayout({
   children,
-  onCreate,
-}: Readonly<Props>) {
-  const { data } = useDocuments();
+}: Readonly<{ children: React.ReactNode }>) {
+  const { path, createDocument, createFolder } = useExplorer();
 
   return (
     <div className="flex h-full w-full flex-col">
-      <header className="flex h-12 items-center gap-2 px-6">
-        <h1 className="text-sm font-semibold">Documents</h1>
-        {data && (
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {data.length}
-          </span>
-        )}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="ml-auto text-muted-foreground"
-          aria-label="New document"
-          title="New document"
-          onClick={onCreate}
-        >
-          <FilePlusIcon />
-        </Button>
-      </header>
-      <Separator />
+      <AppHeader actions={<ExplorerHeaderActions />}>
+        <TrailBreadcrumb folders={path} />
+      </AppHeader>
       <ContextMenu>
         <ContextMenuTrigger
           render={<main className="flex-1 overflow-auto p-6" />}
@@ -48,9 +27,13 @@ export default function ExplorerLayout({
           {children}
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={onCreate}>
+          <ContextMenuItem onClick={createDocument}>
             <FilePlusIcon />
             New document
+          </ContextMenuItem>
+          <ContextMenuItem onClick={createFolder}>
+            <FolderPlusIcon />
+            New folder
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

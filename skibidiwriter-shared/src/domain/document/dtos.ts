@@ -1,15 +1,15 @@
 import z from "zod";
+import { NameSchema } from "../name";
 
-const DocumentNameSchema = z.string().trim().min(1).max(255);
-
-export const CreateDocumentSchema = z.object({ name: DocumentNameSchema });
+export const CreateDocumentSchema = z.object({
+  name: NameSchema,
+  folderId: z.uuid().nullable().default(null),
+});
 export type CreateDocumentDTO = z.infer<typeof CreateDocumentSchema>;
-
-export const RenameDocumentSchema = z.object({ name: DocumentNameSchema });
-export type RenameDocumentDTO = z.infer<typeof RenameDocumentSchema>;
 
 export interface DocumentDTO {
   id: string;
   name: string;
+  folderId: string | null;
   updatedAt: string;
 }
