@@ -1,7 +1,32 @@
 import { Button } from "@/components/ui/button";
-import { useToastManager } from "@/components/ui/toast";
+import {
+  Progress,
+  ProgressLabel,
+  ProgressValue,
+} from "@/components/ui/progress";
+import { toast } from "@/components/ui/toast";
+import {
+  DEFAULT_DOCUMENT_NAME,
+  useCreateDocument,
+} from "@/hooks/use-documents";
 import { UploadIcon } from "lucide-react";
+import { MAX_DOCUMENT_CONTENT_LENGTH } from "skibidiwriter-shared";
 import { useRef } from "react";
+
+const MIN_UPLOAD_DURATION = 900;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+function UploadProgress({ value }: Readonly<{ value: number }>) {
+  return (
+    <Progress value={value} className="gap-1.5">
+      <ProgressLabel className="font-normal text-muted-foreground">
+        Uploading…
+      </ProgressLabel>
+      <ProgressValue />
+    </Progress>
+  );
+}
 
 interface Props {
   folderId: string | null;
@@ -9,18 +34,38 @@ interface Props {
 
 export default function UploadFileAction({ folderId }: Readonly<Props>) {
   const inputRef = useRef<HTMLInputElement>(null);
-  const toast = useToastManager();
+  const createDocument = useCreateDocument();
 
   async function upload(file: File) {
     const id = toast.add({
       title: file.name,
-      description: "Uploading…",
+      description: <UploadProgress value={0} />,
       type: "loading",
       timeout: 0,
     });
 
+    const startedAt = Date.now();
+    const setProgress = (value: number) =>
+      toast.update(id, { description: <UploadProgress value={value} /> });
+
     try {
-      await new Promise((r) => setTimeout(r, 1200));
+      if (file.size > MAX_DOCUMENT_CONTENT_LENGTH) {
+        throw new Error("File too large");
+      }
+
+      const content = await file.text();
+      setProgress(40);
+
+      await createDocument.mutateAsync({
+        name: file.name.trim().slice(0, 255) || DEFAULT_DOCUMENT_NAME,
+        folderId,
+        content,
+      });
+      setProgress(90);
+
+      await sleep(Math.max(0, MIN_UPLOAD_DURATION - (Date.now() - startedAt)));
+      setProgress(100);
+      await sleep(250);
 
       toast.update(id, {
         description: "Uploaded",

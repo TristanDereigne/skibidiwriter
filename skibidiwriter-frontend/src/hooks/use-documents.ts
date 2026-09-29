@@ -45,11 +45,15 @@ export function useCreateDocument() {
     mutationFn: async ({
       name,
       folderId,
+      content,
     }: {
       name: string;
       folderId: string | null;
+      content?: string;
     }) => {
-      const res = await api.documents.$post({ json: { name, folderId } });
+      const res = await api.documents.$post({
+        json: { name, folderId, content },
+      });
       if (!res.ok) throw new Error("Failed to create document");
 
       return await res.json();
