@@ -10,7 +10,7 @@ export default function Public() {
 
     useEffect(()=>{
         if(authContext?.isUserLoggedin()) {
-            navigate("/");
+            navigate("/explorer");
         }
     },[authContext?.isLoggedIn])
 
