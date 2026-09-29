@@ -1,9 +1,16 @@
 {
-    "name": "@skibidiwriter",
-    "private": true,
-    "workspaces": [
-        "skibidiwriter-frontend",
-        "skibidiwriter-backend",
-        "skibidiwriter-shared"
-    ]
+  "name": "@skibidiwriter",
+  "private": true,
+  "workspaces": [
+    "skibidiwriter-frontend",
+    "skibidiwriter-backend",
+    "skibidiwriter-shared"
+  ],
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.9.9"
+  }
 }
