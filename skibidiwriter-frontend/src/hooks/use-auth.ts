@@ -7,15 +7,6 @@ export function useAuth() {
         email: email,
         password: password,
         name: name,
-      }, {
-        onSuccess: (ctx) => {
-          console.log("success: "+ctx.response.body);
-          return ctx.data;
-        },
-        onError: (ctx) => {
-          console.log("error: "+ctx.error.message);
-          return ctx.error.message;
-        },
       });
 
     if (error) {
@@ -27,7 +18,24 @@ export function useAuth() {
     return data;
   };
 
+  const signIn = async (email: string, password:string) => {
+    const { data, error } = await authClient.signIn.email({
+      email: email,
+      password: password
+    })
+
+    if (error) {
+      console.error("Erreur signin:", error);
+      throw new Error(error.message);
+    }
+
+    console.log("Signin réussi:", data);
+    return data;
+
+  }
+
   return {
     signUp,
+    signIn
   };
 }
