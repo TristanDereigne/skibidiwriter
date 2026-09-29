@@ -1,41 +1,31 @@
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
+import { diffText, mapCursor } from "skibidiwriter-shared";
 import { useSkibidiDocument } from "./lib/document";
 
-export function useDebounced<Value>(value: Value, delay = 300): Value {
-  const [debounced, setDebounced] = useState(value);
-
-  useEffect(() => {
-    const id = setTimeout(() => setDebounced(value), delay);
-    return () => clearTimeout(id);
-  }, [value, delay]);
-
-  return debounced;
-}
 export default function DocEditor() {
-  const composerRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { status, text, edit } = useSkibidiDocument();
 
-  const { content, sendContent, status } = useSkibidiDocument();
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea || textarea.value === text) return;
 
-  const [localContent, setLocalContent] = useState("");
-  const debouncedContent = useDebounced(localContent, 400);
+    const change = diffText(textarea.value, text);
+    const selectionStart = mapCursor(textarea.selectionStart, change);
+    const selectionEnd = mapCursor(textarea.selectionEnd, change);
 
-  useEffect(() => {
-    sendContent(debouncedContent);
-  }, [debouncedContent]);
+    textarea.value = text;
+    textarea.setSelectionRange(selectionStart, selectionEnd);
+  }, [text]);
 
-  useEffect(() => {
-    sendContent(localContent);
-    setLocalContent(content);
-  }, [content]);
-
-  return status === "connected" ? (
-    <div
-      ref={composerRef}
-      contentEditable
-      className="aspect-[1/sqrt(2)] max-w-1/3 border mx-auto p-1"
-      onInput={() => setLocalContent(composerRef.current?.innerText ?? "")}
-    />
-  ) : (
-    "connecting/disconnected"
+  return (
+    <div className="aspect-[1/sqrt(2)] max-w-1/3 border mx-auto p-1">
+      <textarea
+        ref={textareaRef}
+        className="size-full resize-none outline-none"
+        onInput={(event) => edit(event.currentTarget.value)}
+      />
+      {status !== "connected" && <p>Offline, changes will sync on reconnect</p>}
+    </div>
   );
 }

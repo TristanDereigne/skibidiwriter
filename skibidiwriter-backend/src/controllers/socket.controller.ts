@@ -1,3 +1,6 @@
+import { addConnection, broadcast, removeConnection, send } from "@/libs/socket";
+import chatService from "@/services/chat.service";
+import documentService from "@/services/document.service";
 import { upgradeWebSocket } from "@hono/bun";
 import type { WSContext, WSMessageReceive } from "hono/ws";
 import {
@@ -5,24 +8,24 @@ import {
   ClientEventType,
   ServerEventType,
   type ClientEvent,
-  type MessageDTO,
-  type ServerEvent,
 } from "skibidiwriter-shared";
 import z from "zod";
 
-const MESSAGE_HISTORY_LIMIT = 100;
-
-const clients = new Set<WSContext>();
-const messages: MessageDTO[] = [];
-
-export const chatSocket = upgradeWebSocket(() => {
-  let client: WSContext | undefined;
+export const socketController = upgradeWebSocket(() => {
+  let connection: WSContext | undefined;
 
   return {
     onOpen(_, ws) {
-      client = ws;
-      clients.add(ws);
-      send(ws, { type: ServerEventType.Message_History, messages });
+      connection = ws;
+      addConnection(ws);
+      send(ws, {
+        type: ServerEventType.Message_History,
+        messages: chatService.history(),
+      });
+      send(ws, {
+        type: ServerEventType.Document_Operations,
+        operations: documentService.operations(),
+      });
     },
     onMessage(rawEvent, ws) {
       const result = parseClientEvent(rawEvent.data);
@@ -31,10 +34,10 @@ export const chatSocket = upgradeWebSocket(() => {
         return;
       }
 
-      handleClientEvent(result.data);
+      handleClientEvent(result.data, ws);
     },
     onClose() {
-      if (client) clients.delete(client);
+      if (connection) removeConnection(connection);
     },
   };
 });
@@ -61,33 +64,19 @@ function parseClientEvent(
   return { success: true, data: result.data };
 }
 
-function handleClientEvent(event: ClientEvent) {
+function handleClientEvent(event: ClientEvent, sender: WSContext) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
-      const message: MessageDTO = {
-        id: crypto.randomUUID(),
-        content: event.content,
-        createdAt: new Date().toISOString(),
-      };
-
-      messages.push(message);
-      if (messages.length > MESSAGE_HISTORY_LIMIT) {
-        messages.splice(0, messages.length - MESSAGE_HISTORY_LIMIT);
-      }
-
+      const message = chatService.create(event.content);
       broadcast({ type: ServerEventType.Message_New, message });
       break;
     }
-  }
-}
-
-function send(ws: WSContext, event: ServerEvent) {
-  ws.send(JSON.stringify(event));
-}
-
-function broadcast(event: ServerEvent) {
-  const payload = JSON.stringify(event);
-  for (const client of clients) {
-    client.send(payload);
+    case ClientEventType.Document_Operations: {
+      const operations = documentService.apply(event.operations);
+      if (operations.length > 0) {
+        broadcast({ type: ServerEventType.Document_Operations, operations }, sender);
+      }
+      break;
+    }
   }
 }

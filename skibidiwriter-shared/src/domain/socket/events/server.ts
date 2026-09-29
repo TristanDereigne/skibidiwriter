@@ -1,9 +1,10 @@
+import type { DocumentOperation } from "../../document/operations";
 import type { MessageDTO } from "../../messages/dtos";
 
 export const ServerEventType = {
   Message_History: "message_history",
   Message_New: "message_new",
-  Document_Snapshot: "document_snapshot",
+  Document_Operations: "document_operations",
   Error: "error",
 } as const;
 export type ServerEventType =
@@ -19,8 +20,8 @@ export type ServerEvent =
       message: MessageDTO;
     }
   | {
-      type: typeof ServerEventType.Document_Snapshot;
-      content: string;
+      type: typeof ServerEventType.Document_Operations;
+      operations: DocumentOperation[];
     }
   | {
       type: typeof ServerEventType.Error;

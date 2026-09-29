@@ -1,17 +1,31 @@
 import { useSyncExternalStore } from "react";
-import { ClientEventType, ServerEventType } from "skibidiwriter-shared";
+import {
+  ClientEventType,
+  ServerEventType,
+  TextCrdt,
+  type DocumentOperation,
+} from "skibidiwriter-shared";
 import { realtime, useConnectionStatus } from "./realtime";
 
-let content: string = "";
+const crdt = new TextCrdt(crypto.randomUUID());
 const subscribers = new Set<() => void>();
+let text = crdt.text;
 
 function emit() {
+  text = crdt.text;
   for (const subscriber of subscribers) subscriber();
 }
 
+function sendOperations(operations: DocumentOperation[]) {
+  if (operations.length === 0) return;
+  realtime.send({ type: ClientEventType.Document_Operations, operations });
+}
+
+realtime.onOpen(() => sendOperations(crdt.toOperations()));
+
 realtime.onEvent((event) => {
-  if (event.type === ServerEventType.Document_Snapshot) {
-    content = event.content;
+  if (event.type === ServerEventType.Document_Operations) {
+    crdt.apply(event.operations);
     emit();
   }
 });
@@ -23,14 +37,16 @@ const subscribe = (subscriber: () => void) => {
   };
 };
 
+const getText = () => text;
+
+function edit(newText: string) {
+  sendOperations(crdt.setText(newText));
+  emit();
+}
+
 export function useSkibidiDocument() {
   const status = useConnectionStatus();
-  const currentContent = useSyncExternalStore(subscribe, () => content);
+  const currentText = useSyncExternalStore(subscribe, getText);
 
-  return {
-    status,
-    content: currentContent,
-    sendContent: (content: string) =>
-      realtime.send({ type: ClientEventType.Document_Edited, content }),
-  };
+  return { status, text: currentText, edit };
 }
