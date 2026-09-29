@@ -22,7 +22,7 @@ export default function TrailBreadcrumb({ folders, current }: Readonly<Props>) {
     ...folders,
     ...(current === undefined ? [] : [{ id: "current", name: current }]),
   ];
-  const last = trail[trail.length - 1]!;
+  const last = trail.at(-1)!;
 
   return (
     <Breadcrumb className="min-w-0">

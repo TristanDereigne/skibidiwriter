@@ -1,6 +1,5 @@
 import AppHeader from "@/components/layout/app-header";
 import TrailBreadcrumb from "@/components/layout/trail-breadcrumb";
-import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -8,6 +7,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
+import ExplorerHeaderActions from "./explorer-header-actions";
 import { useExplorer } from "./use-explorer";
 
 export default function ExplorerLayout({
@@ -17,32 +17,7 @@ export default function ExplorerLayout({
 
   return (
     <div className="flex h-full w-full flex-col">
-      <AppHeader
-        actions={
-          <>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-muted-foreground"
-              aria-label="New folder"
-              title="New folder"
-              onClick={createFolder}
-            >
-              <FolderPlusIcon />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-muted-foreground"
-              aria-label="New document"
-              title="New document"
-              onClick={createDocument}
-            >
-              <FilePlusIcon />
-            </Button>
-          </>
-        }
-      >
+      <AppHeader actions={<ExplorerHeaderActions />}>
         <TrailBreadcrumb folders={path} />
       </AppHeader>
       <ContextMenu>
