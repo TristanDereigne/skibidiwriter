@@ -9,21 +9,16 @@ export default function App() {
     const navigate = useNavigate();
     const authContext = useContext(AuthContext);
 
-    if(authContext?.isUserLoggedin()) {
-        return (
-            <Providers>
-                <Outlet />
-                <Toaster />
-            </Providers>
-        );
-
-    }
-
     useEffect(()=>{
         if(!authContext?.isUserLoggedin()) {
             navigate("/login");
         }
-    },[])
+    },[authContext?.isLoggedIn])
 
-
+    return (
+        <Providers>
+            <Outlet />
+            <Toaster />
+        </Providers>
+    );
 }
