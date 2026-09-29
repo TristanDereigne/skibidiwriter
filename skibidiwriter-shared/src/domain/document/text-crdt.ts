@@ -38,6 +38,7 @@ export class TextCrdt {
     for (let i = 0; i < deleteCount; i++) {
       operations.push(this.#deleteAt(start));
     }
+
     for (let i = 0; i < insert.length; i++) {
       operations.push(this.#insertAt(start + i, insert[i]!));
     }
@@ -64,7 +65,11 @@ export class TextCrdt {
         after: previous?.id ?? null,
         value: char.value,
       });
-      if (char.deleted) operations.push({ type: "delete", id: char.id });
+
+      if (char.deleted) {
+        operations.push({ type: "delete", id: char.id });
+      }
+
       previous = char;
     }
 
@@ -89,6 +94,7 @@ export class TextCrdt {
     };
 
     this.#integrateInsert(operation);
+
     return operation;
   }
 
@@ -99,6 +105,7 @@ export class TextCrdt {
     };
 
     this.#integrateDelete(operation);
+
     return operation;
   }
 
@@ -116,12 +123,16 @@ export class TextCrdt {
       index = afterIndex + 1;
     }
 
-    while (index < this.#chars.length && compareIds(this.#chars[index]!.id, id) > 0) {
+    while (
+      index < this.#chars.length &&
+      compareIds(this.#chars[index]!.id, id) > 0
+    ) {
       index++;
     }
 
     this.#chars.splice(index, 0, { id, value, deleted: false });
     this.#clock = Math.max(this.#clock, id.counter);
+
     return true;
   }
 
@@ -132,6 +143,7 @@ export class TextCrdt {
     if (!char || char.deleted) return false;
 
     char.deleted = true;
+
     return true;
   }
 }

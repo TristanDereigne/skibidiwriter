@@ -7,6 +7,7 @@ export interface TextChange {
 export function diffText(previous: string, next: string): TextChange {
   const maxPrefix = Math.min(previous.length, next.length);
   let start = 0;
+
   while (start < maxPrefix && previous[start] === next[start]) start++;
 
   const maxSuffix = maxPrefix - start;
@@ -27,8 +28,10 @@ export function diffText(previous: string, next: string): TextChange {
 
 export function mapCursor(cursor: number, change: TextChange): number {
   if (cursor <= change.start) return cursor;
+
   if (cursor >= change.start + change.deleteCount) {
     return cursor - change.deleteCount + change.insert.length;
   }
+
   return change.start + change.insert.length;
 }

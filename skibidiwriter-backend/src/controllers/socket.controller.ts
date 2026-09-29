@@ -18,10 +18,12 @@ export const socketController = upgradeWebSocket(() => {
     onOpen(_, ws) {
       connection = ws;
       addConnection(ws);
+
       send(ws, {
         type: ServerEventType.Message_History,
         messages: chatService.history(),
       });
+
       send(ws, {
         type: ServerEventType.Document_Operations,
         operations: documentService.operations(),
@@ -68,13 +70,18 @@ function handleClientEvent(event: ClientEvent, sender: WSContext) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
       const message = chatService.create(event.content);
+
       broadcast({ type: ServerEventType.Message_New, message });
       break;
     }
     case ClientEventType.Document_Operations: {
       const operations = documentService.apply(event.operations);
+
       if (operations.length > 0) {
-        broadcast({ type: ServerEventType.Document_Operations, operations }, sender);
+        broadcast(
+          { type: ServerEventType.Document_Operations, operations },
+          sender,
+        );
       }
       break;
     }

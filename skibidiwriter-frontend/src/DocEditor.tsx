@@ -8,6 +8,7 @@ export default function DocEditor() {
 
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
+
     if (!textarea || textarea.value === text) return;
 
     const change = diffText(textarea.value, text);

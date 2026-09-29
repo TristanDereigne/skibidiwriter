@@ -18,6 +18,7 @@ function emit() {
 
 function sendOperations(operations: DocumentOperation[]) {
   if (operations.length === 0) return;
+
   realtime.send({ type: ClientEventType.Document_Operations, operations });
 }
 
@@ -26,6 +27,7 @@ realtime.onOpen(() => sendOperations(crdt.toOperations()));
 realtime.onEvent((event) => {
   if (event.type === ServerEventType.Document_Operations) {
     crdt.apply(event.operations);
+
     emit();
   }
 });
@@ -41,6 +43,7 @@ const getText = () => text;
 
 function edit(newText: string) {
   sendOperations(crdt.setText(newText));
+
   emit();
 }
 

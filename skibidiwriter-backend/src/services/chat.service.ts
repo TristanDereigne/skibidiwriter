@@ -16,6 +16,7 @@ function create(content: string): MessageDTO {
   };
 
   messages.push(message);
+
   if (messages.length > MESSAGE_HISTORY_LIMIT) {
     messages.splice(0, messages.length - MESSAGE_HISTORY_LIMIT);
   }
