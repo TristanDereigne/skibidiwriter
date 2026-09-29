@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import {
   Empty,
+  EmptyContent,
+  EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-  EmptyDescription,
-  EmptyContent,
 } from "@/components/ui/empty";
 import { FolderIcon, PlusIcon } from "lucide-react";
 
@@ -14,7 +14,7 @@ interface Props {
   isCreating: boolean;
 }
 
-export function ExplorerEmpty({ onCreate, isCreating }: Props) {
+export function ExplorerEmpty({ onCreate, isCreating }: Readonly<Props>) {
   return (
     <Empty>
       <EmptyHeader>

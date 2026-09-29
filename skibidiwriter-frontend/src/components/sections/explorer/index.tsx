@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
-import { Button } from "../../ui/button";
-import { Separator } from "../../ui/separator";
 import { api } from "../../../lib/api";
-import { ExplorerEmpty } from "./explorer-empty";
 import ExplorerDocument from "./explorer-document";
+import { ExplorerEmpty } from "./explorer-empty";
+import ExplorerLayout from "./explorer-layout";
 import ExplorerSkeleton from "./explorer-skeleton";
 
 const DOCUMENTS_QUERY_KEY = ["documents.list"];
@@ -38,43 +36,30 @@ export default function Explorer() {
     },
   });
 
-  const create = () => createDocument.mutate(DEFAULT_NAME);
+  if (isPending) {
+    return (
+      <ExplorerLayout>
+        <ExplorerSkeleton />
+      </ExplorerLayout>
+    );
+  }
 
   return (
-    <div className="flex h-full w-full flex-col">
-      <header className="flex items-center justify-between px-8 py-5">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Documents</h1>
-          {data && (
-            <p className="text-sm text-muted-foreground">
-              {data.length} {data.length === 1 ? "item" : "items"}
-            </p>
-          )}
+    <ExplorerLayout>
+      {data?.length ? (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-6">
+          {data.map((document) => (
+            <ExplorerDocument key={document.id} document={document} />
+          ))}
         </div>
-        <Button onClick={create} disabled={createDocument.isPending}>
-          <PlusIcon />
-          New document
-        </Button>
-      </header>
-      <Separator />
-      <main className="flex-1 overflow-auto p-8">
-        {isPending ? (
-          <ExplorerSkeleton />
-        ) : data?.length ? (
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-6">
-            {data.map((document) => (
-              <ExplorerDocument key={document.id} document={document} />
-            ))}
-          </div>
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <ExplorerEmpty
-              onCreate={create}
-              isCreating={createDocument.isPending}
-            />
-          </div>
-        )}
-      </main>
-    </div>
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <ExplorerEmpty
+            onCreate={() => createDocument.mutate(DEFAULT_NAME)}
+            isCreating={createDocument.isPending}
+          />
+        </div>
+      )}
+    </ExplorerLayout>
   );
 }
