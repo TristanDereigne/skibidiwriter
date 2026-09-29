@@ -6,6 +6,7 @@ import "./index.css";
 import App from "./App.tsx";
 import Public from "./Public.tsx";
 
+import { EditPage } from "./pages/app/edit.page.tsx";
 import { ExplorerPage } from "./pages/app/explorer.page.tsx";
 import { HomePage } from "./pages/app/home.page.tsx";
 import { ProfilePage } from "./pages/app/profile.page.tsx";
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<HomePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="explorer" element={<ExplorerPage />} />
+        <Route path="edit/:documentId" element={<EditPage />} />
       </Route>
     </Routes>
   </BrowserRouter>,
