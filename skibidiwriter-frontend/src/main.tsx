@@ -6,6 +6,7 @@ import "./index.css";
 import App from "./App.tsx";
 import Public from "./Public.tsx";
 
+import { EditPage } from "./pages/app/edit.page.tsx";
 import { ExplorerPage } from "./pages/app/explorer.page.tsx";
 import { HomePage } from "./pages/app/home.page.tsx";
 import { ProfilePage } from "./pages/app/profile.page.tsx";
