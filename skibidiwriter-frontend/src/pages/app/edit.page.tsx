@@ -2,17 +2,18 @@ import DocumentEditor from "@/components/sections/document/document-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useDocuments } from "@/hooks/use-documents";
+import { useDocument } from "@/hooks/use-documents";
+import { explorerPath } from "@/lib/paths";
 import { CONNECTION_STATUS_LABELS, useConnectionStatus } from "@/lib/realtime";
 import { ArrowLeftIcon, LoaderCircleIcon } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 export const EditPage = () => {
   const { documentId } = useParams();
-  const { isLoading, data } = useDocuments();
+  const { isLoading, data: document } = useDocument(documentId);
   const status = useConnectionStatus();
 
-  const name = data?.find((document) => document.id === documentId)?.name;
+  const name = document?.name;
 
   return (
     <div className="flex h-full min-h-screen w-full flex-col">
@@ -21,7 +22,8 @@ export const EditPage = () => {
           variant="ghost"
           size="icon"
           aria-label="Back to documents"
-          render={<Link to="/explorer" />}
+          nativeButton={false}
+          render={<Link to={explorerPath(document?.folderId ?? null)} />}
         >
           <ArrowLeftIcon />
         </Button>

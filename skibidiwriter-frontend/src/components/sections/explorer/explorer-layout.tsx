@@ -1,44 +1,46 @@
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { useDocuments } from "@/hooks/use-documents";
-import { FilePlusIcon } from "lucide-react";
-
-interface Props {
-  children: React.ReactNode;
-  onCreate: () => void;
-}
+import { Separator } from "@/components/ui/separator";
+import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
+import ExplorerBreadcrumb from "./explorer-breadcrumb";
+import { useExplorer } from "./use-explorer";
 
 export default function ExplorerLayout({
   children,
-  onCreate,
-}: Readonly<Props>) {
-  const { data } = useDocuments();
+}: Readonly<{ children: React.ReactNode }>) {
+  const { createDocument, createFolder } = useExplorer();
 
   return (
     <div className="flex h-full w-full flex-col">
       <header className="flex h-12 items-center gap-2 px-6">
-        <h1 className="text-sm font-semibold">Documents</h1>
-        {data && (
-          <span className="text-xs text-muted-foreground tabular-nums">
-            {data.length}
-          </span>
-        )}
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="ml-auto text-muted-foreground"
-          aria-label="New document"
-          title="New document"
-          onClick={onCreate}
-        >
-          <FilePlusIcon />
-        </Button>
+        <ExplorerBreadcrumb />
+        <div className="ml-auto flex items-center">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="text-muted-foreground"
+            aria-label="New folder"
+            title="New folder"
+            onClick={createFolder}
+          >
+            <FolderPlusIcon />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="text-muted-foreground"
+            aria-label="New document"
+            title="New document"
+            onClick={createDocument}
+          >
+            <FilePlusIcon />
+          </Button>
+        </div>
       </header>
       <Separator />
       <ContextMenu>
@@ -48,9 +50,13 @@ export default function ExplorerLayout({
           {children}
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={onCreate}>
+          <ContextMenuItem onClick={createDocument}>
             <FilePlusIcon />
             New document
+          </ContextMenuItem>
+          <ContextMenuItem onClick={createFolder}>
+            <FolderPlusIcon />
+            New folder
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

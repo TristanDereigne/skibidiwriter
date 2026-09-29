@@ -1,5 +1,6 @@
 import { db } from "@/libs/db";
 import { documentTable } from "@/models";
+import { eqOrNull } from "@/libs/sql";
 import { eq } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
@@ -91,12 +92,43 @@ async function release(id: string) {
   });
 }
 
-async function findAll() {
-  return await db.query.documentTable.findMany();
+const summarySelect = {
+  id: documentTable.id,
+  name: documentTable.name,
+  folderId: documentTable.folderId,
+  updatedAt: documentTable.updatedAt,
+};
+
+async function forget(ids: string[]) {
+  for (const id of ids) {
+    const opened = openDocuments.get(id);
+    openDocuments.delete(id);
+
+    clearTimeout((await opened)?.persistTimer);
+  }
 }
 
-async function create(name: string) {
-  const [row] = await db.insert(documentTable).values({ name }).returning();
+async function findInFolder(folderId: string | null) {
+  return await db
+    .select(summarySelect)
+    .from(documentTable)
+    .where(eqOrNull(documentTable.folderId, folderId));
+}
+
+async function findById(id: string) {
+  const [row] = await db
+    .select(summarySelect)
+    .from(documentTable)
+    .where(eq(documentTable.id, id));
+
+  return row;
+}
+
+async function create(name: string, folderId: string | null) {
+  const [row] = await db
+    .insert(documentTable)
+    .values({ name, folderId })
+    .returning(summarySelect);
 
   return row!;
 }
@@ -106,7 +138,7 @@ async function rename(id: string, name: string) {
     .update(documentTable)
     .set({ name })
     .where(eq(documentTable.id, id))
-    .returning();
+    .returning(summarySelect);
 
   return row;
 }
@@ -130,7 +162,9 @@ export default {
   operations,
   apply,
   release,
-  findAll,
+  forget,
+  findInFolder,
+  findById,
   create,
   rename,
   remove,

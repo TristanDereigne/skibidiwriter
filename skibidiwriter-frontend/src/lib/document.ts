@@ -29,7 +29,6 @@ class DocumentSession {
 
   join() {
     realtime.send({ type: ClientEventType.Document_Join, documentId: this.id });
-    // Push anything typed while offline; the server ignores what it already has.
     this.#sendOperations(this.#crdt.toOperations());
   }
 

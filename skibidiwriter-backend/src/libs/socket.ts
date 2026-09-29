@@ -25,7 +25,6 @@ export function joinRoom(ws: WSContext, roomId: string) {
   room.set(keyOf(ws), ws);
 }
 
-/** Removes the connection from the room and returns whether the room is now empty. */
 export function leaveRoom(ws: WSContext, roomId: string): boolean {
   const room = rooms.get(roomId);
   if (!room) return true;

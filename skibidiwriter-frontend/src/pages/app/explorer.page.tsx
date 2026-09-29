@@ -1,5 +1,13 @@
 import Explorer from "@/components/sections/explorer";
+import ExplorerProvider from "@/components/sections/explorer/explorer-provider";
+import { useParams } from "react-router";
 
 export const ExplorerPage = () => {
-  return <Explorer />;
+  const folderId = useParams().folderId ?? null;
+
+  return (
+    <ExplorerProvider key={folderId ?? "root"} folderId={folderId}>
+      <Explorer />
+    </ExplorerProvider>
+  );
 };

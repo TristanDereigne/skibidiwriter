@@ -9,7 +9,6 @@ export const documentTable = pgTable("document", {
   folderId: uuid("folder_id").references(() => folderTable.id, {
     onDelete: "cascade",
   }),
-  // TODO: make notNull once auth is wired and documents are created by a user
   ownerId: text("owner_id").references(() => user.id, { onDelete: "cascade" }),
   operations: jsonb("operations")
     .$type<DocumentOperation[]>()

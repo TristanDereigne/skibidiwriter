@@ -1,52 +1,58 @@
-import {
-  DEFAULT_DOCUMENT_NAME,
-  useCreateDocument,
-  useDocuments,
-} from "@/hooks/use-documents";
-import { useState } from "react";
+import { useDocuments } from "@/hooks/use-documents";
+import { useFolders } from "@/hooks/use-folders";
 import ExplorerDocument from "./explorer-document";
-import { ExplorerEmpty } from "./explorer-empty";
+import { useExplorer } from "./use-explorer";
+import { ExplorerEmpty, ExplorerNotFound } from "./explorer-empty";
+import ExplorerFolder from "./explorer-folder";
 import ExplorerLayout from "./explorer-layout";
 import ExplorerSkeleton from "./explorer-skeleton";
 
 export default function Explorer() {
-  const createDocument = useCreateDocument();
-  const { isPending, data } = useDocuments();
-  const [createdId, setCreatedId] = useState<string>();
+  return (
+    <ExplorerLayout>
+      <ExplorerContent />
+    </ExplorerLayout>
+  );
+}
 
-  const create = () =>
-    createDocument.mutate(DEFAULT_DOCUMENT_NAME, {
-      onSuccess: (document) => setCreatedId(document.id),
-    });
+function ExplorerContent() {
+  const { folderId, isNotFound } = useExplorer();
+  const documents = useDocuments(folderId);
+  const folders = useFolders(folderId);
 
-  if (isPending) {
+  if (isNotFound)
     return (
-      <ExplorerLayout onCreate={create}>
-        <ExplorerSkeleton />
-      </ExplorerLayout>
+      <Centered>
+        <ExplorerNotFound />
+      </Centered>
+    );
+
+  if (documents.isPending || folders.isPending) return <ExplorerSkeleton />;
+
+  if (!documents.data?.length && !folders.data?.length) {
+    return (
+      <Centered>
+        <ExplorerEmpty />
+      </Centered>
     );
   }
 
   return (
-    <ExplorerLayout onCreate={create}>
-      {data?.length ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-6">
-          {data.map((document) => (
-            <ExplorerDocument
-              key={document.id}
-              document={document}
-              startRenaming={document.id === createdId}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex h-full w-full items-center justify-center">
-          <ExplorerEmpty
-            onCreate={create}
-            isCreating={createDocument.isPending}
-          />
-        </div>
-      )}
-    </ExplorerLayout>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-6">
+      {folders.data?.map((folder) => (
+        <ExplorerFolder key={folder.id} folder={folder} />
+      ))}
+      {documents.data?.map((document) => (
+        <ExplorerDocument key={document.id} document={document} />
+      ))}
+    </div>
+  );
+}
+
+function Centered({ children }: Readonly<{ children: React.ReactNode }>) {
+  return (
+    <div className="flex h-full w-full items-center justify-center">
+      {children}
+    </div>
   );
 }
