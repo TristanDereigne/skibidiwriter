@@ -9,7 +9,11 @@ type Char = {
 
 function compareIds(a: CharId, b: CharId): number {
   if (a.counter !== b.counter) return a.counter - b.counter;
-  return a.site < b.site ? -1 : a.site > b.site ? 1 : 0;
+
+  if (a.site < b.site) return -1;
+  if (a.site > b.site) return 1;
+
+  return 0;
 }
 
 function sameId(a: CharId, b: CharId): boolean {
@@ -17,7 +21,7 @@ function sameId(a: CharId, b: CharId): boolean {
 }
 
 export class TextCrdt {
-  #chars: Char[] = [];
+  readonly #chars: Char[] = [];
   #clock = 0;
   readonly #site: string;
 
