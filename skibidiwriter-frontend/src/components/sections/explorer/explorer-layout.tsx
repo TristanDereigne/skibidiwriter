@@ -1,38 +1,59 @@
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
-  DEFAULT_DOCUMENT_NAME,
-  useCreateDocument,
-  useDocuments,
-} from "@/hooks/use-documents";
-import { PlusIcon } from "lucide-react";
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { useDocuments } from "@/hooks/use-documents";
+import { FilePlusIcon } from "lucide-react";
+
+interface Props {
+  children: React.ReactNode;
+  onCreate: () => void;
+}
 
 export default function ExplorerLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
-  const createDocument = useCreateDocument();
+  onCreate,
+}: Readonly<Props>) {
   const { data } = useDocuments();
-
-  const create = () => createDocument.mutate(DEFAULT_DOCUMENT_NAME);
 
   return (
     <div className="flex h-full w-full flex-col">
-      <header className="flex items-center justify-between px-8 py-5">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Documents</h1>
-          {data && (
-            <p className="text-sm text-muted-foreground">
-              {data.length} {data.length === 1 ? "item" : "items"}
-            </p>
-          )}
-        </div>
-        <Button onClick={create} disabled={createDocument.isPending}>
-          <PlusIcon />
-          New document
+      <header className="flex h-12 items-center gap-2 px-6">
+        <h1 className="text-sm font-semibold">Documents</h1>
+        {data && (
+          <span className="text-xs text-muted-foreground tabular-nums">
+            {data.length}
+          </span>
+        )}
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="ml-auto text-muted-foreground"
+          aria-label="New document"
+          title="New document"
+          onClick={onCreate}
+        >
+          <FilePlusIcon />
         </Button>
       </header>
       <Separator />
-      <main className="flex-1 overflow-auto p-8">{children}</main>
+      <ContextMenu>
+        <ContextMenuTrigger
+          render={<main className="flex-1 overflow-auto p-6" />}
+        >
+          {children}
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <ContextMenuItem onClick={onCreate}>
+            <FilePlusIcon />
+            New document
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
     </div>
   );
 }

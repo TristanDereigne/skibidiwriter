@@ -14,6 +14,7 @@ import ExplorerDocumentNameInput from "./explorer-document-name";
 
 interface Props {
   document: DocumentDTO;
+  startRenaming?: boolean;
 }
 
 const dateFormat = new Intl.DateTimeFormat(undefined, {
@@ -22,9 +23,12 @@ const dateFormat = new Intl.DateTimeFormat(undefined, {
   year: "numeric",
 });
 
-export default function ExplorerDocument({ document }: Readonly<Props>) {
+export default function ExplorerDocument({
+  document,
+  startRenaming = false,
+}: Readonly<Props>) {
   const navigate = useNavigate();
-  const [renaming, setRenaming] = useState(false);
+  const [renaming, setRenaming] = useState(startRenaming);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
   const open = () => navigate(`/edit/${document.id}`);
