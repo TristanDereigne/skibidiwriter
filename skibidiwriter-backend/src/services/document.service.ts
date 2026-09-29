@@ -124,10 +124,13 @@ async function findById(id: string) {
   return row;
 }
 
-async function create(name: string, folderId: string | null) {
+async function create(name: string, folderId: string | null, content?: string) {
+  const crdt = new TextCrdt("server");
+  const operations = content ? crdt.setText(content) : [];
+
   const [row] = await db
     .insert(documentTable)
-    .values({ name, folderId })
+    .values({ name, folderId, operations })
     .returning(summarySelect);
 
   return row!;

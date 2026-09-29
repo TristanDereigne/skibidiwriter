@@ -34,13 +34,13 @@ export const documentController = new Hono()
     return ctx.json(toDTO(row), 200);
   })
   .post("/", validate("json", CreateDocumentSchema), async (ctx) => {
-    const { name, folderId } = ctx.req.valid("json");
+    const { name, folderId, content } = ctx.req.valid("json");
 
     if (folderId && !(await folderService.exists(folderId))) {
       return ctx.json({ error: "Folder not found" }, 404);
     }
 
-    const row = await documentService.create(name, folderId);
+    const row = await documentService.create(name, folderId, content);
 
     return ctx.json(toDTO(row), 201);
   })

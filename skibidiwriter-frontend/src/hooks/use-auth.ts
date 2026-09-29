@@ -1,13 +1,12 @@
 import { authClient } from "../lib/auth-client.ts";
 
 export function useAuth() {
-
   const signUp = async (email: string, password: string, name: string) => {
-      const { data, error } = await authClient.signUp.email({
-        email: email,
-        password: password,
-        name: name,
-      });
+    const { data, error } = await authClient.signUp.email({
+      email: email,
+      password: password,
+      name: name,
+    });
 
     if (error) {
       console.error("Erreur signup:", error);
@@ -18,11 +17,11 @@ export function useAuth() {
     return data;
   };
 
-  const signIn = async (email: string, password:string) => {
+  const signIn = async (email: string, password: string) => {
     const { data, error } = await authClient.signIn.email({
       email: email,
-      password: password
-    })
+      password: password,
+    });
 
     if (error) {
       console.error("Erreur signin:", error);
@@ -31,19 +30,19 @@ export function useAuth() {
 
     console.log("Signin réussi:", data);
     return data;
-  }
+  };
 
   const isSignIn = async () => {
-    const { data: session } = await authClient.getSession()
-    if(session?.session.expiresAt>Date.now()) {
+    const { data: session } = await authClient.getSession();
+    if (session?.session.expiresAt > Date.now()) {
       return true;
     }
     return false;
-  }
+  };
 
   return {
     signUp,
     signIn,
-    isSignIn
+    isSignIn,
   };
 }

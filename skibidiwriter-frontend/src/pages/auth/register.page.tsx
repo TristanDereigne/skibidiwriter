@@ -13,11 +13,10 @@ import { Label } from "../../components/ui/label.tsx";
 import { Input } from "../../components/ui/input.tsx";
 import { Button } from "../../components/ui/button.tsx";
 import { z } from "zod";
-import {useState, type SetStateAction, useContext} from "react";
-import { AuthContext } from '@/context/AuthContext.tsx'
+import { useState, type SetStateAction, useContext } from "react";
+import { AuthContext } from "@/context/AuthContext.tsx";
 
 export const RegisterPage = () => {
-
   let navigate = useNavigate();
   const authContext = useContext(AuthContext);
 
@@ -31,7 +30,10 @@ export const RegisterPage = () => {
         /\w/,
         "Le pseudo ne peut contenir que des lettres, chiffres et underscore",
       ),
-    password: z.string().min(8, "8 caractères minimum").max(32, "32 caractères maximum"),
+    password: z
+      .string()
+      .min(8, "8 caractères minimum")
+      .max(32, "32 caractères maximum"),
   });
 
   const [email, setEmail] = useState("");
