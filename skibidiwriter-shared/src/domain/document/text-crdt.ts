@@ -16,13 +16,20 @@ function compareIds(a: CharId, b: CharId): number {
   return 0;
 }
 
+function idKey(id: CharId): string {
+  return `${id.site}:${id.counter}`;
+}
+
 function sameId(a: CharId, b: CharId): boolean {
   return compareIds(a, b) === 0;
 }
 
 export class TextCrdt {
   readonly #chars: Char[] = [];
+  readonly #seen = new Set<string>();
   #clock = 0;
+  #hint = 0;
+  #deletedCount = 0;
   readonly #site: string;
 
   constructor(site: string) {
@@ -85,11 +92,18 @@ export class TextCrdt {
   }
 
   #indexOf(id: CharId): number {
+    const hinted = this.#chars[this.#hint];
+    if (hinted && sameId(hinted.id, id)) return this.#hint;
+
     return this.#chars.findIndex((char) => sameId(char.id, id));
   }
 
   #insertAt(index: number, value: string): DocumentOperation {
-    const after = this.#visibleChars()[index - 1]?.id ?? null;
+    const previous =
+      this.#deletedCount === 0
+        ? this.#chars[index - 1]
+        : this.#visibleChars()[index - 1];
+    const after = previous?.id ?? null;
     const operation: DocumentOperation = {
       type: "insert",
       id: { site: this.#site, counter: this.#clock + 1 },
@@ -118,7 +132,7 @@ export class TextCrdt {
     after,
     value,
   }: Extract<DocumentOperation, { type: "insert" }>): boolean {
-    if (this.#indexOf(id) !== -1) return false;
+    if (this.#seen.has(idKey(id))) return false;
 
     let index = 0;
     if (after) {
@@ -135,6 +149,8 @@ export class TextCrdt {
     }
 
     this.#chars.splice(index, 0, { id, value, deleted: false });
+    this.#seen.add(idKey(id));
+    this.#hint = index;
     this.#clock = Math.max(this.#clock, id.counter);
 
     return true;
@@ -147,6 +163,7 @@ export class TextCrdt {
     if (!char || char.deleted) return false;
 
     char.deleted = true;
+    this.#deletedCount++;
 
     return true;
   }
