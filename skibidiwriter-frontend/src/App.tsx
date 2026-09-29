@@ -1,18 +1,13 @@
-import { Outlet, useNavigate } from "react-router";
+import { Navigate, Outlet } from "react-router";
 import Providers from "./components/providers";
 import { Toaster } from "./components/ui/toast";
-import { useContext, useEffect } from "react";
-import { AuthContext } from "@/context/AuthContext.tsx";
+import { useAuthContext } from "@/context/AuthContext.tsx";
 
 export default function App() {
-  const navigate = useNavigate();
-  const authContext = useContext(AuthContext);
+  const { isLoggedIn, isPending } = useAuthContext();
 
-  useEffect(() => {
-    if (!authContext?.isUserLoggedin()) {
-      navigate("/login");
-    }
-  }, [authContext?.isLoggedIn]);
+  if (isPending) return null;
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
 
   return (
     <Providers>

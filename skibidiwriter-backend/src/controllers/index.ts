@@ -13,7 +13,7 @@ export const app = new Hono()
       origin: env.FRONTEND_URL_NO_SLASH,
       credentials: true,
       allowHeaders: ["Content-Type", "Authorization"],
-      allowMethods: ["POST", "GET", "OPTIONS", "DELETE"],
+      allowMethods: ["POST", "GET", "PATCH", "OPTIONS", "DELETE"],
     }),
   )
   .get("/ws", socketController)

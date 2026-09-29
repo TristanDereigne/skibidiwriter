@@ -14,6 +14,7 @@ import { Input } from "../../components/ui/input.tsx";
 import { Button } from "../../components/ui/button.tsx";
 import { z } from "zod";
 import { useState, type SetStateAction, useContext } from "react";
+import { toast } from "@/components/ui/toast.tsx";
 import { AuthContext } from "@/context/AuthContext.tsx";
 
 export const LoginPage = () => {
@@ -62,7 +63,15 @@ export const LoginPage = () => {
     setErrors({});
     console.log("Données valides :", result.data);
 
-    authContext?.login(email, password);
+    try {
+      await authContext?.login(email, password);
+    } catch (error) {
+      toast.add({
+        title: "Authentication failed",
+        description: error instanceof Error ? error.message : undefined,
+        type: "error",
+      });
+    }
   };
 
   return (

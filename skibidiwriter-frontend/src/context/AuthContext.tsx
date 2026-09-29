@@ -1,71 +1,47 @@
-import * as React from "react";
-import { createContext, useState } from "react";
+import { authClient } from "@/lib/auth-client";
+import { createContext, useContext, useMemo } from "react";
 import { useAuth } from "@/hooks/use-auth.ts";
 
 type AuthContextType = {
   user: string | null;
-  register: (username: string, password: string, pseudo: string) => void;
-  login: (username: string, password: string) => void;
-  isUserLoggedin: () => boolean;
   isLoggedIn: boolean;
+  isPending: boolean;
+  register: (email: string, password: string, pseudo: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
+export function useAuthContext() {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuthContext requires an AuthProvider");
+
+  return context;
+}
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const auth = useAuth();
+  const { data: session, isPending } = authClient.useSession();
 
-  const [user, setUser] = useState<string | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-
-  const register = async (email: string, password: string, pseudo: string) => {
-    try {
-      const signUpResult = await auth.signUp(email, password, pseudo);
-      if (signUpResult) {
-        const signInResult = await auth.signIn(email, password);
-        if (signInResult) {
-          setUser(signInResult.user.name);
-          setIsLoggedIn(true);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to register :", error.message);
-      setUser(null);
-      setIsLoggedIn(false);
-      throw error;
-    }
-  };
-
-  const login = async (email: string, password: string) => {
-    try {
-      const signInResult = await auth.signIn(email, password);
-      if (signInResult) {
-        setUser(signInResult.user.name);
-        setIsLoggedIn(true);
-      }
-    } catch (error) {
-      console.error("Failed to login :", error.message);
-      setUser(null);
-      setIsLoggedIn(false);
-      throw error;
-    }
-  };
-
-  const isUserLoggedin = async () => {
-    const isSignedIn = await auth.isSignIn();
-    if (isSignedIn) {
-      setIsLoggedIn(true);
-    } else {
-      setIsLoggedIn(false);
-    }
-    return isLoggedIn;
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{ user, isUserLoggedin, register, login, isLoggedIn }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo<AuthContextType>(
+    () => ({
+      user: session?.user.name ?? null,
+      isLoggedIn: !!session,
+      isPending,
+      register: async (email, password, pseudo) => {
+        await auth.signUp(email, password, pseudo);
+        await auth.signIn(email, password);
+      },
+      login: async (email, password) => {
+        await auth.signIn(email, password);
+      },
+      logout: async () => {
+        await authClient.signOut();
+      },
+    }),
+    [session, isPending],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

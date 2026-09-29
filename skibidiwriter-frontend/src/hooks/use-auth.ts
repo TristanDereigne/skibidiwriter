@@ -32,17 +32,8 @@ export function useAuth() {
     return data;
   };
 
-  const isSignIn = async () => {
-    const { data: session } = await authClient.getSession();
-    if (session?.session.expiresAt > Date.now()) {
-      return true;
-    }
-    return false;
-  };
-
   return {
     signUp,
     signIn,
-    isSignIn,
   };
 }
