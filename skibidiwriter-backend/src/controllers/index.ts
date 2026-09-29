@@ -1,22 +1,13 @@
 import { env } from "@/libs/env";
-import { upgradeWebSocket } from "@hono/bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import { WSContext, WSMessageReceive } from "hono/ws";
+import { documentController } from "./document.controller";
 import { exampleController } from "./example.controller";
+import { socketController } from "./socket.controller";
 
 export const app = new Hono()
   .use("*", cors({ origin: env.FRONTEND_URL, credentials: true }))
-  .get(
-    "/ws",
-    upgradeWebSocket((ctx) => ({
-      onMessage: handleWSMessage,
-    })),
-  )
+  .get("/ws", socketController)
   .all("/", (ctx) => ctx.text("SkibidiWriter 🚽"))
-  .route("/examples", exampleController);
-
-function handleWSMessage(
-  event: MessageEvent<WSMessageReceive>,
-  ws: WSContext,
-): void {}
+  .route("/examples", exampleController)
+  .route("/documents", documentController);

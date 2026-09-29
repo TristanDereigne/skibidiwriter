@@ -1,6 +1,6 @@
-import { env } from "./libs/env";
+import { websocket } from "@hono/bun";
 import { app } from "./controllers";
-import {websocket} from "@hono/bun";
+import { env } from "./libs/env";
 
 export type AppType = typeof app;
 

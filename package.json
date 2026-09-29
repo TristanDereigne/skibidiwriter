@@ -1,8 +1,9 @@
 {
     "name": "@skibidiwriter",
-    "private": "true",
+    "private": true,
     "workspaces": [
         "skibidiwriter-frontend",
-        "skibidiwriter-backend"
+        "skibidiwriter-backend",
+        "skibidiwriter-shared"
     ]
 }
