@@ -2,9 +2,13 @@ import { useLayoutEffect, useRef } from "react";
 import { diffText, mapCursor } from "skibidiwriter-shared";
 import { useSkibidiDocument } from "./lib/document";
 
-export default function DocEditor() {
+interface Props {
+  documentId: string;
+}
+
+export default function DocEditor({ documentId }: Readonly<Props>) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { text, edit } = useSkibidiDocument();
+  const { text, edit } = useSkibidiDocument(documentId);
 
   useLayoutEffect(() => {
     const textarea = textareaRef.current;

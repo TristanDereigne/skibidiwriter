@@ -1,4 +1,13 @@
-import { addConnection, broadcast, removeConnection, send } from "@/libs/socket";
+import {
+  addConnection,
+  broadcast,
+  broadcastToRoom,
+  joinRoom,
+  leaveRoom,
+  removeConnection,
+  roomsOf,
+  send,
+} from "@/libs/socket";
 import chatService from "@/services/chat.service";
 import documentService from "@/services/document.service";
 import { upgradeWebSocket } from "@hono/bun";
@@ -23,23 +32,23 @@ export const socketController = upgradeWebSocket(() => {
         type: ServerEventType.Message_History,
         messages: chatService.history(),
       });
-
-      send(ws, {
-        type: ServerEventType.Document_Operations,
-        operations: documentService.operations(),
-      });
     },
-    onMessage(rawEvent, ws) {
+    async onMessage(rawEvent, ws) {
       const result = parseClientEvent(rawEvent.data);
       if (!result.success) {
         send(ws, { type: ServerEventType.Error, message: result.error });
         return;
       }
 
-      handleClientEvent(result.data, ws);
+      await handleClientEvent(result.data, ws);
     },
     onClose() {
-      if (connection) removeConnection(connection);
+      if (!connection) return;
+
+      for (const documentId of roomsOf(connection)) {
+        leaveDocument(connection, documentId);
+      }
+      removeConnection(connection);
     },
   };
 });
@@ -66,7 +75,7 @@ function parseClientEvent(
   return { success: true, data: result.data };
 }
 
-function handleClientEvent(event: ClientEvent, sender: WSContext) {
+async function handleClientEvent(event: ClientEvent, sender: WSContext) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
       const message = chatService.create(event.content);
@@ -74,16 +83,51 @@ function handleClientEvent(event: ClientEvent, sender: WSContext) {
       broadcast({ type: ServerEventType.Message_New, message });
       break;
     }
+    case ClientEventType.Document_Join: {
+      const operations = await documentService.operations(event.documentId);
+      if (!operations) return sendDocumentNotFound(sender);
+
+      joinRoom(sender, event.documentId);
+      send(sender, {
+        type: ServerEventType.Document_Operations,
+        documentId: event.documentId,
+        operations,
+      });
+      break;
+    }
+    case ClientEventType.Document_Leave: {
+      leaveDocument(sender, event.documentId);
+      break;
+    }
     case ClientEventType.Document_Operations: {
-      const operations = documentService.apply(event.operations);
+      const operations = await documentService.apply(
+        event.documentId,
+        event.operations,
+      );
+      if (!operations) return sendDocumentNotFound(sender);
 
       if (operations.length > 0) {
-        broadcast(
-          { type: ServerEventType.Document_Operations, operations },
+        broadcastToRoom(
+          event.documentId,
+          {
+            type: ServerEventType.Document_Operations,
+            documentId: event.documentId,
+            operations,
+          },
           sender,
         );
       }
       break;
     }
   }
+}
+
+function leaveDocument(connection: WSContext, documentId: string) {
+  if (leaveRoom(connection, documentId)) {
+    void documentService.release(documentId);
+  }
+}
+
+function sendDocumentNotFound(ws: WSContext) {
+  send(ws, { type: ServerEventType.Error, message: "Document not found" });
 }

@@ -21,6 +21,7 @@ export type ServerEvent =
     }
   | {
       type: typeof ServerEventType.Document_Operations;
+      documentId: string;
       operations: DocumentOperation[];
     }
   | {

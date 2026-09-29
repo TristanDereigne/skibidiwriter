@@ -1,14 +1,46 @@
 import type { WSContext } from "hono/ws";
 import type { ServerEvent } from "skibidiwriter-shared";
 
-const connections = new Set<WSContext>();
+// Hono hands out a new WSContext per event, so connections are keyed by the underlying socket.
+const connections = new Map<unknown, WSContext>();
+const rooms = new Map<string, Map<unknown, WSContext>>();
+
+const keyOf = (ws: WSContext) => ws.raw ?? ws;
 
 export function addConnection(ws: WSContext) {
-  connections.add(ws);
+  connections.set(keyOf(ws), ws);
 }
 
 export function removeConnection(ws: WSContext) {
-  connections.delete(ws);
+  connections.delete(keyOf(ws));
+}
+
+export function joinRoom(ws: WSContext, roomId: string) {
+  let room = rooms.get(roomId);
+  if (!room) {
+    room = new Map();
+    rooms.set(roomId, room);
+  }
+
+  room.set(keyOf(ws), ws);
+}
+
+/** Removes the connection from the room and returns whether the room is now empty. */
+export function leaveRoom(ws: WSContext, roomId: string): boolean {
+  const room = rooms.get(roomId);
+  if (!room) return true;
+
+  room.delete(keyOf(ws));
+  if (room.size > 0) return false;
+
+  rooms.delete(roomId);
+  return true;
+}
+
+export function roomsOf(ws: WSContext): string[] {
+  const key = keyOf(ws);
+
+  return [...rooms].filter(([, room]) => room.has(key)).map(([id]) => id);
 }
 
 export function send(ws: WSContext, event: ServerEvent) {
@@ -17,7 +49,18 @@ export function send(ws: WSContext, event: ServerEvent) {
 
 export function broadcast(event: ServerEvent, except?: WSContext) {
   const payload = JSON.stringify(event);
-  for (const connection of connections) {
-    if (connection !== except) connection.send(payload);
+  for (const [key, connection] of connections) {
+    if (key !== (except && keyOf(except))) connection.send(payload);
+  }
+}
+
+export function broadcastToRoom(
+  roomId: string,
+  event: ServerEvent,
+  except?: WSContext,
+) {
+  const payload = JSON.stringify(event);
+  for (const [key, connection] of rooms.get(roomId) ?? []) {
+    if (key !== (except && keyOf(except))) connection.send(payload);
   }
 }

@@ -41,7 +41,7 @@ export const EditPage = () => {
       </header>
       <Separator />
       <main className="mx-auto min-h-0 w-full max-w-3xl flex-1 px-6 py-8">
-        <DocEditor />
+        {documentId && <DocEditor key={documentId} documentId={documentId} />}
       </main>
     </div>
   );
