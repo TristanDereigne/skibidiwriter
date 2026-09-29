@@ -3,17 +3,19 @@ import { HeaderContext } from "@/context/HeaderContext.tsx";
 
 export const ProfilePage = () => {
     const headerContext = useContext(HeaderContext);
+    const setHeaderChildren = headerContext?.setHeaderChildren;
+    const setHeaderActions = headerContext?.setHeaderActions;
 
     useEffect(() => {
-        headerContext?.setHeaderChildren(
+        setHeaderChildren?.(
             <h2 className="text-xl font-bold">My profile</h2>
         );
 
         return () => {
-            headerContext?.setHeaderChildren(null);
-            headerContext?.setHeaderActions(null);
+            setHeaderChildren?.(null);
+            setHeaderActions?.(null);
         };
-    }, [headerContext]);
+    }, [setHeaderChildren, setHeaderActions]);
 
     return (
         <div>

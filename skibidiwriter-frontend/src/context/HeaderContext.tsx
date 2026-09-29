@@ -1,5 +1,5 @@
 import * as React from "react";
-import {createContext, useState} from "react";
+import {createContext, useMemo, useState} from "react";
 
 type HeaderContextType = {
     headerChildren: React.ReactNode | null;
@@ -15,8 +15,13 @@ export const HeaderProvider = ({ children }: { children: React.ReactNode }) => {
     const [headerChildren, setHeaderChildren] = useState<React.ReactNode | null>(null);
     const [headerActions, setHeaderActions] = useState<React.ReactNode | null>(null);
 
+    const value = useMemo(
+        () => ({ headerChildren, headerActions, setHeaderChildren, setHeaderActions }),
+        [headerChildren, headerActions],
+    );
+
     return (
-        <HeaderContext.Provider value={{ headerChildren, headerActions, setHeaderChildren, setHeaderActions }}>
+        <HeaderContext.Provider value={value}>
             {children}
         </HeaderContext.Provider>
     );
