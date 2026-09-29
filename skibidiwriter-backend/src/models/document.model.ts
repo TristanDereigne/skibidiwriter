@@ -5,9 +5,8 @@ import { user } from "./auth.model";
 export const documentTable = pgTable("document", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  ownerId: text("owner_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+  // TODO: make notNull once auth is wired and documents are created by a user
+  ownerId: text("owner_id").references(() => user.id, { onDelete: "cascade" }),
   operations: jsonb("operations")
     .$type<DocumentOperation[]>()
     .notNull()

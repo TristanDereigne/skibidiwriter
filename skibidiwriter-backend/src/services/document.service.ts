@@ -1,4 +1,5 @@
 import { db } from "@/libs/db";
+import { documentTable } from "@/models";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
 const document = new TextCrdt("server");
@@ -17,7 +18,17 @@ async function findAll() {
   return rows;
 }
 
+async function create(name: string) {
+  const [row] = await db
+    .insert(documentTable)
+    .values({ name })
+    .returning();
+
+  return row!;
+}
+
 export default {
+  create,
   operations,
   apply,
   findAll,
