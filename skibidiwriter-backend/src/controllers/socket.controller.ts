@@ -10,7 +10,7 @@ import {
 } from "@/libs/socket";
 import chatService from "@/services/chat.service";
 import fileService from "@/services/file.service";
-import type { AuthEnv } from "@/libs/require-auth";
+import type { AuthEnv } from "@/middleware/session.middleware";
 import { upgradeWebSocket } from "@hono/bun";
 import type { Context } from "hono";
 import type { WSContext, WSMessageReceive } from "hono/ws";

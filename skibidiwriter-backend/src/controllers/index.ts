@@ -5,11 +5,11 @@ import { fileController } from "./file.controller";
 import { folderController } from "./folder.controller";
 import { socketController } from "./socket.controller";
 import { auth } from "@/libs/auth";
-import { requireAuth } from "@/libs/require-auth";
+import { sessionMiddleware } from "@/middleware/session.middleware";
 import { userController } from "./user.controller";
 
 const protectedRoutes = new Hono()
-  .use(requireAuth)
+  .use(sessionMiddleware)
   .route("/folders", folderController)
   .route("/files", fileController)
   .route("/users", userController);
@@ -24,7 +24,7 @@ export const app = new Hono()
       allowMethods: ["POST", "GET", "PATCH", "OPTIONS", "DELETE"],
     }),
   )
-  .get("/ws", requireAuth, socketController)
+  .get("/ws", sessionMiddleware, socketController)
   .on(["POST", "GET"], "/api/auth/*", (c) => {
     return auth.handler(c.req.raw);
   })

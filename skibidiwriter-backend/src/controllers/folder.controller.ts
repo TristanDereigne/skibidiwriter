@@ -1,4 +1,4 @@
-import type { AuthEnv } from "@/libs/require-auth";
+import type { AuthEnv } from "@/middleware/session.middleware";
 import { IdParamSchema, validate } from "@/libs/validation";
 import { toFolderDTO } from "@/mappers/folder.mapper";
 import folderService from "@/services/folder.service";
