@@ -1,6 +1,6 @@
+import { useAuth } from "@/hooks/use-auth.ts";
 import { authClient } from "@/lib/auth-client";
 import { createContext, useContext, useMemo } from "react";
-import { useAuth } from "@/hooks/use-auth.ts";
 
 type AuthContextType = {
   user: string | null;
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await authClient.signOut();
       },
     }),
-    [session, isPending],
+    [session, isPending, auth],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
