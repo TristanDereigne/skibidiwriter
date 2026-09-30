@@ -81,9 +81,9 @@ export function useRenameDocument() {
 }
 
 function toFileName(name: string) {
-  const safe = name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").trim() || "document";
+  const safe = name.replace(/[\\/:*?"<>|]/g, "_").trim() || "document";
 
-  return /\.[A-Za-z0-9]{1,8}$/.test(safe) ? safe : `${safe}.md`;
+  return /\.(md|markdown|txt)$/i.test(safe) ? safe : `${safe}.md`;
 }
 
 export function useDownloadDocument() {

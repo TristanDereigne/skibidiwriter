@@ -1,8 +1,14 @@
 import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import DocumentEditor from "@/components/sections/document/document-editor";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { DownloadIcon } from "lucide-react";
 import { HeaderContext } from "@/context/HeaderContext";
-import { useDocument, useRenameDocument } from "@/hooks/use-documents";
+import {
+  useDocument,
+  useDownloadDocument,
+  useRenameDocument,
+} from "@/hooks/use-documents";
 import { useFolderPath } from "@/hooks/use-folders";
 import { CONNECTION_STATUS_LABELS, useConnectionStatus } from "@/lib/realtime";
 import { useContext, useEffect } from "react";
@@ -13,6 +19,7 @@ export const EditPage = () => {
   const { isLoading, data: document } = useDocument(documentId);
   const { data: folders } = useFolderPath(document?.folderId ?? null);
   const { mutate: rename } = useRenameDocument();
+  const { mutate: download } = useDownloadDocument();
   const status = useConnectionStatus();
   const headerContext = useContext(HeaderContext);
   const setHeaderChildren = headerContext?.setHeaderChildren;
@@ -34,9 +41,25 @@ export const EditPage = () => {
       />,
     );
     setHeaderActions?.(
-      <Badge variant={status === "connected" ? "secondary" : "outline"}>
-        {CONNECTION_STATUS_LABELS[status]}
-      </Badge>,
+      <>
+        <Badge variant={status === "connected" ? "secondary" : "outline"}>
+          {CONNECTION_STATUS_LABELS[status]}
+        </Badge>
+        {documentRowId && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className="ml-2 text-muted-foreground"
+            aria-label="Download document"
+            title="Download document"
+            onClick={() =>
+              download({ id: documentRowId, name: documentName ?? "" })
+            }
+          >
+            <DownloadIcon />
+          </Button>
+        )}
+      </>,
     );
 
     return () => {
@@ -51,6 +74,7 @@ export const EditPage = () => {
     documentName,
     documentRowId,
     rename,
+    download,
     status,
   ]);
 
