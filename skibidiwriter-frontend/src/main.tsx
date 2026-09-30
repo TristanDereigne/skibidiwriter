@@ -23,33 +23,32 @@ import { ProfilePage } from "./pages/app/profile.page.tsx";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-    <QueryClientProvider client={queryClient}>
-      <UserProvider>
-        <AuthProvider>
-          <ThemeProvider>
-            <TooltipProvider>
-              <ToastProvider>
-                <HeaderProvider>
-                  <BrowserRouter>
-                    <Routes>
-                      <Route element={<Public />}>
-                        <Route path="login" element={<LoginPage />} />
-                        <Route path="register" element={<RegisterPage />} />
-                      </Route>
-                      <Route element={<App />}>
-                        <Route path="profile" element={<ProfilePage />} />
-                        <Route path="/:folderId?" element={<ExplorerPage />} />
-                        <Route path="edit/:documentId" element={<EditPage />} />
-                      </Route>
-                    </Routes>
-                  </BrowserRouter>
-                  <Toaster />
-                </HeaderProvider>
-              </ToastProvider>
-            </TooltipProvider>
-          </ThemeProvider>
-        </AuthProvider>
-      </UserProvider>
-    </QueryClientProvider>
-
+  <QueryClientProvider client={queryClient}>
+    <UserProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <ToastProvider>
+              <HeaderProvider>
+                <BrowserRouter>
+                  <Routes>
+                    <Route element={<Public />}>
+                      <Route path="login" element={<LoginPage />} />
+                      <Route path="register" element={<RegisterPage />} />
+                    </Route>
+                    <Route element={<App />}>
+                      <Route path="profile" element={<ProfilePage />} />
+                      <Route path="/:folderId?" element={<ExplorerPage />} />
+                      <Route path="edit/:documentId" element={<EditPage />} />
+                    </Route>
+                  </Routes>
+                </BrowserRouter>
+                <Toaster />
+              </HeaderProvider>
+            </ToastProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </UserProvider>
+  </QueryClientProvider>,
 );
