@@ -10,6 +10,9 @@ export const CreateDocumentSchema = z.object({
 });
 export type CreateDocumentDTO = z.infer<typeof CreateDocumentSchema>;
 
+export const MoveDocumentSchema = z.object({ folderId: z.uuid().nullable() });
+export type MoveDocumentDTO = z.infer<typeof MoveDocumentSchema>;
+
 export interface DocumentDTO {
   id: string;
   name: string;

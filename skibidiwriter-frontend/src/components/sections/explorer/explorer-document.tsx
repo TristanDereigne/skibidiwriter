@@ -26,6 +26,8 @@ export default function ExplorerDocument({ document }: Readonly<Props>) {
   return (
     <ExplorerItem
       icon={FileTextIcon}
+      iconClassName="fill-primary/15 text-primary"
+      dragItem={{ kind: "document", id: document.id }}
       name={document.name}
       nameLabel="Document name"
       subtitle={dateFormat.format(new Date(document.updatedAt))}

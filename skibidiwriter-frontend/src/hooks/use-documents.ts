@@ -79,6 +79,29 @@ export function useRenameDocument() {
   });
 }
 
+export function useMoveDocument() {
+  const invalidate = useInvalidateDocuments();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      folderId,
+    }: {
+      id: string;
+      folderId: string | null;
+    }) => {
+      const res = await api.documents[":id"].move.$patch({
+        param: { id },
+        json: { folderId },
+      });
+      if (!res.ok) throw new Error("Failed to move document");
+
+      return await res.json();
+    },
+    onSuccess: invalidate,
+  });
+}
+
 export function useDeleteDocument() {
   const invalidate = useInvalidateDocuments();
 

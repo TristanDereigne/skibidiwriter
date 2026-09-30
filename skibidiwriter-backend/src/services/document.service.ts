@@ -166,6 +166,16 @@ async function rename(id: string, name: string, userId: string) {
   return row;
 }
 
+async function move(id: string, folderId: string | null, userId: string) {
+  const [row] = await db
+    .update(documentTable)
+    .set({ folderId })
+    .where(and(eq(documentTable.id, id), accessibleTo(userId)))
+    .returning(summarySelect);
+
+  return row;
+}
+
 async function remove(id: string, userId: string) {
   const canAccess = await hasAccess(id, userId);
   if (!canAccess) return;
@@ -194,5 +204,6 @@ export default {
   findById,
   create,
   rename,
+  move,
   remove,
 };

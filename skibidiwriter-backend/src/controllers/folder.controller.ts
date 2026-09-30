@@ -4,6 +4,7 @@ import folderService from "@/services/folder.service";
 import { Hono } from "hono";
 import {
   CreateFolderSchema,
+  MoveFolderSchema,
   RenameSchema,
   type FolderDTO,
 } from "skibidiwriter-shared";
@@ -59,6 +60,31 @@ export const folderController = new Hono<AuthEnv>()
         ctx.req.valid("json").name,
         ctx.get("userId"),
       );
+      if (!row) return ctx.json({ error: "Folder not found" }, 404);
+
+      return ctx.json(toDTO(row), 200);
+    },
+  )
+  .patch(
+    "/:id/move",
+    validate("param", IdParamSchema),
+    validate("json", MoveFolderSchema),
+    async (ctx) => {
+      const userId = ctx.get("userId");
+      const { id } = ctx.req.valid("param");
+      const { parentId } = ctx.req.valid("json");
+
+      if (parentId) {
+        const ancestors = await folderService.path(parentId, userId);
+        if (ancestors.length === 0) {
+          return ctx.json({ error: "Parent folder not found" }, 404);
+        }
+        if (ancestors.some((folder) => folder.id === id)) {
+          return ctx.json({ error: "Cannot move a folder into itself" }, 409);
+        }
+      }
+
+      const row = await folderService.move(id, parentId, userId);
       if (!row) return ctx.json({ error: "Folder not found" }, 404);
 
       return ctx.json(toDTO(row), 200);

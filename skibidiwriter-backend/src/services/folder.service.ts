@@ -71,6 +71,16 @@ async function rename(id: string, name: string, userId: string) {
   return row;
 }
 
+async function move(id: string, parentId: string | null, userId: string) {
+  const [row] = await db
+    .update(folderTable)
+    .set({ parentId })
+    .where(and(eq(folderTable.id, id), ownedBy(userId)))
+    .returning();
+
+  return row;
+}
+
 async function documentIdsWithin(id: string) {
   const result = await db.execute<{ id: string }>(sql`
     WITH RECURSIVE tree AS (
@@ -106,5 +116,6 @@ export default {
   path,
   create,
   rename,
+  move,
   remove,
 };
