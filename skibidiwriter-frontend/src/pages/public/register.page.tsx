@@ -98,22 +98,27 @@ export const RegisterPage = () => {
 
   return (
     <div
-      className={"w-screen h-screen flex flex-col justify-center items-center"}
+      className={"w-screen h-screen flex flex-col justify-center items-center gap-14"}
     >
+      <div className={"text-center text-6xl font-bold max-w-md w-full"}>
+        <h1 className={"text-[#432DD7]"}>Skibidi Writer.</h1>
+      </div>
       <Card className="w-full max-w-md shadow-xl shadow-[#6957DF]/10">
         <form
           action=""
           onSubmit={handleSubmit}
           className={"w-full gap-2 flex flex-col"}
         >
-          <CardHeader>
-            <CardTitle>Create an account</CardTitle>
-            <CardDescription>
-              Enter your email below to register an account
-            </CardDescription>
+          <CardHeader className={"flex flex-row"}>
+            <div className={"flex flex-col"}>
+              <CardTitle>Inscription</CardTitle>
+              <CardDescription>
+                Renseigner vos identifiants ci-dessous pour vous enregistrer
+              </CardDescription>
+            </div>
             <CardAction>
-              <Button variant="link" onClick={() => navigate("/login")}>
-                Sign In
+              <Button variant="link" className={"relative bottom-1"} onClick={() => navigate("/login")}>
+                Se connecter ?
               </Button>
             </CardAction>
           </CardHeader>
@@ -145,7 +150,7 @@ export const RegisterPage = () => {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Mot de passe</Label>
                   </div>
                   <Input
                     id="password"
@@ -158,7 +163,7 @@ export const RegisterPage = () => {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Verify Password</Label>
+                    <Label htmlFor="password">Confirmation du mot de passe</Label>
                   </div>
                   <Input
                     id="verifyPassword"
@@ -189,10 +194,10 @@ export const RegisterPage = () => {
               <div className={"mt-2"}></div>
             )}
             <Button type="submit" className="w-full">
-              Register
+              S'enregistrer
             </Button>
             <Button variant="outline" className="w-full">
-              Register with Google
+              S'enregistrer avec Google
             </Button>
           </CardFooter>
         </form>

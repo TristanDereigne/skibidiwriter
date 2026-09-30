@@ -22,7 +22,7 @@ export const ProfileRounded = ({
   }, [user.username]);
 
   return (
-    <button
+    <div
       style={{ width: `${width}px`, height: `${height}px` }}
       className={
         "cursor-pointer rounded-full flex justify-center items-center bg-[#432DD7]"
@@ -31,6 +31,6 @@ export const ProfileRounded = ({
       <p style={{ fontSize: `${textSize}px` }} className={"text-white"}>
         {userFirstLetter}
       </p>
-    </button>
+    </div>
   );
 };
