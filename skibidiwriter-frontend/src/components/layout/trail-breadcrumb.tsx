@@ -6,17 +6,16 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import InlineNameInput from "./inline-name-input";
 import { explorerPath } from "@/lib/paths";
 import { cn } from "@/lib/utils";
 import { Fragment, useState } from "react";
 import { Link } from "react-router";
 import type { FolderDTO } from "skibidiwriter-shared";
+import InlineNameInput from "./inline-name-input";
 
 interface Props {
   folders: FolderDTO[];
   current?: string;
-  /** Makes the current crumb editable in place. */
   onRename?: (name: string) => void;
 }
 
