@@ -34,7 +34,7 @@ export function ModeToggle() {
         checked={checked}
         onCheckedChange={toggleSwitch}
         aria-labelledby={`${id}-dark ${id}-light`}
-        aria-label="Toggle between dark and light mode"
+        aria-label="Basculer entre le mode sombre et le mode clair"
       />
       <span
         id={`${id}-dark`}

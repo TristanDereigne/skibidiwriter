@@ -109,7 +109,9 @@ export default function Explorer() {
         )}
       >
         <UploadCloudIcon className="size-10" />
-        <p className="text-sm font-medium">Drop files to upload</p>
+        <p className="text-sm font-medium">
+          Déposez des fichiers pour les téléverser
+        </p>
       </div>
     </div>
   );

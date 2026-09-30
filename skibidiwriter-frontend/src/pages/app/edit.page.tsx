@@ -28,7 +28,7 @@ export const EditPage = () => {
     setHeaderChildren?.(
       <TrailBreadcrumb
         folders={folders ?? []}
-        current={isLoading ? "Loading…" : (documentName ?? "Document")}
+        current={isLoading ? "Chargement…" : (documentName ?? "Document")}
         onRename={
           documentRowId
             ? (name) => rename({ id: documentRowId, name })
@@ -46,8 +46,8 @@ export const EditPage = () => {
             variant="ghost"
             size="icon-sm"
             className="ml-2 text-muted-foreground"
-            aria-label="Download document"
-            title="Download document"
+            aria-label="Télécharger le document"
+            title="Télécharger le document"
             onClick={() => download(documentRowId)}
           >
             <DownloadIcon />

@@ -17,11 +17,13 @@ const KIND_VIEW = {
     icon: FileTextIcon,
     iconClassName: "fill-primary/15 text-primary",
     noun: "document",
+    label: "Nom du document",
   },
   upload: {
     icon: FileIcon,
     iconClassName: "fill-muted-foreground/10 text-muted-foreground",
-    noun: "file",
+    noun: "fichier",
+    label: "Nom du fichier",
   },
 } as const;
 
@@ -36,7 +38,7 @@ export default function ExplorerFile({ file }: Readonly<Props>) {
   const deleteFile = useDeleteFile();
   const downloadFile = useDownloadFile();
 
-  const { icon, iconClassName, noun } = KIND_VIEW[file.kind];
+  const { icon, iconClassName, noun, label } = KIND_VIEW[file.kind];
   const isDocument = file.kind === "document";
   const download = () => downloadFile.mutate(file.id);
 
@@ -46,10 +48,10 @@ export default function ExplorerFile({ file }: Readonly<Props>) {
       iconClassName={iconClassName}
       dragItem={{ kind: "file", id: file.id }}
       name={file.name}
-      nameLabel={`${noun[0]!.toUpperCase()}${noun.slice(1)} name`}
+      nameLabel={label}
       subtitle={dateFormat.format(new Date(file.updatedAt))}
       startRenaming={file.id === createdId}
-      deleteDescription={`This ${noun} will be permanently deleted. This can’t be undone.`}
+      deleteDescription={`Ce ${noun} sera supprimé définitivement. Cette action est irréversible.`}
       isDeleting={deleteFile.isPending}
       onPrefetch={isDocument ? () => prefetchDocument(file.id) : undefined}
       onOpen={isDocument ? () => navigate(editPath(file.id)) : download}

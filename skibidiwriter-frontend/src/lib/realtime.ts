@@ -10,9 +10,9 @@ import { api } from "./api";
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 
 export const CONNECTION_STATUS_LABELS: Record<ConnectionStatus, string> = {
-  connecting: "Connecting…",
-  connected: "Connected",
-  disconnected: "Reconnecting…",
+  connecting: "Connexion…",
+  connected: "Connecté",
+  disconnected: "Reconnexion…",
 };
 
 const MAX_RECONNECT_DELAY = 30_000;
@@ -82,7 +82,7 @@ class RealtimeClient {
 
       if (event.type === ServerEventType.Error) {
         toast.add({
-          title: "Something went wrong",
+          title: "Une erreur est survenue",
           description: event.message,
           type: "error",
         });

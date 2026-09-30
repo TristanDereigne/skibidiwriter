@@ -27,7 +27,7 @@ export default function DocumentEditor({ documentId }: Readonly<Props>) {
     <textarea
       ref={textareaRef}
       aria-label="Document"
-      placeholder="Start writing…"
+      placeholder="Commencez à écrire…"
       className="size-full resize-none bg-transparent text-base leading-relaxed outline-none placeholder:text-muted-foreground"
       onInput={(event) => edit(event.currentTarget.value)}
     />

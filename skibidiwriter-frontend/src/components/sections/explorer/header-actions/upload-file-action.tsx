@@ -28,8 +28,8 @@ export default function UploadFileAction({ folderId }: Readonly<Props>) {
         variant="ghost"
         size="icon-sm"
         className="text-muted-foreground"
-        aria-label="Upload files"
-        title="Upload files"
+        aria-label="Téléverser des fichiers"
+        title="Téléverser des fichiers"
         onClick={() => inputRef.current?.click()}
       >
         <UploadIcon />

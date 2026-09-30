@@ -65,14 +65,14 @@ function parseClientEvent(
   data: WSMessageReceive,
 ): { success: true; data: ClientEvent } | { success: false; error: string } {
   if (typeof data !== "string") {
-    return { success: false, error: "Expected a text message" };
+    return { success: false, error: "Message texte attendu" };
   }
 
   let json: unknown;
   try {
     json = JSON.parse(data);
   } catch {
-    return { success: false, error: "Malformed JSON" };
+    return { success: false, error: "JSON malformé" };
   }
 
   const result = ClientEventSchema.safeParse(json);
@@ -150,5 +150,5 @@ function leaveDocument(connection: WSContext, documentId: string) {
 }
 
 function sendDocumentNotFound(ws: WSContext) {
-  send(ws, { type: ServerEventType.Error, message: "Document not found" });
+  send(ws, { type: ServerEventType.Error, message: "Document introuvable" });
 }

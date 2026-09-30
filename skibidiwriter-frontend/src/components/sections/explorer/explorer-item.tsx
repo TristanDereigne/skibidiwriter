@@ -126,7 +126,7 @@ export default function ExplorerItem({
         >
           <button
             type="button"
-            aria-label={`Open ${name}`}
+            aria-label={`Ouvrir ${name}`}
             className="flex h-28 w-full items-center justify-center rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             onClick={onOpen}
             title={name}
@@ -157,12 +157,12 @@ export default function ExplorerItem({
         <ContextMenuContent>
           <ContextMenuItem onClick={() => setRenaming(true)}>
             <PencilIcon />
-            Rename
+            Renommer
           </ContextMenuItem>
           {onDownload && (
             <ContextMenuItem onClick={onDownload}>
               <DownloadIcon />
-              Download
+              Télécharger
             </ContextMenuItem>
           )}
           <ContextMenuSeparator />
@@ -171,14 +171,14 @@ export default function ExplorerItem({
             onClick={() => setDeleteOpen(true)}
           >
             <Trash2Icon />
-            Delete
+            Supprimer
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
       <ExplorerDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title={`Delete “${name}”?`}
+        title={`Supprimer « ${name} » ?`}
         description={deleteDescription}
         isPending={isDeleting}
         onConfirm={onDelete}

@@ -36,7 +36,8 @@ export const folderController = new Hono<AuthEnv>()
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
-    if (rows.length === 0) return ctx.json({ error: "Folder not found" }, 404);
+    if (rows.length === 0)
+      return ctx.json({ error: "Dossier introuvable" }, 404);
 
     return ctx.json(rows.map(toDTO), 200);
   })
@@ -46,7 +47,7 @@ export const folderController = new Hono<AuthEnv>()
     const parentExists =
       !parentId || (await folderService.exists(parentId, ctx.get("userId")));
     if (!parentExists) {
-      return ctx.json({ error: "Parent folder not found" }, 404);
+      return ctx.json({ error: "Dossier parent introuvable" }, 404);
     }
 
     const row = await folderService.create(name, parentId, ctx.get("userId"));
@@ -63,7 +64,7 @@ export const folderController = new Hono<AuthEnv>()
         ctx.req.valid("json").name,
         ctx.get("userId"),
       );
-      if (!row) return ctx.json({ error: "Folder not found" }, 404);
+      if (!row) return ctx.json({ error: "Dossier introuvable" }, 404);
 
       return ctx.json(toDTO(row), 200);
     },
@@ -80,15 +81,18 @@ export const folderController = new Hono<AuthEnv>()
       if (parentId) {
         const ancestors = await folderService.path(parentId, userId);
         if (ancestors.length === 0) {
-          return ctx.json({ error: "Parent folder not found" }, 404);
+          return ctx.json({ error: "Dossier parent introuvable" }, 404);
         }
         if (ancestors.some((folder) => folder.id === id)) {
-          return ctx.json({ error: "Cannot move a folder into itself" }, 409);
+          return ctx.json(
+            { error: "Impossible de déplacer un dossier dans lui-même" },
+            409,
+          );
         }
       }
 
       const row = await folderService.move(id, parentId, userId);
-      if (!row) return ctx.json({ error: "Folder not found" }, 404);
+      if (!row) return ctx.json({ error: "Dossier introuvable" }, 404);
 
       return ctx.json(toDTO(row), 200);
     },
@@ -98,7 +102,7 @@ export const folderController = new Hono<AuthEnv>()
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
-    if (!row) return ctx.json({ error: "Folder not found" }, 404);
+    if (!row) return ctx.json({ error: "Dossier introuvable" }, 404);
 
     return ctx.body(null, 204);
   });

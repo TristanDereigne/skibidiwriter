@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const FOLDERS_QUERY_KEY = ["folders"];
 
-export const DEFAULT_FOLDER_NAME = "New folder";
+export const DEFAULT_FOLDER_NAME = "Nouveau dossier";
 
 export function useFolders(parentId: string | null = null) {
   return useQuery({
@@ -51,7 +51,7 @@ export function useCreateFolder() {
       parentId: string | null;
     }) => {
       const res = await api.folders.$post({ json: { name, parentId } });
-      if (!res.ok) throw new Error("Failed to create folder");
+      if (!res.ok) throw new Error("Échec de la création du dossier");
 
       return await res.json();
     },
@@ -68,7 +68,7 @@ export function useRenameFolder() {
         param: { id },
         json: { name },
       });
-      if (!res.ok) throw new Error("Failed to rename folder");
+      if (!res.ok) throw new Error("Échec du renommage du dossier");
 
       return await res.json();
     },
@@ -95,7 +95,7 @@ export function useMoveFolder() {
         const body = (await res.json().catch(() => null)) as {
           error?: string;
         } | null;
-        throw new Error(body?.error ?? "Failed to move folder");
+        throw new Error(body?.error ?? "Échec du déplacement du dossier");
       }
 
       return await res.json();
@@ -110,7 +110,7 @@ export function useDeleteFolder() {
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await api.folders[":id"].$delete({ param: { id } });
-      if (!res.ok) throw new Error("Failed to delete folder");
+      if (!res.ok) throw new Error("Échec de la suppression du dossier");
     },
     onSuccess: () =>
       Promise.all([

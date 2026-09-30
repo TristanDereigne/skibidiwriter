@@ -21,13 +21,13 @@ export function ExplorerEmpty() {
         <EmptyMedia variant="icon">
           <FolderIcon />
         </EmptyMedia>
-        <EmptyTitle>No documents</EmptyTitle>
-        <EmptyDescription>Create your first document</EmptyDescription>
+        <EmptyTitle>Aucun document</EmptyTitle>
+        <EmptyDescription>Créez votre premier document</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button onClick={createDocument} disabled={isCreatingDocument}>
           <PlusIcon />
-          New document
+          Nouveau document
         </Button>
       </EmptyContent>
     </Empty>
@@ -41,14 +41,14 @@ export function ExplorerNotFound() {
         <EmptyMedia variant="icon">
           <FolderXIcon />
         </EmptyMedia>
-        <EmptyTitle>Folder not found</EmptyTitle>
+        <EmptyTitle>Dossier introuvable</EmptyTitle>
         <EmptyDescription>
-          This folder doesn’t exist or was deleted.
+          Ce dossier n’existe pas ou a été supprimé.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button nativeButton={false} render={<Link to={explorerPath(null)} />}>
-          Back to documents
+          Retour aux documents
         </Button>
       </EmptyContent>
     </Empty>

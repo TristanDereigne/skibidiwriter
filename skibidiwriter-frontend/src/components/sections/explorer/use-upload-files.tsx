@@ -22,7 +22,7 @@ function UploadProgress({ value }: Readonly<{ value: number }>) {
   return (
     <Progress value={value} className="gap-1.5">
       <ProgressLabel className="font-normal text-muted-foreground">
-        Uploading…
+        Téléversement…
       </ProgressLabel>
       <ProgressValue />
     </Progress>
@@ -54,7 +54,7 @@ export function useUploadFiles(folderId: string | null) {
     try {
       if (file.size > MAX_FILE_SIZE_BYTES)
         throw new Error(
-          `File too large (max ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB)`,
+          `Fichier trop volumineux (max. ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} Mo)`,
         );
 
       if (isTextFile(file) && file.size <= MAX_DOCUMENT_CONTENT_LENGTH) {
@@ -77,17 +77,18 @@ export function useUploadFiles(folderId: string | null) {
       await sleep(250);
 
       toast.update(id, {
-        description: "Uploaded",
+        description: "Téléversé",
         type: "success",
         timeout: 4000,
       });
     } catch (error) {
       toast.update(id, {
-        description: error instanceof Error ? error.message : "Upload failed",
+        description:
+          error instanceof Error ? error.message : "Échec du téléversement",
         type: "error",
         timeout: 0,
         actionProps: {
-          children: "Retry",
+          children: "Réessayer",
           onClick: () => {
             toast.close(id);
             void upload(file);

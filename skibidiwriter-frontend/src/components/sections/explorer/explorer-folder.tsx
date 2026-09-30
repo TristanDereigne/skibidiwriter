@@ -28,7 +28,7 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   function handleDrop(item: DragItem) {
     const onError = (error: Error) =>
       toast.add({
-        title: "Couldn’t move",
+        title: "Déplacement impossible",
         description: error.message,
         type: "error",
       });
@@ -47,10 +47,10 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
       dragItem={{ kind: "folder", id: folder.id }}
       onDropItem={handleDrop}
       name={folder.name}
-      nameLabel="Folder name"
-      subtitle="Folder"
+      nameLabel="Nom du dossier"
+      subtitle="Dossier"
       startRenaming={folder.id === createdId}
-      deleteDescription="This folder and everything inside it will be permanently deleted. This can’t be undone."
+      deleteDescription="Ce dossier et tout son contenu seront supprimés définitivement. Cette action est irréversible."
       isDeleting={deleteFolder.isPending}
       onOpen={() => navigate(explorerPath(folder.id))}
       onRename={(name) => renameFolder.mutate({ id: folder.id, name })}

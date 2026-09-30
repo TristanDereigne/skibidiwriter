@@ -20,16 +20,16 @@ export function DropdownMenuProfile() {
       <DropdownMenuContent>
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate("/")}>
-            Explorer
+            Explorateur
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate("/profile")}>
-            Profile
+            Profil
           </DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem>Paramètres</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>GitHub</DropdownMenuItem>
-        <DropdownMenuItem>Support</DropdownMenuItem>
+        <DropdownMenuItem>Assistance</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

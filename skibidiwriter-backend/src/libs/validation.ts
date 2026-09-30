@@ -9,6 +9,6 @@ export function validate<
   Schema extends z.ZodType,
 >(target: Target, schema: Schema) {
   return zValidator(target, schema, (result, ctx) => {
-    if (!result.success) return ctx.json({ error: "Invalid request" }, 400);
+    if (!result.success) return ctx.json({ error: "Requête invalide" }, 400);
   });
 }
