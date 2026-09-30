@@ -2,25 +2,29 @@ import { db } from "@/libs/db";
 import documentService from "@/services/document.service";
 import { documentTable, folderTable } from "@/models";
 import { eqOrNull } from "@/libs/sql";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 
-async function findInFolder(parentId: string | null) {
+function ownedBy(userId: string) {
+  return eq(folderTable.ownerId, userId);
+}
+
+async function findInFolder(parentId: string | null, userId: string) {
   return await db
     .select()
     .from(folderTable)
-    .where(eqOrNull(folderTable.parentId, parentId));
+    .where(and(eqOrNull(folderTable.parentId, parentId), ownedBy(userId)));
 }
 
-async function exists(id: string) {
+async function exists(id: string, userId: string) {
   const [row] = await db
     .select({ id: folderTable.id })
     .from(folderTable)
-    .where(eq(folderTable.id, id));
+    .where(and(eq(folderTable.id, id), ownedBy(userId)));
 
   return !!row;
 }
 
-async function path(id: string) {
+async function path(id: string, userId: string) {
   const result = await db.execute<{
     id: string;
     name: string;
@@ -29,7 +33,7 @@ async function path(id: string) {
   }>(sql`
     WITH RECURSIVE ancestors AS (
       SELECT id, name, parent_id, updated_at, ARRAY[id] AS visited
-      FROM ${folderTable} WHERE id = ${id}
+      FROM ${folderTable} WHERE id = ${id} AND owner_id = ${userId}
       UNION ALL
       SELECT f.id, f.name, f.parent_id, f.updated_at, a.visited || f.id
       FROM ${folderTable} f
@@ -48,20 +52,20 @@ async function path(id: string) {
   }));
 }
 
-async function create(name: string, parentId: string | null) {
+async function create(name: string, parentId: string | null, userId: string) {
   const [row] = await db
     .insert(folderTable)
-    .values({ name, parentId })
+    .values({ name, parentId, ownerId: userId })
     .returning();
 
   return row!;
 }
 
-async function rename(id: string, name: string) {
+async function rename(id: string, name: string, userId: string) {
   const [row] = await db
     .update(folderTable)
     .set({ name })
-    .where(eq(folderTable.id, id))
+    .where(and(eq(folderTable.id, id), ownedBy(userId)))
     .returning();
 
   return row;
@@ -80,12 +84,15 @@ async function documentIdsWithin(id: string) {
   return result.rows.map((row) => row.id);
 }
 
-async function remove(id: string) {
+async function remove(id: string, userId: string) {
+  const isOwned = await exists(id, userId);
+  if (!isOwned) return;
+
   const documentIds = await documentIdsWithin(id);
 
   const [row] = await db
     .delete(folderTable)
-    .where(eq(folderTable.id, id))
+    .where(and(eq(folderTable.id, id), ownedBy(userId)))
     .returning({ id: folderTable.id });
 
   if (row) await documentService.forget(documentIds);
