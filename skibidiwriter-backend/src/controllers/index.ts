@@ -12,7 +12,6 @@ const protectedRoutes = new Hono()
   .route("/folders", folderController)
   .route("/files", fileController);
 
-// Must be mounted after the public routes: its pathless `use` becomes `/*`.
 export const app = new Hono()
   .use(
     "*",
