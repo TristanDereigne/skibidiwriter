@@ -11,12 +11,11 @@ import { explorerPath } from "@/lib/paths.ts";
 import { cn } from "@/lib/utils.ts";
 import { Fragment, useState } from "react";
 import { Link } from "react-router";
-import type { FolderDTO } from "../../../../../skibidiwriter-shared";
+import type { FolderDTO } from "skibidiwriter-shared";
 
 interface Props {
   folders: FolderDTO[];
   current?: string;
-  /** Makes the current crumb editable in place. */
   onRename?: (name: string) => void;
 }
 

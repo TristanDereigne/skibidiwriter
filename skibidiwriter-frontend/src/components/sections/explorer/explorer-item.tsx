@@ -57,6 +57,7 @@ export default function ExplorerItem({
             aria-label={`Open ${name}`}
             className="flex h-28 w-full items-center justify-center rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             onClick={onOpen}
+            title={name}
           >
             <Icon
               strokeWidth={1}
