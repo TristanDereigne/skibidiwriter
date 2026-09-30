@@ -1,6 +1,6 @@
 import type { AuthEnv } from "@/libs/require-auth";
 import { IdParamSchema, validate } from "@/libs/validation";
-import type { FolderRow } from "@/models";
+import { toFolderDTO } from "@/mappers/folder.mapper";
 import folderService from "@/services/folder.service";
 import { Hono } from "hono";
 import {
@@ -8,30 +8,17 @@ import {
   ErrorCode,
   MoveFolderSchema,
   RenameSchema,
-  type FolderDTO,
 } from "skibidiwriter-shared";
 import z from "zod";
 
 const ListQuerySchema = z.object({ parentId: z.uuid().optional() });
-
-function toDTO(
-  row: Pick<FolderRow, "id" | "name" | "parentId" | "createdAt" | "updatedAt">,
-): FolderDTO {
-  return {
-    id: row.id,
-    name: row.name,
-    parentId: row.parentId,
-    createdAt: row.createdAt.toISOString(),
-    updatedAt: row.updatedAt.toISOString(),
-  };
-}
 
 export const folderController = new Hono<AuthEnv>()
   .get("/", validate("query", ListQuerySchema), async (ctx) => {
     const { parentId = null } = ctx.req.valid("query");
     const rows = await folderService.findInFolder(parentId, ctx.get("userId"));
 
-    return ctx.json(rows.map(toDTO));
+    return ctx.json(rows.map(toFolderDTO));
   })
   .get("/:id/path", validate("param", IdParamSchema), async (ctx) => {
     const rows = await folderService.path(
@@ -41,7 +28,7 @@ export const folderController = new Hono<AuthEnv>()
     if (rows.length === 0)
       return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-    return ctx.json(rows.map(toDTO), 200);
+    return ctx.json(rows.map(toFolderDTO), 200);
   })
   .get("/:id/stats", validate("param", IdParamSchema), async (ctx) => {
     const { id } = ctx.req.valid("param");
@@ -71,7 +58,7 @@ export const folderController = new Hono<AuthEnv>()
 
     const row = await folderService.create(name, parentId, ctx.get("userId"));
 
-    return ctx.json(toDTO(row), 201);
+    return ctx.json(toFolderDTO(row), 201);
   })
   .patch(
     "/:id",
@@ -97,7 +84,7 @@ export const folderController = new Hono<AuthEnv>()
       const row = await folderService.rename(id, name, userId);
       if (!row) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-      return ctx.json(toDTO(row), 200);
+      return ctx.json(toFolderDTO(row), 200);
     },
   )
   .patch(
@@ -134,7 +121,7 @@ export const folderController = new Hono<AuthEnv>()
       const row = await folderService.move(id, parentId, userId);
       if (!row) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-      return ctx.json(toDTO(row), 200);
+      return ctx.json(toFolderDTO(row), 200);
     },
   )
   .delete("/:id", validate("param", IdParamSchema), async (ctx) => {
