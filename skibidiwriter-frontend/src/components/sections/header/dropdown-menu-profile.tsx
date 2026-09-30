@@ -23,9 +23,9 @@ export function DropdownMenuProfile() {
             Explorer
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate("/profile")}>
-            Profile
+            Profil
           </DropdownMenuItem>
-          <DropdownMenuItem>Settings</DropdownMenuItem>
+          <DropdownMenuItem>Paramètres</DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>GitHub</DropdownMenuItem>

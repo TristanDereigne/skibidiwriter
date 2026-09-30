@@ -23,33 +23,33 @@ import { ProfilePage } from "./pages/app/profile.page.tsx";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-  <UserProvider>
-    <AuthProvider>
-      <ThemeProvider>
-        <TooltipProvider>
-          <ToastProvider>
-            <QueryClientProvider client={queryClient}>
-              <HeaderProvider>
-                <BrowserRouter>
-                  <Routes>
-                    <Route element={<Public />}>
-                      <Route path="login" element={<LoginPage />} />
-                      <Route path="register" element={<RegisterPage />} />
-                    </Route>
-                    <Route element={<App />}>
-                      <Route path="profile" element={<ProfilePage />} />
-                      <Route path="/:folderId?" element={<ExplorerPage />} />
-                      <Route path="edit/:documentId" element={<EditPage />} />
-                    </Route>
-                  </Routes>
-                </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <UserProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <TooltipProvider>
+              <ToastProvider>
+                <HeaderProvider>
+                  <BrowserRouter>
+                    <Routes>
+                      <Route element={<Public />}>
+                        <Route path="login" element={<LoginPage />} />
+                        <Route path="register" element={<RegisterPage />} />
+                      </Route>
+                      <Route element={<App />}>
+                        <Route path="profile" element={<ProfilePage />} />
+                        <Route path="/:folderId?" element={<ExplorerPage />} />
+                        <Route path="edit/:documentId" element={<EditPage />} />
+                      </Route>
+                    </Routes>
+                  </BrowserRouter>
+                  <Toaster />
+                </HeaderProvider>
+              </ToastProvider>
+            </TooltipProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </UserProvider>
+    </QueryClientProvider>
 
-                <Toaster />
-              </HeaderProvider>
-            </QueryClientProvider>
-          </ToastProvider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  </UserProvider>,
 );
