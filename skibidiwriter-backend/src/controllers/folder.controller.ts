@@ -39,7 +39,7 @@ export const folderController = new Hono<AuthEnv>()
       ctx.get("userId"),
     );
     if (rows.length === 0)
-      return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+      return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
     return ctx.json(rows.map(toDTO), 200);
   })
@@ -47,7 +47,7 @@ export const folderController = new Hono<AuthEnv>()
     const { id } = ctx.req.valid("param");
     const userId = ctx.get("userId");
     const isOwned = await folderService.exists(id, userId);
-    if (!isOwned) return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+    if (!isOwned) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
     const stats = await folderService.stats(id, userId);
 
@@ -59,7 +59,7 @@ export const folderController = new Hono<AuthEnv>()
     const parentExists =
       !parentId || (await folderService.exists(parentId, ctx.get("userId")));
     if (!parentExists) {
-      return ctx.json({ code: ErrorCode.ParentFolderNotFound }, 404);
+      return ctx.json({ code: ErrorCode.Folder_ParentNotFound }, 404);
     }
 
     const nameTaken = await folderService.nameTaken(
@@ -67,7 +67,7 @@ export const folderController = new Hono<AuthEnv>()
       parentId,
       ctx.get("userId"),
     );
-    if (nameTaken) return ctx.json({ code: ErrorCode.NameAlreadyInUse }, 409);
+    if (nameTaken) return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
     const row = await folderService.create(name, parentId, ctx.get("userId"));
 
@@ -83,7 +83,7 @@ export const folderController = new Hono<AuthEnv>()
       const { name } = ctx.req.valid("json");
 
       const folder = await folderService.findById(id, userId);
-      if (!folder) return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+      if (!folder) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       const nameTaken = await folderService.nameTaken(
         name,
@@ -91,10 +91,11 @@ export const folderController = new Hono<AuthEnv>()
         userId,
         id,
       );
-      if (nameTaken) return ctx.json({ code: ErrorCode.NameAlreadyInUse }, 409);
+      if (nameTaken)
+        return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await folderService.rename(id, name, userId);
-      if (!row) return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+      if (!row) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       return ctx.json(toDTO(row), 200);
     },
@@ -111,15 +112,15 @@ export const folderController = new Hono<AuthEnv>()
       if (parentId) {
         const ancestors = await folderService.path(parentId, userId);
         if (ancestors.length === 0) {
-          return ctx.json({ code: ErrorCode.ParentFolderNotFound }, 404);
+          return ctx.json({ code: ErrorCode.Folder_ParentNotFound }, 404);
         }
         if (ancestors.some((folder) => folder.id === id)) {
-          return ctx.json({ code: ErrorCode.FolderMoveIntoItself }, 409);
+          return ctx.json({ code: ErrorCode.Folder_MoveIntoItself }, 409);
         }
       }
 
       const folder = await folderService.findById(id, userId);
-      if (!folder) return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+      if (!folder) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       const nameTaken = await folderService.nameTaken(
         folder.name,
@@ -127,10 +128,11 @@ export const folderController = new Hono<AuthEnv>()
         userId,
         id,
       );
-      if (nameTaken) return ctx.json({ code: ErrorCode.NameAlreadyInUse }, 409);
+      if (nameTaken)
+        return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await folderService.move(id, parentId, userId);
-      if (!row) return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+      if (!row) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       return ctx.json(toDTO(row), 200);
     },
@@ -140,7 +142,7 @@ export const folderController = new Hono<AuthEnv>()
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
-    if (!row) return ctx.json({ code: ErrorCode.FolderNotFound }, 404);
+    if (!row) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
     return ctx.body(null, 204);
   });

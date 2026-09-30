@@ -1,20 +1,20 @@
 import { ErrorCode } from "skibidiwriter-shared";
 
 const ERROR_MESSAGES: Record<ErrorCode, string> = {
-  [ErrorCode.Unauthorized]: "Non autorisé",
-  [ErrorCode.InvalidRequest]: "Requête invalide",
-  [ErrorCode.FileNotFound]: "Fichier introuvable",
-  [ErrorCode.FileTooLarge]: "Fichier trop volumineux",
-  [ErrorCode.FileNameInvalid]: "Nom de fichier invalide",
-  [ErrorCode.FolderNotFound]: "Dossier introuvable",
-  [ErrorCode.ParentFolderNotFound]: "Dossier parent introuvable",
-  [ErrorCode.FolderMoveIntoItself]:
+  [ErrorCode.Auth_Unauthorized]: "Non autorisé",
+  [ErrorCode.Request_Invalid]: "Requête invalide",
+  [ErrorCode.File_NotFound]: "Fichier introuvable",
+  [ErrorCode.File_TooLarge]: "Fichier trop volumineux",
+  [ErrorCode.File_NameInvalid]: "Nom de fichier invalide",
+  [ErrorCode.Folder_NotFound]: "Dossier introuvable",
+  [ErrorCode.Folder_ParentNotFound]: "Dossier parent introuvable",
+  [ErrorCode.Folder_MoveIntoItself]:
     "Impossible de déplacer un dossier dans lui-même",
-  [ErrorCode.NameAlreadyInUse]: "Ce nom est déjà utilisé dans ce dossier",
-  [ErrorCode.DocumentNotFound]: "Document introuvable",
-  [ErrorCode.SocketTextExpected]: "Message texte attendu",
-  [ErrorCode.SocketMalformedJson]: "JSON malformé",
-  [ErrorCode.SocketInvalidEvent]: "Évènement invalide",
+  [ErrorCode.Name_AlreadyInUse]: "Ce nom est déjà utilisé dans ce dossier",
+  [ErrorCode.Document_NotFound]: "Document introuvable",
+  [ErrorCode.Socket_TextExpected]: "Message texte attendu",
+  [ErrorCode.Socket_MalformedJson]: "JSON malformé",
+  [ErrorCode.Socket_InvalidEvent]: "Évènement invalide",
 };
 
 export function getErrorMessage(code: string | undefined, fallback: string) {

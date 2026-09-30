@@ -11,6 +11,6 @@ export function validate<
 >(target: Target, schema: Schema) {
   return zValidator(target, schema, (result, ctx) => {
     if (!result.success)
-      return ctx.json({ code: ErrorCode.InvalidRequest }, 400);
+      return ctx.json({ code: ErrorCode.Request_Invalid }, 400);
   });
 }
