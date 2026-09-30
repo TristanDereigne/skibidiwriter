@@ -12,9 +12,9 @@ export function DropdownMenuProfile() {
         <DropdownMenu>
             <DropdownMenuTrigger
                 render={
-                    <div className={"cursor-pointer w-8 h-8 rounded-full flex justify-center items-center bg-[#432DD7]"}>
+                    <button className={"cursor-pointer w-8 h-8 rounded-full flex justify-center items-center bg-[#432DD7]"}>
                         <p className={"text-white"}>H</p>
-                    </div>
+                    </button>
                 }
             />
             <DropdownMenuContent>
