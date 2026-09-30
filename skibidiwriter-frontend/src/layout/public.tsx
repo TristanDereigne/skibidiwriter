@@ -1,4 +1,4 @@
-import Providers from "./components/providers";
+import Providers from "../components/providers.tsx";
 import { Navigate, Outlet } from "react-router";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import { Toaster } from "@/components/ui/toast.tsx";

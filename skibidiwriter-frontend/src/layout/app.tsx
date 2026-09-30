@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from "react-router";
-import Providers from "./components/providers";
-import { Toaster } from "./components/ui/toast";
+import Providers from "../components/providers.tsx";
+import { Toaster } from "../components/ui/toast.tsx";
 import { useContext } from "react";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import { HeaderContext } from "@/context/HeaderContext.tsx";

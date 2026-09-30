@@ -19,7 +19,7 @@ export function ModeToggle() {
 
   return (
     <div
-      className="group inline-flex items-center gap-2"
+      className="group inline-flex items-center gap-1 ml-4"
       data-state={checked ? "checked" : "unchecked"}
     >
       <label

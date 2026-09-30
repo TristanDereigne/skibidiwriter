@@ -3,8 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import "./index.css";
 
-import App from "./App.tsx";
-import Public from "./Public.tsx";
+import App from "./layout/App.tsx";
+import Public from "./layout/Public.tsx";
 
 import { AuthProvider } from "./context/AuthContext.tsx";
 import { EditPage } from "./pages/app/edit.page.tsx";
