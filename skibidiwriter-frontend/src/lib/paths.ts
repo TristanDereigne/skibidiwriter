@@ -1,4 +1,4 @@
 export const explorerPath = (folderId: string | null) =>
-  folderId ? `/explorer/${folderId}` : "/explorer";
+  folderId ? `/${folderId}` : "/";
 
 export const editPath = (documentId: string) => `/edit/${documentId}`;
