@@ -9,13 +9,3 @@ export const CreateDocumentSchema = z.object({
   content: z.string().max(MAX_DOCUMENT_CONTENT_LENGTH).optional(),
 });
 export type CreateDocumentDTO = z.infer<typeof CreateDocumentSchema>;
-
-export const MoveDocumentSchema = z.object({ folderId: z.uuid().nullable() });
-export type MoveDocumentDTO = z.infer<typeof MoveDocumentSchema>;
-
-export interface DocumentDTO {
-  id: string;
-  name: string;
-  folderId: string | null;
-  updatedAt: string;
-}

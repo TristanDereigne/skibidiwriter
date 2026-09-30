@@ -20,3 +20,5 @@ export const folderTable = pgTable("folder", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+export type FolderRow = typeof folderTable.$inferSelect;

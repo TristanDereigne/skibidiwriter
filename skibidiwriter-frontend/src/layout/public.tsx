@@ -1,4 +1,3 @@
-import Providers from "../components/providers.tsx";
 import { Navigate, Outlet } from "react-router";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import { Toaster } from "@/components/ui/toast.tsx";
@@ -10,9 +9,9 @@ export default function Public() {
   if (isLoggedIn) return <Navigate to="/" replace />;
 
   return (
-    <Providers>
+    <>
       <Outlet />
       <Toaster />
-    </Providers>
+    </>
   );
 }

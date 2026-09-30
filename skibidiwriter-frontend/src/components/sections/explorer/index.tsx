@@ -1,8 +1,6 @@
-import { useDocuments } from "@/hooks/use-documents";
 import { useFiles } from "@/hooks/use-files";
 import { useFolders } from "@/hooks/use-folders";
 import ExplorerFile from "./explorer-file";
-import ExplorerDocument from "./explorer-document";
 import { useExplorer } from "./use-explorer";
 import { ExplorerEmpty, ExplorerNotFound } from "./explorer-empty";
 import ExplorerFolder from "./explorer-folder";
@@ -119,7 +117,6 @@ export default function Explorer() {
 
 function ExplorerContent() {
   const { folderId, isNotFound } = useExplorer();
-  const documents = useDocuments(folderId);
   const folders = useFolders(folderId);
   const files = useFiles(folderId);
 
@@ -130,10 +127,9 @@ function ExplorerContent() {
       </Centered>
     );
 
-  if (documents.isPending || folders.isPending || files.isPending)
-    return <ExplorerSkeleton />;
+  if (folders.isPending || files.isPending) return <ExplorerSkeleton />;
 
-  if (!documents.data?.length && !folders.data?.length && !files.data?.length) {
+  if (!folders.data?.length && !files.data?.length) {
     return (
       <Centered>
         <ExplorerEmpty />
@@ -145,9 +141,6 @@ function ExplorerContent() {
     <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-6">
       {folders.data?.map((folder) => (
         <ExplorerFolder key={folder.id} folder={folder} />
-      ))}
-      {documents.data?.map((document) => (
-        <ExplorerDocument key={document.id} document={document} />
       ))}
       {files.data?.map((file) => (
         <ExplorerFile key={file.id} file={file} />

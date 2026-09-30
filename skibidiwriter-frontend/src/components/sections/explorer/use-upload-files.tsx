@@ -4,11 +4,11 @@ import {
   ProgressValue,
 } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
-import { useUploadFile } from "@/hooks/use-files";
 import {
   DEFAULT_DOCUMENT_NAME,
   useCreateDocument,
-} from "@/hooks/use-documents";
+  useUploadFile,
+} from "@/hooks/use-files";
 import {
   MAX_DOCUMENT_CONTENT_LENGTH,
   MAX_FILE_SIZE_BYTES,

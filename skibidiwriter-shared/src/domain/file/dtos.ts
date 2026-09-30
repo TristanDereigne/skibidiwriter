@@ -1,15 +1,26 @@
 import z from "zod";
+import { NameSchema } from "../name";
 
 export const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
+export const MAX_DOCUMENT_CONTENT_LENGTH = 200_000;
+
+export const FILE_KINDS = ["document", "upload"] as const;
+export type FileKind = (typeof FILE_KINDS)[number];
+
+export const CreateDocumentSchema = z.object({
+  name: NameSchema,
+  folderId: z.uuid().nullable().default(null),
+  content: z.string().max(MAX_DOCUMENT_CONTENT_LENGTH).optional(),
+});
 
 export const MoveFileSchema = z.object({ folderId: z.uuid().nullable() });
-export type MoveFileDTO = z.infer<typeof MoveFileSchema>;
 
 export interface FileDTO {
   id: string;
   name: string;
   folderId: string | null;
+  kind: FileKind;
   mimeType: string;
-  size: number;
+  sizeBytes: number;
   updatedAt: string;
 }

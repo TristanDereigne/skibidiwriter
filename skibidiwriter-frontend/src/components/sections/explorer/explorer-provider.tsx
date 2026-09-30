@@ -1,7 +1,4 @@
-import {
-  DEFAULT_DOCUMENT_NAME,
-  useCreateDocument,
-} from "@/hooks/use-documents";
+import { DEFAULT_DOCUMENT_NAME, useCreateDocument } from "@/hooks/use-files";
 import {
   DEFAULT_FOLDER_NAME,
   useCreateFolder,

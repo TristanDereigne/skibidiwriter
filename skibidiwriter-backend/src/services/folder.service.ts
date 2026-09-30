@@ -1,6 +1,6 @@
 import { db } from "@/libs/db";
-import documentService from "@/services/document.service";
-import { documentTable, folderTable } from "@/models";
+import fileService from "@/services/file.service";
+import { fileTable, folderTable } from "@/models";
 import { eqOrNull } from "@/libs/sql";
 import { and, eq, sql } from "drizzle-orm";
 
@@ -88,7 +88,8 @@ async function documentIdsWithin(id: string) {
       UNION
       SELECT f.id FROM ${folderTable} f JOIN tree t ON f.parent_id = t.id
     )
-    SELECT d.id FROM ${documentTable} d WHERE d.folder_id IN (SELECT id FROM tree)
+    SELECT d.id FROM ${fileTable} d
+    WHERE d.kind = 'document' AND d.folder_id IN (SELECT id FROM tree)
   `);
 
   return result.rows.map((row) => row.id);
@@ -105,7 +106,7 @@ async function remove(id: string, userId: string) {
     .where(and(eq(folderTable.id, id), ownedBy(userId)))
     .returning({ id: folderTable.id });
 
-  if (row) await documentService.forget(documentIds);
+  if (row) await fileService.forget(documentIds);
 
   return row;
 }

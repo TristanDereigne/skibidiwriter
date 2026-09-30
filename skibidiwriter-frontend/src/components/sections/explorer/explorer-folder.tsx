@@ -1,4 +1,3 @@
-import { useMoveDocument } from "@/hooks/use-documents";
 import { useMoveFile } from "@/hooks/use-files";
 import {
   useDeleteFolder,
@@ -24,7 +23,6 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   const renameFolder = useRenameFolder();
   const deleteFolder = useDeleteFolder();
   const moveFolder = useMoveFolder();
-  const moveDocument = useMoveDocument();
   const moveFile = useMoveFile();
 
   function handleDrop(item: DragItem) {
@@ -35,9 +33,7 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
         type: "error",
       });
 
-    if (item.kind === "document") {
-      moveDocument.mutate({ id: item.id, folderId: folder.id }, { onError });
-    } else if (item.kind === "file") {
+    if (item.kind === "file") {
       moveFile.mutate({ id: item.id, folderId: folder.id }, { onError });
     } else if (item.id !== folder.id) {
       moveFolder.mutate({ id: item.id, parentId: folder.id }, { onError });

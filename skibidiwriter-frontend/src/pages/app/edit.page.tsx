@@ -4,11 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
 import { HeaderContext } from "@/context/HeaderContext";
-import {
-  useDocument,
-  useDownloadDocument,
-  useRenameDocument,
-} from "@/hooks/use-documents";
+import { useDownloadFile, useFile, useRenameFile } from "@/hooks/use-files";
 import { useFolderPath } from "@/hooks/use-folders";
 import { CONNECTION_STATUS_LABELS, useConnectionStatus } from "@/lib/realtime";
 import { useContext, useEffect } from "react";
@@ -16,10 +12,10 @@ import { useParams } from "react-router";
 
 export const EditPage = () => {
   const { documentId } = useParams();
-  const { isLoading, data: document } = useDocument(documentId);
+  const { isLoading, data: document } = useFile(documentId);
   const { data: folders } = useFolderPath(document?.folderId ?? null);
-  const { mutate: rename } = useRenameDocument();
-  const { mutate: download } = useDownloadDocument();
+  const { mutate: rename } = useRenameFile();
+  const { mutate: download } = useDownloadFile();
   const status = useConnectionStatus();
   const headerContext = useContext(HeaderContext);
   const setHeaderChildren = headerContext?.setHeaderChildren;
@@ -52,9 +48,7 @@ export const EditPage = () => {
             className="ml-2 text-muted-foreground"
             aria-label="Download document"
             title="Download document"
-            onClick={() =>
-              download({ id: documentRowId, name: documentName ?? "" })
-            }
+            onClick={() => download(documentRowId)}
           >
             <DownloadIcon />
           </Button>

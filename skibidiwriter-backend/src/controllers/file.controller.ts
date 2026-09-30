@@ -1,10 +1,12 @@
 import type { AuthEnv } from "@/libs/require-auth";
 import { IdParamSchema, validate } from "@/libs/validation";
+import type { FileRow } from "@/models";
 import fileService from "@/services/file.service";
 import folderService from "@/services/folder.service";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import {
+  CreateDocumentSchema,
   MAX_FILE_SIZE_BYTES,
   MoveFileSchema,
   NameSchema,
@@ -29,15 +31,16 @@ function toMimeType(type: string) {
   return MIME_TYPE.test(essence) ? essence : "application/octet-stream";
 }
 
-function toDTO(row: Omit<FileDTO, "updatedAt"> & { updatedAt: Date }) {
+function toDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
   return {
     id: row.id,
     name: row.name,
     folderId: row.folderId,
+    kind: row.kind,
     mimeType: row.mimeType,
-    size: row.size,
+    sizeBytes: row.sizeBytes,
     updatedAt: row.updatedAt.toISOString(),
-  } satisfies FileDTO;
+  };
 }
 
 export const fileController = new Hono<AuthEnv>()
@@ -47,8 +50,17 @@ export const fileController = new Hono<AuthEnv>()
 
     return ctx.json(rows.map(toDTO));
   })
+  .get("/:id", validate("param", IdParamSchema), async (ctx) => {
+    const row = await fileService.findById(
+      ctx.req.valid("param").id,
+      ctx.get("userId"),
+    );
+    if (!row) return ctx.json({ error: "File not found" }, 404);
+
+    return ctx.json(toDTO(row), 200);
+  })
   .get("/:id/content", validate("param", IdParamSchema), async (ctx) => {
-    const row = await fileService.findContent(
+    const row = await fileService.content(
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
@@ -60,6 +72,23 @@ export const fileController = new Hono<AuthEnv>()
       "X-Content-Type-Options": "nosniff",
       "Content-Security-Policy": "sandbox",
     });
+  })
+  .post("/documents", validate("json", CreateDocumentSchema), async (ctx) => {
+    const userId = ctx.get("userId");
+    const { name, folderId, content } = ctx.req.valid("json");
+
+    const folderExists =
+      !folderId || (await folderService.exists(folderId, userId));
+    if (!folderExists) return ctx.json({ error: "Folder not found" }, 404);
+
+    const row = await fileService.createDocument(
+      name,
+      folderId,
+      userId,
+      content,
+    );
+
+    return ctx.json(toDTO(row), 201);
   })
   .post(
     "/",
@@ -83,7 +112,7 @@ export const fileController = new Hono<AuthEnv>()
       const name = NameSchema.safeParse(file.name.slice(0, 255));
       if (!name.success) return ctx.json({ error: "Invalid file name" }, 400);
 
-      const row = await fileService.create(
+      const row = await fileService.createUpload(
         {
           name: name.data,
           mimeType: toMimeType(file.type),

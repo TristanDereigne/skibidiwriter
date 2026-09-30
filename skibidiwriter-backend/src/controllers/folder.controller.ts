@@ -1,5 +1,6 @@
 import type { AuthEnv } from "@/libs/require-auth";
 import { IdParamSchema, validate } from "@/libs/validation";
+import type { FolderRow } from "@/models";
 import folderService from "@/services/folder.service";
 import { Hono } from "hono";
 import {
@@ -12,13 +13,15 @@ import z from "zod";
 
 const ListQuerySchema = z.object({ parentId: z.uuid().optional() });
 
-function toDTO(row: Omit<FolderDTO, "updatedAt"> & { updatedAt: Date }) {
+function toDTO(
+  row: Pick<FolderRow, "id" | "name" | "parentId" | "updatedAt">,
+): FolderDTO {
   return {
     id: row.id,
     name: row.name,
     parentId: row.parentId,
     updatedAt: row.updatedAt.toISOString(),
-  } satisfies FolderDTO;
+  };
 }
 
 export const folderController = new Hono<AuthEnv>()

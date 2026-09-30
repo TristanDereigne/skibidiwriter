@@ -9,7 +9,7 @@ import {
   send,
 } from "@/libs/socket";
 import chatService from "@/services/chat.service";
-import documentService from "@/services/document.service";
+import fileService from "@/services/file.service";
 import type { AuthEnv } from "@/libs/require-auth";
 import { upgradeWebSocket } from "@hono/bun";
 import type { Context } from "hono";
@@ -96,13 +96,10 @@ async function handleClientEvent(
       break;
     }
     case ClientEventType.Document_Join: {
-      const canAccess = await documentService.hasAccess(
-        event.documentId,
-        userId,
-      );
+      const canAccess = await fileService.hasAccess(event.documentId, userId);
       if (!canAccess) return sendDocumentNotFound(sender);
 
-      const operations = await documentService.operations(event.documentId);
+      const operations = await fileService.operations(event.documentId);
       if (!operations) return sendDocumentNotFound(sender);
 
       joinRoom(sender, event.documentId);
@@ -124,7 +121,7 @@ async function handleClientEvent(
         return sendDocumentNotFound(sender);
       }
 
-      const operations = await documentService.apply(
+      const operations = await fileService.apply(
         event.documentId,
         event.operations,
       );
@@ -148,7 +145,7 @@ async function handleClientEvent(
 
 function leaveDocument(connection: WSContext, documentId: string) {
   if (leaveRoom(connection, documentId)) {
-    void documentService.release(documentId);
+    void fileService.release(documentId);
   }
 }
 

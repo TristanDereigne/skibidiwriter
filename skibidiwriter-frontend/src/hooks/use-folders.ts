@@ -1,5 +1,4 @@
 import { api } from "@/lib/api";
-import { DOCUMENTS_QUERY_KEY } from "./use-documents";
 import { FILES_QUERY_KEY } from "./use-files";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -116,7 +115,6 @@ export function useDeleteFolder() {
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: FOLDERS_QUERY_KEY }),
-        queryClient.invalidateQueries({ queryKey: DOCUMENTS_QUERY_KEY }),
         queryClient.invalidateQueries({ queryKey: FILES_QUERY_KEY }),
       ]),
   });
