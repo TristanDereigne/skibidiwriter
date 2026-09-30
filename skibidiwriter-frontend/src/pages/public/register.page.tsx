@@ -98,7 +98,9 @@ export const RegisterPage = () => {
 
   return (
     <div
-      className={"w-screen h-screen flex flex-col justify-center items-center gap-14"}
+      className={
+        "w-screen h-screen flex flex-col justify-center items-center gap-14"
+      }
     >
       <div className={"text-center text-6xl font-bold max-w-md w-full"}>
         <h1 className={"text-[#432DD7]"}>Skibidi Writer.</h1>
@@ -117,7 +119,11 @@ export const RegisterPage = () => {
               </CardDescription>
             </div>
             <CardAction>
-              <Button variant="link" className={"relative bottom-1"} onClick={() => navigate("/login")}>
+              <Button
+                variant="link"
+                className={"relative bottom-1"}
+                onClick={() => navigate("/login")}
+              >
                 Se connecter ?
               </Button>
             </CardAction>
@@ -163,7 +169,9 @@ export const RegisterPage = () => {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">Confirmation du mot de passe</Label>
+                    <Label htmlFor="password">
+                      Confirmation du mot de passe
+                    </Label>
                   </div>
                   <Input
                     id="verifyPassword"

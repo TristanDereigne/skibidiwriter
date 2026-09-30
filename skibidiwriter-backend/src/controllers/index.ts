@@ -6,11 +6,13 @@ import { folderController } from "./folder.controller";
 import { socketController } from "./socket.controller";
 import { auth } from "@/libs/auth";
 import { requireAuth } from "@/libs/require-auth";
+import { userController } from "./user.controller";
 
 const protectedRoutes = new Hono()
   .use(requireAuth)
   .route("/folders", folderController)
-  .route("/files", fileController);
+  .route("/files", fileController)
+  .route("/users", userController);
 
 export const app = new Hono()
   .use(

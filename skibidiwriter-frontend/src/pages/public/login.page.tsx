@@ -75,7 +75,9 @@ export const LoginPage = () => {
 
   return (
     <div
-      className={"w-screen h-screen flex flex-col justify-center items-center gap-14"}
+      className={
+        "w-screen h-screen flex flex-col justify-center items-center gap-14"
+      }
     >
       <div className={"text-center text-6xl font-bold max-w-md w-full"}>
         <h1 className={"text-[#432DD7]"}>Skibidi Writer.</h1>
@@ -94,7 +96,11 @@ export const LoginPage = () => {
               </CardDescription>
             </div>
             <CardAction>
-              <Button variant="link" className={"relative bottom-1"} onClick={() => navigate("/register")}>
+              <Button
+                variant="link"
+                className={"relative bottom-1"}
+                onClick={() => navigate("/register")}
+              >
                 S'inscrire ?
               </Button>
             </CardAction>
@@ -135,7 +141,9 @@ export const LoginPage = () => {
               <p className={"mt-2 text-red-500"}>E-mail : {errors.email}</p>
             )}
             {errors.password && (
-              <p className={"mt-2 text-red-500"}>Mot de passe: {errors.password}</p>
+              <p className={"mt-2 text-red-500"}>
+                Mot de passe: {errors.password}
+              </p>
             )}
             <Button type="submit" className="w-full">
               Se connecter

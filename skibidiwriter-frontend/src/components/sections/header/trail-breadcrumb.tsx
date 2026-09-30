@@ -27,7 +27,7 @@ export default function TrailBreadcrumb({
   const [renaming, setRenaming] = useState(false);
 
   const trail = [
-    { id: null, name: "Documents" },
+    { id: null, name: "Explorer" },
     ...folders,
     ...(current === undefined ? [] : [{ id: "current", name: current }]),
   ];

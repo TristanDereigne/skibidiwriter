@@ -23,12 +23,12 @@ import { ProfilePage } from "./pages/app/profile.page.tsx";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-  <UserProvider>
-    <AuthProvider>
-      <ThemeProvider>
-        <TooltipProvider>
-          <ToastProvider>
-            <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <UserProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <ToastProvider>
               <HeaderProvider>
                 <BrowserRouter>
                   <Routes>
@@ -43,13 +43,12 @@ createRoot(document.getElementById("root")!).render(
                     </Route>
                   </Routes>
                 </BrowserRouter>
-
                 <Toaster />
               </HeaderProvider>
-            </QueryClientProvider>
-          </ToastProvider>
-        </TooltipProvider>
-      </ThemeProvider>
-    </AuthProvider>
-  </UserProvider>,
+            </ToastProvider>
+          </TooltipProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </UserProvider>
+  </QueryClientProvider>,
 );
