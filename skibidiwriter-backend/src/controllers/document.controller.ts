@@ -41,6 +41,15 @@ export const documentController = new Hono<AuthEnv>()
 
     return ctx.json(toDTO(row), 200);
   })
+  .get("/:id/content", validate("param", IdParamSchema), async (ctx) => {
+    const { id } = ctx.req.valid("param");
+    const content = await documentService.text(id, ctx.get("userId"));
+    if (content === null) return ctx.json({ error: "Document not found" }, 404);
+
+    return ctx.text(content, 200, {
+      "Content-Type": "text/plain; charset=utf-8",
+    });
+  })
   .post("/", validate("json", CreateDocumentSchema), async (ctx) => {
     const { name, folderId, content } = ctx.req.valid("json");
 

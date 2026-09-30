@@ -1,4 +1,4 @@
-import TrailBreadcrumb from "@/components/layout/trail-breadcrumb";
+import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import DocumentEditor from "@/components/sections/document/document-editor";
 import { Badge } from "@/components/ui/badge";
 import { HeaderContext } from "@/context/HeaderContext";

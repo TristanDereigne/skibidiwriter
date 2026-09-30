@@ -1,3 +1,4 @@
+import { toast } from "@/components/ui/toast";
 import { api } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -76,6 +77,36 @@ export function useRenameDocument() {
       return await res.json();
     },
     onSuccess: invalidate,
+  });
+}
+
+function toFileName(name: string) {
+  const safe = name.replace(/[\\/:*?"<>|\u0000-\u001f]/g, "_").trim() || "document";
+
+  return /\.[A-Za-z0-9]{1,8}$/.test(safe) ? safe : `${safe}.md`;
+}
+
+export function useDownloadDocument() {
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const res = await api.documents[":id"].content.$get({ param: { id } });
+      if (!res.ok) throw new Error("Failed to download document");
+
+      const url = URL.createObjectURL(
+        new Blob([await res.text()], { type: "text/plain;charset=utf-8" }),
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = toFileName(name);
+      link.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: (error) =>
+      toast.add({
+        title: "Couldn’t download",
+        description: error.message,
+        type: "error",
+      }),
   });
 }
 

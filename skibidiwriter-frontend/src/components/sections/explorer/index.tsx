@@ -19,7 +19,7 @@ import { useContext, useEffect, useState } from "react";
 import { hasDragItem } from "./drag-item";
 import { useUploadFiles } from "./use-upload-files";
 import { HeaderContext } from "@/context/HeaderContext.tsx";
-import TrailBreadcrumb from "@/components/layout/trail-breadcrumb";
+import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import ExplorerHeaderActions from "@/components/sections/explorer/header-actions";
 
 export default function Explorer() {

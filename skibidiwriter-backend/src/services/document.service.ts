@@ -57,6 +57,25 @@ async function operations(id: string): Promise<DocumentOperation[] | null> {
   return document?.crdt.toOperations() ?? null;
 }
 
+async function text(id: string, userId: string): Promise<string | null> {
+  const canAccess = await hasAccess(id, userId);
+  if (!canAccess) return null;
+
+  const opened = await openDocuments.get(id);
+  if (opened) return opened.crdt.text;
+
+  const [row] = await db
+    .select({ operations: documentTable.operations })
+    .from(documentTable)
+    .where(eq(documentTable.id, id));
+  if (!row) return null;
+
+  const crdt = new TextCrdt("server");
+  crdt.apply(row.operations);
+
+  return crdt.text;
+}
+
 async function apply(
   id: string,
   incoming: DocumentOperation[],
@@ -196,6 +215,7 @@ async function remove(id: string, userId: string) {
 
 export default {
   hasAccess,
+  text,
   operations,
   apply,
   release,

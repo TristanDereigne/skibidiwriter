@@ -1,5 +1,8 @@
-import { Separator } from "@/components/ui/separator";
-import { ModeToggle } from "../mode-toggle";
+import { Separator } from "@/components/ui/separator.tsx";
+
+
+import { ModeToggle } from "../components/mode-toggle.tsx";
+import {DropdownMenuProfile} from "@/components/sections/header/dropdown-menu-profile.tsx";
 
 interface Props {
   children: React.ReactNode;
@@ -13,11 +16,11 @@ export default function AppHeader({ children, actions }: Readonly<Props>) {
             {children}
             {actions && <div className="ml-auto flex items-center">{actions}</div>}
             <ModeToggle />
-              <div className={"cursor-pointer w-8 h-8 rounded-full flex justify-center items-center bg-[#432DD7]"}>
-                  <p className={"text-white"}>H</p>
-              </div>
+            <DropdownMenuProfile />
           </header>
           <Separator />
       </>
   );
 }
+
+

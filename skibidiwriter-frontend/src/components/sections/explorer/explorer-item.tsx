@@ -5,10 +5,15 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { PencilIcon, Trash2Icon, type LucideIcon } from "lucide-react";
+import {
+  DownloadIcon,
+  PencilIcon,
+  Trash2Icon,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "cn";
 import { useEffect, useState } from "react";
-import InlineNameInput from "@/components/layout/inline-name-input";
+import InlineNameInput from "@/components/shared/inline-name-input";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
 import {
   hasDragItem,
@@ -29,6 +34,7 @@ interface Props {
   dragItem: DragItem;
   onDropItem?: (item: DragItem) => void;
   onOpen: () => void;
+  onDownload?: () => void;
   onPrefetch?: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
@@ -46,6 +52,7 @@ export default function ExplorerItem({
   dragItem,
   onDropItem,
   onOpen,
+  onDownload,
   onPrefetch,
   onRename,
   onDelete,
@@ -122,6 +129,7 @@ export default function ExplorerItem({
             aria-label={`Open ${name}`}
             className="flex h-28 w-full items-center justify-center rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             onClick={onOpen}
+            title={name}
           >
             <Icon strokeWidth={1} className={cn("size-24", iconClassName)} />
           </button>
@@ -151,6 +159,12 @@ export default function ExplorerItem({
             <PencilIcon />
             Rename
           </ContextMenuItem>
+          {onDownload && (
+            <ContextMenuItem onClick={onDownload}>
+              <DownloadIcon />
+              Download
+            </ContextMenuItem>
+          )}
           <ContextMenuSeparator />
           <ContextMenuItem
             variant="destructive"
