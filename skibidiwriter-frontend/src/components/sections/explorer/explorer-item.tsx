@@ -1,3 +1,4 @@
+import InlineNameInput from "@/components/layout/inline-name-input";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -7,7 +8,6 @@ import {
 } from "@/components/ui/context-menu";
 import { PencilIcon, Trash2Icon, type LucideIcon } from "lucide-react";
 import { useState } from "react";
-import InlineNameInput from "@/components/layout/inline-name-input";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
 
 interface Props {
@@ -57,6 +57,7 @@ export default function ExplorerItem({
             aria-label={`Open ${name}`}
             className="flex h-28 w-full items-center justify-center rounded-lg outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
             onClick={onOpen}
+            title={name}
           >
             <Icon
               strokeWidth={1}
