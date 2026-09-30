@@ -1,11 +1,11 @@
 import { toast } from "@/components/ui/toast";
-import { api } from "@/lib/api";
+import { api, errorMessage } from "@/lib/api";
 import { saveBlob } from "@/lib/download";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const FILES_QUERY_KEY = ["files"];
 
-export const DEFAULT_DOCUMENT_NAME = "Untitled document";
+export const DEFAULT_DOCUMENT_NAME = "Document sans titre";
 
 export function useFiles(folderId: string | null = null) {
   return useQuery({
@@ -40,12 +40,9 @@ function useInvalidateFiles() {
   return () => queryClient.invalidateQueries({ queryKey: FILES_QUERY_KEY });
 }
 
-async function errorMessage(res: Response, fallback: string) {
-  const body = (await res.json().catch(() => null)) as {
-    error?: string;
-  } | null;
-
-  return body?.error ?? fallback;
+function toastError(title: string) {
+  return (error: Error) =>
+    toast.add({ title, description: error.message, type: "error" });
 }
 
 export function useCreateDocument() {
@@ -64,7 +61,10 @@ export function useCreateDocument() {
       const res = await api.files.documents.$post({
         json: { name, folderId, content },
       });
-      if (!res.ok) throw new Error("Failed to create document");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec de la création du document"),
+        );
 
       return await res.json();
     },
@@ -86,7 +86,8 @@ export function useUploadFile() {
       const res = await api.files.$post({
         form: folderId ? { file, folderId } : { file },
       });
-      if (!res.ok) throw new Error(await errorMessage(res, "Upload failed"));
+      if (!res.ok)
+        throw new Error(await errorMessage(res, "Échec du téléversement"));
 
       return await res.json();
     },
@@ -103,11 +104,15 @@ export function useRenameFile() {
         param: { id },
         json: { name },
       });
-      if (!res.ok) throw new Error("Failed to rename file");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec du renommage du fichier"),
+        );
 
       return await res.json();
     },
     onSuccess: invalidate,
+    onError: toastError("Renommage impossible"),
   });
 }
 
@@ -127,7 +132,9 @@ export function useMoveFile() {
         json: { folderId },
       });
       if (!res.ok)
-        throw new Error(await errorMessage(res, "Failed to move file"));
+        throw new Error(
+          await errorMessage(res, "Échec du déplacement du fichier"),
+        );
 
       return await res.json();
     },
@@ -141,7 +148,7 @@ export function useDeleteFile() {
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await api.files[":id"].$delete({ param: { id } });
-      if (!res.ok) throw new Error("Failed to delete file");
+      if (!res.ok) throw new Error("Échec de la suppression du fichier");
     },
     onSuccess: invalidate,
   });
@@ -159,13 +166,13 @@ export function useDownloadFile() {
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await api.files[":id"].content.$get({ param: { id } });
-      if (!res.ok) throw new Error("Failed to download file");
+      if (!res.ok) throw new Error("Échec du téléchargement du fichier");
 
       saveBlob(await res.blob(), fileNameOf(res));
     },
     onError: (error) =>
       toast.add({
-        title: "Couldn’t download",
+        title: "Téléchargement impossible",
         description: error.message,
         type: "error",
       }),

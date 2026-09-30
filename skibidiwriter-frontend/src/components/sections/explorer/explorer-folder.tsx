@@ -1,10 +1,13 @@
 import { useMoveFile } from "@/hooks/use-files";
 import {
   useDeleteFolder,
+  useFolderStats,
   useMoveFolder,
   useRenameFolder,
 } from "@/hooks/use-folders";
 import { toast } from "@/components/ui/toast";
+import { useState } from "react";
+import { dateTimeFormat, formatBytes } from "@/lib/format";
 import { explorerPath } from "@/lib/paths";
 import { FolderIcon } from "lucide-react";
 import { useNavigate } from "react-router";
@@ -24,11 +27,13 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   const deleteFolder = useDeleteFolder();
   const moveFolder = useMoveFolder();
   const moveFile = useMoveFile();
+  const [infoOpen, setInfoOpen] = useState(false);
+  const { data: stats } = useFolderStats(folder.id, infoOpen);
 
   function handleDrop(item: DragItem) {
     const onError = (error: Error) =>
       toast.add({
-        title: "Couldn’t move",
+        title: "Déplacement impossible",
         description: error.message,
         type: "error",
       });
@@ -47,10 +52,30 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
       dragItem={{ kind: "folder", id: folder.id }}
       onDropItem={handleDrop}
       name={folder.name}
-      nameLabel="Folder name"
-      subtitle="Folder"
+      nameLabel="Nom du dossier"
+      subtitle="Dossier"
+      infoRows={[
+        { label: "Type", value: "Dossier" },
+        {
+          label: "Créé le",
+          value: dateTimeFormat.format(new Date(folder.createdAt)),
+        },
+        {
+          label: "Modifié le",
+          value: dateTimeFormat.format(new Date(folder.updatedAt)),
+        },
+        {
+          label: "Fichiers",
+          value: stats ? String(stats.fileCount) : "…",
+        },
+        {
+          label: "Taille totale",
+          value: stats ? formatBytes(stats.totalBytes) : "…",
+        },
+      ]}
+      onInfoOpenChange={setInfoOpen}
       startRenaming={folder.id === createdId}
-      deleteDescription="This folder and everything inside it will be permanently deleted. This can’t be undone."
+      deleteDescription="Ce dossier et tout son contenu seront supprimés définitivement. Cette action est irréversible."
       isDeleting={deleteFolder.isPending}
       onOpen={() => navigate(explorerPath(folder.id))}
       onRename={(name) => renameFolder.mutate({ id: folder.id, name })}

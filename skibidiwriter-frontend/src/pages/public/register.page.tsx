@@ -77,7 +77,7 @@ export const RegisterPage = () => {
       return;
     } else if (password != verifyPassword) {
       setErrors({
-        verifyPassword: "Passwords do not match",
+        verifyPassword: "Les mots de passe ne correspondent pas",
       });
       return;
     }
@@ -89,7 +89,7 @@ export const RegisterPage = () => {
       await authContext?.register(email, password, pseudo);
     } catch (error) {
       toast.add({
-        title: "Authentication failed",
+        title: "Échec de l’authentification",
         description: error instanceof Error ? error.message : undefined,
         type: "error",
       });
@@ -132,7 +132,7 @@ export const RegisterPage = () => {
             <div className={"mt-4"}>
               <div className="flex flex-col gap-6">
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">E-mail</Label>
                   <Input
                     id="email"
                     type="email"
@@ -187,13 +187,15 @@ export const RegisterPage = () => {
           </CardContent>
           <CardFooter className="flex-col gap-2">
             {errors.email && (
-              <p className={"mt-2 text-red-500"}>Email: {errors.email}</p>
+              <p className={"mt-2 text-red-500"}>E-mail : {errors.email}</p>
             )}
             {errors.pseudo && (
-              <p className={"mt-2 text-red-500"}>Pseudo: {errors.pseudo}</p>
+              <p className={"mt-2 text-red-500"}>Pseudo : {errors.pseudo}</p>
             )}
             {errors.password && (
-              <p className={"mt-2 text-red-500"}>Password: {errors.password}</p>
+              <p className={"mt-2 text-red-500"}>
+                Mot de passe : {errors.password}
+              </p>
             )}
             {errors.verifyPassword && (
               <p className={"mt-2 text-red-500"}>{errors.verifyPassword}</p>

@@ -6,13 +6,14 @@ import {
   type ServerEvent,
 } from "skibidiwriter-shared";
 import { api } from "./api";
+import { getErrorMessage } from "./errors";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 
 export const CONNECTION_STATUS_LABELS: Record<ConnectionStatus, string> = {
-  connecting: "Connecting…",
-  connected: "Connected",
-  disconnected: "Reconnecting…",
+  connecting: "Connexion…",
+  connected: "Connecté",
+  disconnected: "Reconnexion…",
 };
 
 const MAX_RECONNECT_DELAY = 30_000;
@@ -82,8 +83,8 @@ class RealtimeClient {
 
       if (event.type === ServerEventType.Error) {
         toast.add({
-          title: "Something went wrong",
-          description: event.message,
+          title: "Une erreur est survenue",
+          description: getErrorMessage(event.code, "Erreur inconnue"),
           type: "error",
         });
       }

@@ -7,6 +7,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
 import { FILE_KINDS, type DocumentOperation } from "skibidiwriter-shared";
@@ -45,6 +46,12 @@ export const fileTable = pgTable(
       sql`(${table.kind} = 'document' AND ${table.operations} IS NOT NULL AND ${table.data} IS NULL)
         OR (${table.kind} = 'upload' AND ${table.data} IS NOT NULL AND ${table.operations} IS NULL)`,
     ),
+    uniqueIndex("file_unique_name_in_folder")
+      .on(table.ownerId, table.folderId, sql`lower(${table.name})`)
+      .where(sql`${table.folderId} IS NOT NULL`),
+    uniqueIndex("file_unique_name_at_root")
+      .on(table.ownerId, sql`lower(${table.name})`)
+      .where(sql`${table.folderId} IS NULL`),
   ],
 );
 

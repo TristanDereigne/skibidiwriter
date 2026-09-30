@@ -129,7 +129,7 @@ function ChatComposer({
             type="submit"
             size="icon-xs"
             disabled={disabled || !content}
-            aria-label="Send"
+            aria-label="Envoyer"
           >
             <SendIcon />
           </InputGroupButton>

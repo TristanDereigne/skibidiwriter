@@ -225,7 +225,7 @@ function QuestionnairePrevious({
       )}
       {...props}
     >
-      {children ?? "Previous"}
+      {children ?? "Précédent"}
     </QuestionnairePrimitive.Previous>
   )
 }
@@ -250,7 +250,7 @@ function QuestionnaireSkip({
       )}
       {...props}
     >
-      {children ?? "Skip"}
+      {children ?? "Passer"}
     </QuestionnairePrimitive.Skip>
   )
 }
@@ -275,7 +275,7 @@ function QuestionnaireNext({
       )}
       {...props}
     >
-      {children ?? "Next"}
+      {children ?? "Suivant"}
     </QuestionnairePrimitive.Next>
   )
 }
@@ -300,7 +300,7 @@ function QuestionnaireSubmit({
       )}
       {...props}
     >
-      {children ?? "Submit"}
+      {children ?? "Envoyer"}
     </QuestionnairePrimitive.Submit>
   )
 }

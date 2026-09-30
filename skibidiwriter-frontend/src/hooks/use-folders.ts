@@ -1,10 +1,11 @@
-import { api } from "@/lib/api";
+import { toast } from "@/components/ui/toast";
+import { api, errorMessage } from "@/lib/api";
 import { FILES_QUERY_KEY } from "./use-files";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const FOLDERS_QUERY_KEY = ["folders"];
 
-export const DEFAULT_FOLDER_NAME = "New folder";
+export const DEFAULT_FOLDER_NAME = "Nouveau dossier";
 
 export function useFolders(parentId: string | null = null) {
   return useQuery({
@@ -33,6 +34,19 @@ export function useFolderPath(id: string | null) {
   });
 }
 
+export function useFolderStats(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: [...FOLDERS_QUERY_KEY, "stats", id],
+    enabled,
+    queryFn: async () => {
+      const res = await api.folders[":id"].stats.$get({ param: { id } });
+      if (!res.ok) return null;
+
+      return await res.json();
+    },
+  });
+}
+
 function useInvalidateFolders() {
   const queryClient = useQueryClient();
 
@@ -51,11 +65,20 @@ export function useCreateFolder() {
       parentId: string | null;
     }) => {
       const res = await api.folders.$post({ json: { name, parentId } });
-      if (!res.ok) throw new Error("Failed to create folder");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec de la création du dossier"),
+        );
 
       return await res.json();
     },
     onSuccess: invalidate,
+    onError: (error) =>
+      toast.add({
+        title: "Création impossible",
+        description: error.message,
+        type: "error",
+      }),
   });
 }
 
@@ -68,11 +91,20 @@ export function useRenameFolder() {
         param: { id },
         json: { name },
       });
-      if (!res.ok) throw new Error("Failed to rename folder");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec du renommage du dossier"),
+        );
 
       return await res.json();
     },
     onSuccess: invalidate,
+    onError: (error) =>
+      toast.add({
+        title: "Renommage impossible",
+        description: error.message,
+        type: "error",
+      }),
   });
 }
 
@@ -91,12 +123,10 @@ export function useMoveFolder() {
         param: { id },
         json: { parentId },
       });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
-        throw new Error(body?.error ?? "Failed to move folder");
-      }
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec du déplacement du dossier"),
+        );
 
       return await res.json();
     },
@@ -110,7 +140,7 @@ export function useDeleteFolder() {
   return useMutation({
     mutationFn: async (id: string) => {
       const res = await api.folders[":id"].$delete({ param: { id } });
-      if (!res.ok) throw new Error("Failed to delete folder");
+      if (!res.ok) throw new Error("Échec de la suppression du dossier");
     },
     onSuccess: () =>
       Promise.all([

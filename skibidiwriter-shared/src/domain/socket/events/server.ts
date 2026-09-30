@@ -1,3 +1,4 @@
+import type { ErrorCode } from "../../errors";
 import type { DocumentOperation } from "../../document/operations";
 import type { MessageDTO } from "../../messages/dtos";
 
@@ -26,5 +27,5 @@ export type ServerEvent =
     }
   | {
       type: typeof ServerEventType.Error;
-      message: string;
+      code: ErrorCode;
     };

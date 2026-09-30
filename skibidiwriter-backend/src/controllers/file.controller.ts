@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import {
   CreateDocumentSchema,
+  ErrorCode,
   MAX_FILE_SIZE_BYTES,
   MoveFileSchema,
   NameSchema,
@@ -39,6 +40,7 @@ function toDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
     kind: row.kind,
     mimeType: row.mimeType,
     sizeBytes: row.sizeBytes,
+    createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -55,7 +57,7 @@ export const fileController = new Hono<AuthEnv>()
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
-    if (!row) return ctx.json({ error: "File not found" }, 404);
+    if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
     return ctx.json(toDTO(row), 200);
   })
@@ -64,7 +66,7 @@ export const fileController = new Hono<AuthEnv>()
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
-    if (!row) return ctx.json({ error: "File not found" }, 404);
+    if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
     return ctx.body(new Uint8Array(row.data), 200, {
       "Content-Type": row.mimeType,
@@ -79,7 +81,11 @@ export const fileController = new Hono<AuthEnv>()
 
     const folderExists =
       !folderId || (await folderService.exists(folderId, userId));
-    if (!folderExists) return ctx.json({ error: "Folder not found" }, 404);
+    if (!folderExists)
+      return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
+
+    const nameTaken = await fileService.nameTaken(name, folderId, userId);
+    if (nameTaken) return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
     const row = await fileService.createDocument(
       name,
@@ -94,7 +100,7 @@ export const fileController = new Hono<AuthEnv>()
     "/",
     bodyLimit({
       maxSize: MAX_FILE_SIZE_BYTES + MULTIPART_OVERHEAD,
-      onError: (ctx) => ctx.json({ error: "File too large" }, 413),
+      onError: (ctx) => ctx.json({ code: ErrorCode.File_TooLarge }, 413),
     }),
     validate("form", UploadFormSchema),
     async (ctx) => {
@@ -102,15 +108,25 @@ export const fileController = new Hono<AuthEnv>()
       const { file, folderId = null } = ctx.req.valid("form");
 
       if (file.size > MAX_FILE_SIZE_BYTES) {
-        return ctx.json({ error: "File too large" }, 413);
+        return ctx.json({ code: ErrorCode.File_TooLarge }, 413);
       }
 
       const folderExists =
         !folderId || (await folderService.exists(folderId, userId));
-      if (!folderExists) return ctx.json({ error: "Folder not found" }, 404);
+      if (!folderExists)
+        return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       const name = NameSchema.safeParse(file.name.slice(0, 255));
-      if (!name.success) return ctx.json({ error: "Invalid file name" }, 400);
+      if (!name.success)
+        return ctx.json({ code: ErrorCode.File_NameInvalid }, 400);
+
+      const nameTaken = await fileService.nameTaken(
+        name.data,
+        folderId,
+        userId,
+      );
+      if (nameTaken)
+        return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await fileService.createUpload(
         {
@@ -130,12 +146,24 @@ export const fileController = new Hono<AuthEnv>()
     validate("param", IdParamSchema),
     validate("json", RenameSchema),
     async (ctx) => {
-      const row = await fileService.rename(
-        ctx.req.valid("param").id,
-        ctx.req.valid("json").name,
-        ctx.get("userId"),
+      const userId = ctx.get("userId");
+      const { id } = ctx.req.valid("param");
+      const { name } = ctx.req.valid("json");
+
+      const file = await fileService.findById(id, userId);
+      if (!file) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
+
+      const nameTaken = await fileService.nameTaken(
+        name,
+        file.folderId,
+        userId,
+        id,
       );
-      if (!row) return ctx.json({ error: "File not found" }, 404);
+      if (nameTaken)
+        return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
+
+      const row = await fileService.rename(id, name, userId);
+      if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
       return ctx.json(toDTO(row), 200);
     },
@@ -150,14 +178,25 @@ export const fileController = new Hono<AuthEnv>()
 
       const folderExists =
         !folderId || (await folderService.exists(folderId, userId));
-      if (!folderExists) return ctx.json({ error: "Folder not found" }, 404);
+      if (!folderExists)
+        return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-      const row = await fileService.move(
-        ctx.req.valid("param").id,
+      const { id } = ctx.req.valid("param");
+
+      const file = await fileService.findById(id, userId);
+      if (!file) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
+
+      const nameTaken = await fileService.nameTaken(
+        file.name,
         folderId,
         userId,
+        id,
       );
-      if (!row) return ctx.json({ error: "File not found" }, 404);
+      if (nameTaken)
+        return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
+
+      const row = await fileService.move(id, folderId, userId);
+      if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
       return ctx.json(toDTO(row), 200);
     },
@@ -167,7 +206,7 @@ export const fileController = new Hono<AuthEnv>()
       ctx.req.valid("param").id,
       ctx.get("userId"),
     );
-    if (!row) return ctx.json({ error: "File not found" }, 404);
+    if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
     return ctx.body(null, 204);
   });

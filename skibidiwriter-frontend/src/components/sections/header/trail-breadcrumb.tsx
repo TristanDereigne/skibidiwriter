@@ -51,7 +51,7 @@ export default function TrailBreadcrumb({
             <InlineNameInput
               className="w-56"
               name={last.name}
-              label="Document name"
+              label="Nom du document"
               onCommit={onRename}
               onDone={() => setRenaming(false)}
             />
@@ -62,7 +62,7 @@ export default function TrailBreadcrumb({
                 onRename && "cursor-text rounded px-1 hover:bg-muted",
               )}
               onClick={onRename && (() => setRenaming(true))}
-              title={onRename && "Click to rename"}
+              title={onRename && "Cliquer pour renommer"}
             >
               {last.name}
             </BreadcrumbPage>

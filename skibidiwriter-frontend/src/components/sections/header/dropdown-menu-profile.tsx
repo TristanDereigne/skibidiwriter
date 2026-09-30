@@ -20,7 +20,7 @@ export function DropdownMenuProfile() {
       <DropdownMenuContent>
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate("/")}>
-            Explorer
+            Explorateur
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => navigate("/profile")}>
             Profil
@@ -29,7 +29,7 @@ export function DropdownMenuProfile() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem>GitHub</DropdownMenuItem>
-        <DropdownMenuItem>Support</DropdownMenuItem>
+        <DropdownMenuItem>Assistance</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

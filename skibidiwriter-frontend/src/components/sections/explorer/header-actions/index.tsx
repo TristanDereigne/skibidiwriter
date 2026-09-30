@@ -19,8 +19,8 @@ export default function ExplorerHeaderActions({
         variant="ghost"
         size="icon-sm"
         className="text-muted-foreground"
-        aria-label="New folder"
-        title="New folder"
+        aria-label="Nouveau dossier"
+        title="Nouveau dossier"
         onClick={createFolder}
       >
         <FolderPlusIcon />
@@ -29,8 +29,8 @@ export default function ExplorerHeaderActions({
         variant="ghost"
         size="icon-sm"
         className="text-muted-foreground"
-        aria-label="New document"
-        title="New document"
+        aria-label="Nouveau document"
+        title="Nouveau document"
         onClick={createDocument}
       >
         <FilePlusIcon />

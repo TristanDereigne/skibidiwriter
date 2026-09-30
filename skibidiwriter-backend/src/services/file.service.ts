@@ -1,7 +1,7 @@
 import { db } from "@/libs/db";
 import { eqOrNull } from "@/libs/sql";
 import { fileTable } from "@/models";
-import { and, eq, getColumns } from "drizzle-orm";
+import { and, eq, getColumns, ne, sql } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
 const PERSIST_DELAY = 500;
@@ -39,6 +39,27 @@ async function findInFolder(folderId: string | null, userId: string) {
     .select(summarySelect)
     .from(fileTable)
     .where(and(eqOrNull(fileTable.folderId, folderId), accessibleTo(userId)));
+}
+
+async function nameTaken(
+  name: string,
+  folderId: string | null,
+  userId: string,
+  exceptId?: string,
+) {
+  const [row] = await db
+    .select({ id: fileTable.id })
+    .from(fileTable)
+    .where(
+      and(
+        eqOrNull(fileTable.folderId, folderId),
+        accessibleTo(userId),
+        eq(sql`lower(${fileTable.name})`, sql`lower(${name})`),
+        exceptId ? ne(fileTable.id, exceptId) : undefined,
+      ),
+    );
+
+  return !!row;
 }
 
 async function findById(id: string, userId: string) {
@@ -256,6 +277,7 @@ export default {
   hasAccess,
   findInFolder,
   findById,
+  nameTaken,
   createDocument,
   createUpload,
   rename,
