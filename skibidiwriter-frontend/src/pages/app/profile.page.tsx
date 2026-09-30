@@ -34,7 +34,6 @@ export const ProfilePage = () => {
                     <UserGroup color={'#432DD7'} />
                     <p>Membre depuis {userContext.userSince}</p>
                 </div>
-
             </div>
         </div>
 
