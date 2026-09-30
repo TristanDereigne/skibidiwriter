@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/use-auth.ts";
+import {type EnableTwoFactorResult, useAuth} from "@/hooks/use-auth.ts";
 import { authClient } from "@/lib/auth-client";
 import { createContext, useContext, useEffect, useMemo } from "react";
 import { useUserContext } from "@/context/UserContext.tsx";
@@ -8,6 +8,8 @@ type AuthContextType = {
   user: string | null;
   isLoggedIn: boolean;
   isPending: boolean;
+  enable2FA: (password: string) => Promise<string | undefined>,
+  verify2FA: (codeOTP: string) => Promise<string | undefined>,
   register: (email: string, password: string, pseudo: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -48,6 +50,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       user: session?.user.name ?? null,
       isLoggedIn: !!session,
       isPending,
+      enable2FA: async (password) => {
+        const response: EnableTwoFactorResult | undefined = await auth.enable2FA(password);
+        const qrCodeUrl = response?.totpURI
+        if(qrCodeUrl) {
+          return qrCodeUrl;
+        } else {
+          return undefined;
+        }
+      },
+      verify2FA: async (codeOTP) => {
+        const response: any | undefined = await auth.verify2FA(codeOTP);
+        if(response){
+          return response;
+        }
+      },
       register: async (email, password, pseudo) => {
         await auth.signUp(email, password, pseudo);
         await auth.signIn(email, password);

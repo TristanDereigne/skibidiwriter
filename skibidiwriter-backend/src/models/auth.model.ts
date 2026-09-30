@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/_relations";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, index, integer } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -12,6 +12,8 @@ export const user = pgTable("user", {
     .defaultNow()
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
+  twoFactorEnabled: boolean("two_factor_enabled").default(false),
+
 });
 
 export const session = pgTable(
@@ -72,6 +74,16 @@ export const verification = pgTable(
   },
   (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+export const twoFactor = pgTable("two_factor", {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    secret: text("secret").notNull(),
+    backupCodes: text("backup_codes").notNull(),
+    verified: boolean("verified").notNull(),
+    failedVerificationCount: integer("failed_verification_count").notNull(),
+    lockedUntil: timestamp("locked_until", { precision: 6, withTimezone: true }),
+});
 
 export const userRelations = relations(user, ({ many }) => ({
   sessions: many(session),
