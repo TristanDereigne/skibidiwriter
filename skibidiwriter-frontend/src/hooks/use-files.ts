@@ -1,5 +1,5 @@
 import { toast } from "@/components/ui/toast";
-import { api } from "@/lib/api";
+import { api, errorMessage } from "@/lib/api";
 import { saveBlob } from "@/lib/download";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -40,12 +40,9 @@ function useInvalidateFiles() {
   return () => queryClient.invalidateQueries({ queryKey: FILES_QUERY_KEY });
 }
 
-async function errorMessage(res: Response, fallback: string) {
-  const body = (await res.json().catch(() => null)) as {
-    error?: string;
-  } | null;
-
-  return body?.error ?? fallback;
+function toastError(title: string) {
+  return (error: Error) =>
+    toast.add({ title, description: error.message, type: "error" });
 }
 
 export function useCreateDocument() {
@@ -64,7 +61,10 @@ export function useCreateDocument() {
       const res = await api.files.documents.$post({
         json: { name, folderId, content },
       });
-      if (!res.ok) throw new Error("Échec de la création du document");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec de la création du document"),
+        );
 
       return await res.json();
     },
@@ -104,11 +104,15 @@ export function useRenameFile() {
         param: { id },
         json: { name },
       });
-      if (!res.ok) throw new Error("Échec du renommage du fichier");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec du renommage du fichier"),
+        );
 
       return await res.json();
     },
     onSuccess: invalidate,
+    onError: toastError("Renommage impossible"),
   });
 }
 

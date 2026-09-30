@@ -1,4 +1,5 @@
-import { api } from "@/lib/api";
+import { toast } from "@/components/ui/toast";
+import { api, errorMessage } from "@/lib/api";
 import { FILES_QUERY_KEY } from "./use-files";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -64,11 +65,20 @@ export function useCreateFolder() {
       parentId: string | null;
     }) => {
       const res = await api.folders.$post({ json: { name, parentId } });
-      if (!res.ok) throw new Error("Échec de la création du dossier");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec de la création du dossier"),
+        );
 
       return await res.json();
     },
     onSuccess: invalidate,
+    onError: (error) =>
+      toast.add({
+        title: "Création impossible",
+        description: error.message,
+        type: "error",
+      }),
   });
 }
 
@@ -81,11 +91,20 @@ export function useRenameFolder() {
         param: { id },
         json: { name },
       });
-      if (!res.ok) throw new Error("Échec du renommage du dossier");
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec du renommage du dossier"),
+        );
 
       return await res.json();
     },
     onSuccess: invalidate,
+    onError: (error) =>
+      toast.add({
+        title: "Renommage impossible",
+        description: error.message,
+        type: "error",
+      }),
   });
 }
 
@@ -104,12 +123,10 @@ export function useMoveFolder() {
         param: { id },
         json: { parentId },
       });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => null)) as {
-          error?: string;
-        } | null;
-        throw new Error(body?.error ?? "Échec du déplacement du dossier");
-      }
+      if (!res.ok)
+        throw new Error(
+          await errorMessage(res, "Échec du déplacement du dossier"),
+        );
 
       return await res.json();
     },
