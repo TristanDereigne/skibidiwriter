@@ -1,28 +1,13 @@
-import InlineNameInput from "@/components/shared/inline-name-input";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
+import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { cn } from "cn";
-import {
-  DownloadIcon,
-  InfoIcon,
-  PencilIcon,
-  Trash2Icon,
-  type LucideIcon,
-} from "lucide-react";
+import { type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import {
-  hasDragItem,
-  ITEM_DRAG_TYPE,
-  readDragItem,
-  type DragItem,
-} from "./drag-item";
+import { type DragItem } from "./drag-item";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
 import ExplorerInfoDialog, { type InfoRow } from "./explorer-info-dialog";
+import ExplorerItemLabel from "./explorer-item-label";
+import ExplorerItemMenu from "./explorer-item-menu";
+import { useItemDrag } from "./use-item-drag";
 
 interface Props {
   icon: LucideIcon;
@@ -64,23 +49,21 @@ export default function ExplorerItem({
   onDelete,
 }: Readonly<Props>) {
   const [renaming, setRenaming] = useState(startRenaming);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [infoOpen, setInfoOpenState] = useState(false);
+  const { dropActive, dragProps } = useItemDrag({
+    dragItem,
+    draggable: !renaming,
+    onDropItem,
+  });
 
   useEffect(() => {
     if (startRenaming) setRenaming(true);
   }, [startRenaming]);
 
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [infoOpen, setInfoOpenState] = useState(false);
-
   function setInfoOpen(open: boolean) {
     setInfoOpenState(open);
     onInfoOpenChange?.(open);
-  }
-  const [dropActive, setDropActive] = useState(false);
-  const acceptsDrops = !!onDropItem;
-
-  function canDrop(event: React.DragEvent) {
-    return acceptsDrops && hasDragItem(event.dataTransfer);
   }
 
   function handleKeyDown(event: React.KeyboardEvent) {
@@ -107,33 +90,10 @@ export default function ExplorerItem({
                 dropActive && "border-primary bg-primary/10",
               )}
               tabIndex={-1}
-              draggable={!renaming}
               onKeyDown={handleKeyDown}
-              onDragStart={(event: React.DragEvent) => {
-                event.dataTransfer.setData(
-                  ITEM_DRAG_TYPE,
-                  JSON.stringify(dragItem),
-                );
-                event.dataTransfer.effectAllowed = "move";
-              }}
-              onDragOver={(event: React.DragEvent) => {
-                if (!canDrop(event)) return;
-                event.preventDefault();
-                event.stopPropagation();
-                setDropActive(true);
-              }}
-              onDragLeave={() => setDropActive(false)}
-              onDrop={(event: React.DragEvent) => {
-                setDropActive(false);
-                if (!canDrop(event)) return;
-                event.preventDefault();
-                event.stopPropagation();
-
-                const item = readDragItem(event.dataTransfer);
-                if (item) onDropItem?.(item);
-              }}
               onPointerEnter={onPrefetch}
               onFocus={onPrefetch}
+              {...dragProps}
             />
           }
         >
@@ -146,52 +106,22 @@ export default function ExplorerItem({
           >
             <Icon strokeWidth={1} className={cn("size-24", iconClassName)} />
           </button>
-          <div className="w-full">
-            {renaming ? (
-              <InlineNameInput
-                className="text-center"
-                name={name}
-                label={nameLabel}
-                onCommit={onRename}
-                onDone={() => setRenaming(false)}
-              />
-            ) : (
-              <button
-                type="button"
-                className="block w-full truncate rounded text-sm font-medium outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-                onClick={onOpen}
-              >
-                {name}
-              </button>
-            )}
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
-          </div>
+          <ExplorerItemLabel
+            name={name}
+            nameLabel={nameLabel}
+            subtitle={subtitle}
+            renaming={renaming}
+            onOpen={onOpen}
+            onRename={onRename}
+            onRenameDone={() => setRenaming(false)}
+          />
         </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem onClick={() => setRenaming(true)}>
-            <PencilIcon />
-            Renommer
-          </ContextMenuItem>
-          {onDownload && (
-            <ContextMenuItem onClick={onDownload}>
-              <DownloadIcon />
-              Télécharger
-            </ContextMenuItem>
-          )}
-          <ContextMenuSeparator />
-          <ContextMenuItem
-            variant="destructive"
-            onClick={() => setDeleteOpen(true)}
-          >
-            <Trash2Icon />
-            Supprimer
-          </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem onClick={() => setInfoOpen(true)}>
-            <InfoIcon />
-            Informations
-          </ContextMenuItem>
-        </ContextMenuContent>
+        <ExplorerItemMenu
+          onRename={() => setRenaming(true)}
+          onDownload={onDownload}
+          onDelete={() => setDeleteOpen(true)}
+          onInfo={() => setInfoOpen(true)}
+        />
       </ContextMenu>
 
       <ExplorerDeleteDialog
