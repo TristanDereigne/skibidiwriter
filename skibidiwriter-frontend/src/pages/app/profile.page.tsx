@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input.tsx";
 import { z } from "zod";
 
-import {ProfileSettingsContent} from "@/components/sections/profile/profile-settings-content.tsx";
+import { ProfileSettingsContent } from "@/components/sections/profile/profile-settings-content.tsx";
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -118,7 +118,6 @@ export const ProfilePage = () => {
       <div className={"w-10/12"}>
         <Separator />
       </div>
-
 
       <div className={"flex flex-col justify-between w-10/12 flex-1"}>
         <div className={"flex flex-row items-center justify-between gap-4"}>

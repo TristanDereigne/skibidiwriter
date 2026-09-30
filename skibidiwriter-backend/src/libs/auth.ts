@@ -2,11 +2,10 @@ import { env } from "@/libs/env";
 import * as schemas from "@/models";
 
 import { betterAuth } from "better-auth";
-import { twoFactor } from "better-auth/plugins"
+import { twoFactor } from "better-auth/plugins";
 
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
-
 
 export const auth = betterAuth({
   appName: "SkibidiWriter",
@@ -20,7 +19,5 @@ export const auth = betterAuth({
     schema: schemas,
   }),
   trustedOrigins: [env.FRONTEND_URL_NO_SLASH],
-  plugins: [
-    twoFactor()
-  ]
+  plugins: [twoFactor()],
 });

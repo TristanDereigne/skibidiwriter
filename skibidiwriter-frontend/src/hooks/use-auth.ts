@@ -1,11 +1,26 @@
 import { authClient } from "../lib/auth-client.ts";
+import { api } from "@/lib/api.ts";
+import { useMutation } from "@tanstack/react-query";
 
-export type EnableTwoFactorResult = |
-    {
-      method: "totp";
-      totpURI: string;
-      backupCodes: string[];
-    };
+export type EnableTwoFactorResult = {
+  method: "totp";
+  totpURI: string;
+  backupCodes: string[];
+};
+
+export type TwoFactorEnabled = {
+  two_factor_enabled: boolean;
+};
+
+export type DisableTwoFactorResponse = {
+  data: { status: boolean } | null;
+  error: { code?: string; message?: string } | null;
+};
+
+export type VerifyResponse = {
+  data: { token: string; user: any } | null;
+  error: { code?: string; message?: string } | null;
+};
 
 export function useAuth() {
   const signUp = async (email: string, password: string, name: string) => {
@@ -39,7 +54,9 @@ export function useAuth() {
     return data;
   };
 
-  const enable2FA = async (password: string): Promise<EnableTwoFactorResult|undefined> => {
+  const enable2FA = async (
+    password: string,
+  ): Promise<EnableTwoFactorResult | undefined> => {
     const { data, error } = await authClient.twoFactor.enable({
       password: password,
       method: "totp",
@@ -54,30 +71,65 @@ export function useAuth() {
       console.log("2fa qrcode generated", data);
       return data;
     }
-  }
+  };
 
-  const verify2FA = async (codeOTP: string): Promise<any|undefined> => {
-    const { data, error } = await authClient.twoFactor.verifyTotp({
-      code: codeOTP,
-      trustDevice: true,
-    });
+  const deactivate2FA = async (password: string): Promise<boolean> => {
+    const { data, error }: DisableTwoFactorResponse =
+      await authClient.twoFactor.disable({
+        password: password,
+      });
+
+    if (error) {
+      console.error("Error while deactivating 2FA:", error);
+      return false;
+    }
+
+    if (data?.status) {
+      console.log("2fa deactivated", data);
+      return data.status;
+    } else {
+      return false;
+    }
+  };
+
+  const verify2FA = async (codeOTP: string): Promise<boolean> => {
+    const { data, error }: VerifyResponse =
+      await authClient.twoFactor.verifyTotp({
+        code: codeOTP,
+        trustDevice: true,
+      });
 
     if (error) {
       console.error("Error while verifying 2FA:", error);
-      throw new Error(error.message);
+      return false;
     }
 
-    if (data) {
+    if (data?.token) {
       console.log("data verify by 2fa otp", data);
-      return data;
+      return true;
+    } else {
+      return false;
     }
-  }
+  };
 
+  const check2FAEnabled = useMutation({
+    mutationFn: async (): Promise<TwoFactorEnabled> => {
+      const response = await api.users.authtwofactor.$get();
+
+      if (!response.ok) {
+        throw new Error("Error while checking 2fa enabled");
+      }
+
+      return await response.json();
+    },
+  });
 
   return {
     signUp,
     signIn,
     enable2FA,
-    verify2FA
+    verify2FA,
+    check2FAEnabled,
+    deactivate2FA,
   };
 }
