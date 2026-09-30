@@ -6,6 +6,7 @@ import {
   type ServerEvent,
 } from "skibidiwriter-shared";
 import { api } from "./api";
+import { getErrorMessage } from "./errors";
 
 export type ConnectionStatus = "connecting" | "connected" | "disconnected";
 
@@ -83,7 +84,7 @@ class RealtimeClient {
       if (event.type === ServerEventType.Error) {
         toast.add({
           title: "Une erreur est survenue",
-          description: event.message,
+          description: getErrorMessage(event.code, "Erreur inconnue"),
           type: "error",
         });
       }

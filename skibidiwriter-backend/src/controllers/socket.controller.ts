@@ -17,10 +17,10 @@ import type { WSContext, WSMessageReceive } from "hono/ws";
 import {
   ClientEventSchema,
   ClientEventType,
+  ErrorCode,
   ServerEventType,
   type ClientEvent,
 } from "skibidiwriter-shared";
-import z from "zod";
 
 export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
   const userId = ctx.get("userId");
@@ -40,7 +40,7 @@ export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
     async onMessage(rawEvent, ws) {
       const result = parseClientEvent(rawEvent.data);
       if (!result.success) {
-        send(ws, { type: ServerEventType.Error, message: result.error });
+        send(ws, { type: ServerEventType.Error, code: result.error });
         return;
       }
 
@@ -63,21 +63,21 @@ export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
 
 function parseClientEvent(
   data: WSMessageReceive,
-): { success: true; data: ClientEvent } | { success: false; error: string } {
+): { success: true; data: ClientEvent } | { success: false; error: ErrorCode } {
   if (typeof data !== "string") {
-    return { success: false, error: "Message texte attendu" };
+    return { success: false, error: ErrorCode.SocketTextExpected };
   }
 
   let json: unknown;
   try {
     json = JSON.parse(data);
   } catch {
-    return { success: false, error: "JSON malformé" };
+    return { success: false, error: ErrorCode.SocketMalformedJson };
   }
 
   const result = ClientEventSchema.safeParse(json);
   if (!result.success) {
-    return { success: false, error: z.prettifyError(result.error) };
+    return { success: false, error: ErrorCode.SocketInvalidEvent };
   }
 
   return { success: true, data: result.data };
@@ -150,5 +150,5 @@ function leaveDocument(connection: WSContext, documentId: string) {
 }
 
 function sendDocumentNotFound(ws: WSContext) {
-  send(ws, { type: ServerEventType.Error, message: "Document introuvable" });
+  send(ws, { type: ServerEventType.Error, code: ErrorCode.DocumentNotFound });
 }
