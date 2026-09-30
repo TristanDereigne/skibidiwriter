@@ -23,8 +23,8 @@ import { ProfilePage } from "./pages/app/profile.page.tsx";
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
-  <AuthProvider>
-    <UserProvider>
+  <UserProvider>
+    <AuthProvider>
       <ThemeProvider>
         <TooltipProvider>
           <ToastProvider>
@@ -50,6 +50,6 @@ createRoot(document.getElementById("root")!).render(
           </ToastProvider>
         </TooltipProvider>
       </ThemeProvider>
-    </UserProvider>
-  </AuthProvider>,
+    </AuthProvider>
+  </UserProvider>,
 );
