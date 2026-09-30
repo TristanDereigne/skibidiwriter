@@ -15,7 +15,7 @@ import {
 import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
 import { useContext, useEffect } from "react";
 import { HeaderContext } from "@/context/HeaderContext.tsx";
-import TrailBreadcrumb from "@/components/layout/trail-breadcrumb";
+import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import ExplorerHeaderActions from "@/components/sections/explorer/header-actions";
 
 export default function Explorer() {

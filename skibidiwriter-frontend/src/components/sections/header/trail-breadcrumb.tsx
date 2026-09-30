@@ -5,13 +5,13 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import InlineNameInput from "./inline-name-input";
-import { explorerPath } from "@/lib/paths";
-import { cn } from "@/lib/utils";
+} from "@/components/ui/breadcrumb.tsx";
+import InlineNameInput from "../../shared/inline-name-input.tsx";
+import { explorerPath } from "@/lib/paths.ts";
+import { cn } from "@/lib/utils.ts";
 import { Fragment, useState } from "react";
 import { Link } from "react-router";
-import type { FolderDTO } from "skibidiwriter-shared";
+import type { FolderDTO } from "../../../../../skibidiwriter-shared";
 
 interface Props {
   folders: FolderDTO[];

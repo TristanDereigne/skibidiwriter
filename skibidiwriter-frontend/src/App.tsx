@@ -4,7 +4,7 @@ import { Toaster } from "./components/ui/toast";
 import { useContext } from "react";
 import { useAuthContext } from "@/context/AuthContext.tsx";
 import { HeaderContext } from "@/context/HeaderContext.tsx";
-import AppHeader from "@/components/layout/app-header.tsx";
+import AppHeader from "@/layout/app-header.tsx";
 
 export default function App() {
   const { isLoggedIn, isPending } = useAuthContext();
