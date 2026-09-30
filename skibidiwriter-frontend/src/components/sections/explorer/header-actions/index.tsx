@@ -1,10 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
-import { useExplorer } from "../use-explorer";
 import UploadFileAction from "./upload-file-action";
 
-export default function ExplorerHeaderActions() {
-  const { folderId, createDocument, createFolder } = useExplorer();
+export default function ExplorerHeaderActions({createFolder, createDocument, folderId}) {
 
   return (
     <>

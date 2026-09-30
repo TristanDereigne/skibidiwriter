@@ -19,6 +19,7 @@ interface Props {
   deleteDescription: string;
   isDeleting: boolean;
   onOpen: () => void;
+  onPrefetch?: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
 }
@@ -32,6 +33,7 @@ export default function ExplorerItem({
   deleteDescription,
   isDeleting,
   onOpen,
+  onPrefetch,
   onRename,
   onDelete,
 }: Readonly<Props>) {
@@ -43,7 +45,11 @@ export default function ExplorerItem({
       <ContextMenu>
         <ContextMenuTrigger
           render={
-            <div className="group flex flex-col items-center gap-2 rounded-xl p-2 text-center" />
+            <div
+              className="group flex flex-col items-center gap-2 rounded-xl p-2 text-center"
+              onPointerEnter={onPrefetch}
+              onFocus={onPrefetch}
+            />
           }
         >
           <button

@@ -1,24 +1,29 @@
-import {Outlet, useNavigate} from "react-router";
+import { Navigate, Outlet } from "react-router";
 import Providers from "./components/providers";
 import { Toaster } from "./components/ui/toast";
-import {useContext, useEffect} from "react";
-import {AuthContext} from "@/context/AuthContext.tsx";
+import { useContext } from "react";
+import { useAuthContext } from "@/context/AuthContext.tsx";
+import { HeaderContext } from "@/context/HeaderContext.tsx";
+import AppHeader from "@/components/layout/app-header.tsx";
 
 export default function App() {
+  const { isLoggedIn, isPending } = useAuthContext();
+  const headerContext = useContext(HeaderContext);
 
-    const navigate = useNavigate();
-    const authContext = useContext(AuthContext);
+  if (isPending) return null;
+  if (!isLoggedIn) return <Navigate to="/login" replace />;
 
-    useEffect(()=>{
-        if(!authContext?.isUserLoggedin()) {
-            navigate("/login");
-        }
-    },[authContext?.isLoggedIn])
-
-    return (
-        <Providers>
-            <Outlet />
-            <Toaster />
-        </Providers>
-    );
+  return (
+    <Providers>
+      <div className="flex h-svh flex-col">
+        <AppHeader actions={headerContext?.headerActions}>
+          {headerContext?.headerChildren}
+        </AppHeader>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <Outlet />
+        </div>
+      </div>
+      <Toaster />
+    </Providers>
+  );
 }

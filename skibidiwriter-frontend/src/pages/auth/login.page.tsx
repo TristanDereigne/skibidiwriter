@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router";
 
+import { toast } from "@/components/ui/toast.tsx";
 import { AuthContext } from "@/context/AuthContext.tsx";
 import { useContext, useState, type SetStateAction } from "react";
 import { z } from "zod";
@@ -62,7 +63,15 @@ export const LoginPage = () => {
     setErrors({});
     console.log("Données valides :", result.data);
 
-    authContext?.login(email, password);
+    try {
+      await authContext?.login(email, password);
+    } catch (error) {
+      toast.add({
+        title: "Authentication failed",
+        description: error instanceof Error ? error.message : undefined,
+        type: "error",
+      });
+    }
   };
 
   return (
