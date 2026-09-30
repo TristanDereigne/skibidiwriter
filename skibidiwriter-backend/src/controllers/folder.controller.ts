@@ -14,12 +14,13 @@ import z from "zod";
 const ListQuerySchema = z.object({ parentId: z.uuid().optional() });
 
 function toDTO(
-  row: Pick<FolderRow, "id" | "name" | "parentId" | "updatedAt">,
+  row: Pick<FolderRow, "id" | "name" | "parentId" | "createdAt" | "updatedAt">,
 ): FolderDTO {
   return {
     id: row.id,
     name: row.name,
     parentId: row.parentId,
+    createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
 }
@@ -40,6 +41,16 @@ export const folderController = new Hono<AuthEnv>()
       return ctx.json({ error: "Dossier introuvable" }, 404);
 
     return ctx.json(rows.map(toDTO), 200);
+  })
+  .get("/:id/stats", validate("param", IdParamSchema), async (ctx) => {
+    const { id } = ctx.req.valid("param");
+    const userId = ctx.get("userId");
+    const isOwned = await folderService.exists(id, userId);
+    if (!isOwned) return ctx.json({ error: "Dossier introuvable" }, 404);
+
+    const stats = await folderService.stats(id, userId);
+
+    return ctx.json(stats, 200);
   })
   .post("/", validate("json", CreateFolderSchema), async (ctx) => {
     const { name, parentId } = ctx.req.valid("json");

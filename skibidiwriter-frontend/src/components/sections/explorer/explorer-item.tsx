@@ -22,7 +22,7 @@ import {
   type DragItem,
 } from "./drag-item";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
-import ExplorerInfoDialog from "./explorer-info-dialog";
+import ExplorerInfoDialog, { type InfoRow } from "./explorer-info-dialog";
 
 interface Props {
   icon: LucideIcon;
@@ -30,6 +30,8 @@ interface Props {
   name: string;
   nameLabel: string;
   subtitle: string;
+  infoRows: InfoRow[];
+  onInfoOpenChange?: (open: boolean) => void;
   startRenaming: boolean;
   deleteDescription: string;
   isDeleting: boolean;
@@ -48,6 +50,8 @@ export default function ExplorerItem({
   name,
   nameLabel,
   subtitle,
+  infoRows,
+  onInfoOpenChange,
   startRenaming,
   deleteDescription,
   isDeleting,
@@ -66,7 +70,12 @@ export default function ExplorerItem({
   }, [startRenaming]);
 
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoOpen, setInfoOpenState] = useState(false);
+
+  function setInfoOpen(open: boolean) {
+    setInfoOpenState(open);
+    onInfoOpenChange?.(open);
+  }
   const [dropActive, setDropActive] = useState(false);
   const acceptsDrops = !!onDropItem;
 
@@ -198,7 +207,7 @@ export default function ExplorerItem({
         open={infoOpen}
         onOpenChange={setInfoOpen}
         title={`Informations de "${name}"`}
-        description=""
+        rows={infoRows}
       />
     </>
   );

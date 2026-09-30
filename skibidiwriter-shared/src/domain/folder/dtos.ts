@@ -14,5 +14,6 @@ export interface FolderDTO {
   id: string;
   name: string;
   parentId: string | null;
+  createdAt: string;
   updatedAt: string;
 }

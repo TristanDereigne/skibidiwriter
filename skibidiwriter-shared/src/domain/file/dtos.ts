@@ -22,5 +22,6 @@ export interface FileDTO {
   kind: FileKind;
   mimeType: string;
   sizeBytes: number;
+  createdAt: string;
   updatedAt: string;
 }

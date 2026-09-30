@@ -39,6 +39,7 @@ function toDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
     kind: row.kind,
     mimeType: row.mimeType,
     sizeBytes: row.sizeBytes,
+    createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
 }

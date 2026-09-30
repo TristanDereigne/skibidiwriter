@@ -33,6 +33,19 @@ export function useFolderPath(id: string | null) {
   });
 }
 
+export function useFolderStats(id: string, enabled: boolean) {
+  return useQuery({
+    queryKey: [...FOLDERS_QUERY_KEY, "stats", id],
+    enabled,
+    queryFn: async () => {
+      const res = await api.folders[":id"].stats.$get({ param: { id } });
+      if (!res.ok) return null;
+
+      return await res.json();
+    },
+  });
+}
+
 function useInvalidateFolders() {
   const queryClient = useQueryClient();
 
