@@ -1,26 +1,25 @@
 import { useFiles } from "@/hooks/use-files";
 import { useFolders } from "@/hooks/use-folders";
-import ExplorerFile from "./explorer-file";
-import { useExplorer } from "./use-explorer";
 import { ExplorerEmpty, ExplorerNotFound } from "./explorer-empty";
+import ExplorerFile from "./explorer-file";
 import ExplorerFolder from "./explorer-folder";
 import ExplorerSkeleton from "./explorer-skeleton";
+import { useExplorer } from "./use-explorer";
 
+import ExplorerHeaderActions from "@/components/sections/explorer/header-actions";
+import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
-import { UploadCloudIcon } from "lucide-react";
+import { HeaderContext } from "@/context/HeaderContext.tsx";
 import { cn } from "cn";
+import { FilePlusIcon, FolderPlusIcon, UploadCloudIcon } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { hasDragItem } from "./drag-item";
 import { useUploadFiles } from "./use-upload-files";
-import { HeaderContext } from "@/context/HeaderContext.tsx";
-import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
-import ExplorerHeaderActions from "@/components/sections/explorer/header-actions";
 
 export default function Explorer() {
   const { createDocument, createFolder, path, folderId } = useExplorer();
@@ -91,13 +90,13 @@ export default function Explorer() {
           <ExplorerContent />
         </ContextMenuTrigger>
         <ContextMenuContent>
-          <ContextMenuItem onClick={createDocument}>
-            <FilePlusIcon />
-            New document
-          </ContextMenuItem>
           <ContextMenuItem onClick={createFolder}>
             <FolderPlusIcon />
-            New folder
+            Nouveau dossier
+          </ContextMenuItem>
+          <ContextMenuItem onClick={createDocument}>
+            <FilePlusIcon />
+            Nouveau fichier
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
