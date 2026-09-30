@@ -1,3 +1,4 @@
+import InlineNameInput from "@/components/shared/inline-name-input";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -5,22 +6,23 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { cn } from "cn";
 import {
   DownloadIcon,
+  InfoIcon,
   PencilIcon,
   Trash2Icon,
   type LucideIcon,
 } from "lucide-react";
-import { cn } from "cn";
 import { useEffect, useState } from "react";
-import InlineNameInput from "@/components/shared/inline-name-input";
-import ExplorerDeleteDialog from "./explorer-delete-dialog";
 import {
   hasDragItem,
   ITEM_DRAG_TYPE,
   readDragItem,
   type DragItem,
 } from "./drag-item";
+import ExplorerDeleteDialog from "./explorer-delete-dialog";
+import ExplorerInfoDialog from "./explorer-info-dialog";
 
 interface Props {
   icon: LucideIcon;
@@ -62,7 +64,9 @@ export default function ExplorerItem({
   useEffect(() => {
     if (startRenaming) setRenaming(true);
   }, [startRenaming]);
+
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
   const [dropActive, setDropActive] = useState(false);
   const acceptsDrops = !!onDropItem;
 
@@ -173,15 +177,28 @@ export default function ExplorerItem({
             <Trash2Icon />
             Supprimer
           </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem onClick={() => setInfoOpen(true)}>
+            <InfoIcon />
+            Informations
+          </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+
       <ExplorerDeleteDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
-        title={`Supprimer « ${name} » ?`}
+        title={`Supprimer "${name}" ?`}
         description={deleteDescription}
         isPending={isDeleting}
         onConfirm={onDelete}
+      />
+
+      <ExplorerInfoDialog
+        open={infoOpen}
+        onOpenChange={setInfoOpen}
+        title={`Informations de "${name}"`}
+        description=""
       />
     </>
   );
