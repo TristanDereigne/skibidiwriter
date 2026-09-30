@@ -7,7 +7,7 @@ export default function Public() {
   const { isLoggedIn, isPending } = useAuthContext();
 
   if (isPending) return null;
-  if (isLoggedIn) return <Navigate to="/explorer" replace />;
+  if (isLoggedIn) return <Navigate to="/" replace />;
 
   return (
     <Providers>

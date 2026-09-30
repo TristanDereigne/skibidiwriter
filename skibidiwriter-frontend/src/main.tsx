@@ -25,7 +25,7 @@ createRoot(document.getElementById("root")!).render(
           </Route>
           <Route element={<App />}>
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="explorer/:folderId?" element={<ExplorerPage />} />
+            <Route path="/:folderId?" element={<ExplorerPage />} />
             <Route path="edit/:documentId" element={<EditPage />} />
           </Route>
         </Routes>
