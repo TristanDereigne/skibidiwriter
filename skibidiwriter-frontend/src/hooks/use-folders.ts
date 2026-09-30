@@ -76,6 +76,34 @@ export function useRenameFolder() {
   });
 }
 
+export function useMoveFolder() {
+  const invalidate = useInvalidateFolders();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      parentId,
+    }: {
+      id: string;
+      parentId: string | null;
+    }) => {
+      const res = await api.folders[":id"].move.$patch({
+        param: { id },
+        json: { parentId },
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as {
+          error?: string;
+        } | null;
+        throw new Error(body?.error ?? "Failed to move folder");
+      }
+
+      return await res.json();
+    },
+    onSuccess: invalidate,
+  });
+}
+
 export function useDeleteFolder() {
   const queryClient = useQueryClient();
 

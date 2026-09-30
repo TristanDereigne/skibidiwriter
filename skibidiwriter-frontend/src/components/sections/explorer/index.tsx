@@ -13,7 +13,11 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
-import { useContext, useEffect } from "react";
+import { UploadCloudIcon } from "lucide-react";
+import { cn } from "cn";
+import { useContext, useEffect, useState } from "react";
+import { hasDragItem } from "./drag-item";
+import { useUploadFiles } from "./use-upload-files";
 import { HeaderContext } from "@/context/HeaderContext.tsx";
 import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import ExplorerHeaderActions from "@/components/sections/explorer/header-actions";
@@ -47,11 +51,42 @@ export default function Explorer() {
     folderId,
   ]);
 
+  const uploadFiles = useUploadFiles(folderId);
+  const [draggingFiles, setDraggingFiles] = useState(false);
+
+  function isFileDrag(event: React.DragEvent) {
+    return (
+      event.dataTransfer.types.includes("Files") &&
+      !hasDragItem(event.dataTransfer)
+    );
+  }
+
   return (
-    <div className="flex h-full w-full flex-col">
+    <div className="relative flex h-full w-full flex-col">
       <ContextMenu>
         <ContextMenuTrigger
-          render={<main className="flex-1 overflow-auto p-6" />}
+          render={
+            <main
+              className="flex-1 overflow-auto p-6"
+              onDragOver={(event: React.DragEvent) => {
+                if (!isFileDrag(event)) return;
+                event.preventDefault();
+                setDraggingFiles(true);
+              }}
+              onDragLeave={(event: React.DragEvent) => {
+                if (event.currentTarget.contains(event.relatedTarget as Node)) {
+                  return;
+                }
+                setDraggingFiles(false);
+              }}
+              onDrop={(event: React.DragEvent) => {
+                setDraggingFiles(false);
+                if (!isFileDrag(event)) return;
+                event.preventDefault();
+                uploadFiles(Array.from(event.dataTransfer.files));
+              }}
+            />
+          }
         >
           <ExplorerContent />
         </ContextMenuTrigger>
@@ -66,6 +101,16 @@ export default function Explorer() {
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
+      <div
+        aria-hidden={!draggingFiles}
+        className={cn(
+          "pointer-events-none absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-background/80 text-primary opacity-0 backdrop-blur-sm transition-opacity duration-150",
+          draggingFiles && "opacity-100",
+        )}
+      >
+        <UploadCloudIcon className="size-10" />
+        <p className="text-sm font-medium">Drop text files to upload</p>
+      </div>
     </div>
   );
 }

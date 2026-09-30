@@ -57,6 +57,25 @@ async function operations(id: string): Promise<DocumentOperation[] | null> {
   return document?.crdt.toOperations() ?? null;
 }
 
+async function text(id: string, userId: string): Promise<string | null> {
+  const canAccess = await hasAccess(id, userId);
+  if (!canAccess) return null;
+
+  const opened = await openDocuments.get(id);
+  if (opened) return opened.crdt.text;
+
+  const [row] = await db
+    .select({ operations: documentTable.operations })
+    .from(documentTable)
+    .where(eq(documentTable.id, id));
+  if (!row) return null;
+
+  const crdt = new TextCrdt("server");
+  crdt.apply(row.operations);
+
+  return crdt.text;
+}
+
 async function apply(
   id: string,
   incoming: DocumentOperation[],
@@ -166,6 +185,16 @@ async function rename(id: string, name: string, userId: string) {
   return row;
 }
 
+async function move(id: string, folderId: string | null, userId: string) {
+  const [row] = await db
+    .update(documentTable)
+    .set({ folderId })
+    .where(and(eq(documentTable.id, id), accessibleTo(userId)))
+    .returning(summarySelect);
+
+  return row;
+}
+
 async function remove(id: string, userId: string) {
   const canAccess = await hasAccess(id, userId);
   if (!canAccess) return;
@@ -186,6 +215,7 @@ async function remove(id: string, userId: string) {
 
 export default {
   hasAccess,
+  text,
   operations,
   apply,
   release,
@@ -194,5 +224,6 @@ export default {
   findById,
   create,
   rename,
+  move,
   remove,
 };

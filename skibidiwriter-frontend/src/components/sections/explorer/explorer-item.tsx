@@ -5,20 +5,36 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { PencilIcon, Trash2Icon, type LucideIcon } from "lucide-react";
-import { useState } from "react";
-import InlineNameInput from "@/components/shared/inline-name-input.tsx";
+import {
+  DownloadIcon,
+  PencilIcon,
+  Trash2Icon,
+  type LucideIcon,
+} from "lucide-react";
+import { cn } from "cn";
+import { useEffect, useState } from "react";
+import InlineNameInput from "@/components/shared/inline-name-input";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
+import {
+  hasDragItem,
+  ITEM_DRAG_TYPE,
+  readDragItem,
+  type DragItem,
+} from "./drag-item";
 
 interface Props {
   icon: LucideIcon;
+  iconClassName: string;
   name: string;
   nameLabel: string;
   subtitle: string;
   startRenaming: boolean;
   deleteDescription: string;
   isDeleting: boolean;
+  dragItem: DragItem;
+  onDropItem?: (item: DragItem) => void;
   onOpen: () => void;
+  onDownload?: () => void;
   onPrefetch?: () => void;
   onRename: (name: string) => void;
   onDelete: () => void;
@@ -26,19 +42,45 @@ interface Props {
 
 export default function ExplorerItem({
   icon: Icon,
+  iconClassName,
   name,
   nameLabel,
   subtitle,
   startRenaming,
   deleteDescription,
   isDeleting,
+  dragItem,
+  onDropItem,
   onOpen,
+  onDownload,
   onPrefetch,
   onRename,
   onDelete,
 }: Readonly<Props>) {
   const [renaming, setRenaming] = useState(startRenaming);
+
+  useEffect(() => {
+    if (startRenaming) setRenaming(true);
+  }, [startRenaming]);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [dropActive, setDropActive] = useState(false);
+  const acceptsDrops = !!onDropItem;
+
+  function canDrop(event: React.DragEvent) {
+    return acceptsDrops && hasDragItem(event.dataTransfer);
+  }
+
+  function handleKeyDown(event: React.KeyboardEvent) {
+    if (renaming || (event.target as HTMLElement).tagName === "INPUT") return;
+
+    if (event.key === "F2") {
+      event.preventDefault();
+      setRenaming(true);
+    } else if (event.key === "Delete" || event.key === "Backspace") {
+      event.preventDefault();
+      setDeleteOpen(true);
+    }
+  }
 
   return (
     <>
@@ -46,7 +88,37 @@ export default function ExplorerItem({
         <ContextMenuTrigger
           render={
             <div
-              className="group flex flex-col items-center gap-2 rounded-xl p-2 text-center"
+              className={cn(
+                "group flex flex-col items-center gap-2 rounded-2xl border border-transparent p-3 text-center hover:bg-muted/40",
+                startRenaming && "border-primary/40 bg-primary/5",
+                dropActive && "border-primary bg-primary/10",
+              )}
+              tabIndex={-1}
+              draggable={!renaming}
+              onKeyDown={handleKeyDown}
+              onDragStart={(event: React.DragEvent) => {
+                event.dataTransfer.setData(
+                  ITEM_DRAG_TYPE,
+                  JSON.stringify(dragItem),
+                );
+                event.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(event: React.DragEvent) => {
+                if (!canDrop(event)) return;
+                event.preventDefault();
+                event.stopPropagation();
+                setDropActive(true);
+              }}
+              onDragLeave={() => setDropActive(false)}
+              onDrop={(event: React.DragEvent) => {
+                setDropActive(false);
+                if (!canDrop(event)) return;
+                event.preventDefault();
+                event.stopPropagation();
+
+                const item = readDragItem(event.dataTransfer);
+                if (item) onDropItem?.(item);
+              }}
               onPointerEnter={onPrefetch}
               onFocus={onPrefetch}
             />
@@ -59,10 +131,7 @@ export default function ExplorerItem({
             onClick={onOpen}
             title={name}
           >
-            <Icon
-              strokeWidth={1}
-              className="size-24 fill-primary/15 text-primary transition-transform group-hover:scale-105"
-            />
+            <Icon strokeWidth={1} className={cn("size-24", iconClassName)} />
           </button>
           <div className="w-full">
             {renaming ? (
@@ -90,6 +159,12 @@ export default function ExplorerItem({
             <PencilIcon />
             Rename
           </ContextMenuItem>
+          {onDownload && (
+            <ContextMenuItem onClick={onDownload}>
+              <DownloadIcon />
+              Download
+            </ContextMenuItem>
+          )}
           <ContextMenuSeparator />
           <ContextMenuItem
             variant="destructive"

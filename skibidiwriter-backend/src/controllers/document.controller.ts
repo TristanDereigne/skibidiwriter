@@ -5,6 +5,7 @@ import folderService from "@/services/folder.service";
 import { Hono } from "hono";
 import {
   CreateDocumentSchema,
+  MoveDocumentSchema,
   RenameSchema,
   type DocumentDTO,
 } from "skibidiwriter-shared";
@@ -40,6 +41,15 @@ export const documentController = new Hono<AuthEnv>()
 
     return ctx.json(toDTO(row), 200);
   })
+  .get("/:id/content", validate("param", IdParamSchema), async (ctx) => {
+    const { id } = ctx.req.valid("param");
+    const content = await documentService.text(id, ctx.get("userId"));
+    if (content === null) return ctx.json({ error: "Document not found" }, 404);
+
+    return ctx.text(content, 200, {
+      "Content-Type": "text/plain; charset=utf-8",
+    });
+  })
   .post("/", validate("json", CreateDocumentSchema), async (ctx) => {
     const { name, folderId, content } = ctx.req.valid("json");
 
@@ -67,6 +77,28 @@ export const documentController = new Hono<AuthEnv>()
         ctx.req.valid("param").id,
         ctx.req.valid("json").name,
         ctx.get("userId"),
+      );
+      if (!row) return ctx.json({ error: "Document not found" }, 404);
+
+      return ctx.json(toDTO(row), 200);
+    },
+  )
+  .patch(
+    "/:id/move",
+    validate("param", IdParamSchema),
+    validate("json", MoveDocumentSchema),
+    async (ctx) => {
+      const userId = ctx.get("userId");
+      const { folderId } = ctx.req.valid("json");
+
+      const folderExists =
+        !folderId || (await folderService.exists(folderId, userId));
+      if (!folderExists) return ctx.json({ error: "Folder not found" }, 404);
+
+      const row = await documentService.move(
+        ctx.req.valid("param").id,
+        folderId,
+        userId,
       );
       if (!row) return ctx.json({ error: "Document not found" }, 404);
 

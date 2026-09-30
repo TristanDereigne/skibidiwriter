@@ -1,3 +1,4 @@
+import { toast } from "@/components/ui/toast";
 import { api } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -72,6 +73,59 @@ export function useRenameDocument() {
         json: { name },
       });
       if (!res.ok) throw new Error("Failed to rename document");
+
+      return await res.json();
+    },
+    onSuccess: invalidate,
+  });
+}
+
+function toFileName(name: string) {
+  const safe = name.replace(/[\\/:*?"<>|]/g, "_").trim() || "document";
+
+  return /\.(md|markdown|txt)$/i.test(safe) ? safe : `${safe}.md`;
+}
+
+export function useDownloadDocument() {
+  return useMutation({
+    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+      const res = await api.documents[":id"].content.$get({ param: { id } });
+      if (!res.ok) throw new Error("Failed to download document");
+
+      const url = URL.createObjectURL(
+        new Blob([await res.text()], { type: "text/plain;charset=utf-8" }),
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = toFileName(name);
+      link.click();
+      URL.revokeObjectURL(url);
+    },
+    onError: (error) =>
+      toast.add({
+        title: "Couldn’t download",
+        description: error.message,
+        type: "error",
+      }),
+  });
+}
+
+export function useMoveDocument() {
+  const invalidate = useInvalidateDocuments();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      folderId,
+    }: {
+      id: string;
+      folderId: string | null;
+    }) => {
+      const res = await api.documents[":id"].move.$patch({
+        param: { id },
+        json: { folderId },
+      });
+      if (!res.ok) throw new Error("Failed to move document");
 
       return await res.json();
     },
