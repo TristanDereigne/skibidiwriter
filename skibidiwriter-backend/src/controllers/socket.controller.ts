@@ -10,7 +10,9 @@ import {
 } from "@/libs/socket";
 import chatService from "@/services/chat.service";
 import documentService from "@/services/document.service";
+import type { AuthEnv } from "@/libs/require-auth";
 import { upgradeWebSocket } from "@hono/bun";
+import type { Context } from "hono";
 import type { WSContext, WSMessageReceive } from "hono/ws";
 import {
   ClientEventSchema,
@@ -20,8 +22,10 @@ import {
 } from "skibidiwriter-shared";
 import z from "zod";
 
-export const socketController = upgradeWebSocket(() => {
+export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
+  const userId = ctx.get("userId");
   let connection: WSContext | undefined;
+  let queue: Promise<void> = Promise.resolve();
 
   return {
     onOpen(_, ws) {
@@ -40,7 +44,11 @@ export const socketController = upgradeWebSocket(() => {
         return;
       }
 
-      await handleClientEvent(result.data, ws);
+      queue = queue
+        .then(() => handleClientEvent(result.data, ws, userId))
+        .catch((error) => console.error("Socket event failed", error));
+
+      await queue;
     },
     onClose() {
       if (!connection) return;
@@ -75,7 +83,11 @@ function parseClientEvent(
   return { success: true, data: result.data };
 }
 
-async function handleClientEvent(event: ClientEvent, sender: WSContext) {
+async function handleClientEvent(
+  event: ClientEvent,
+  sender: WSContext,
+  userId: string,
+) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
       const message = chatService.create(event.content);
@@ -84,6 +96,12 @@ async function handleClientEvent(event: ClientEvent, sender: WSContext) {
       break;
     }
     case ClientEventType.Document_Join: {
+      const canAccess = await documentService.hasAccess(
+        event.documentId,
+        userId,
+      );
+      if (!canAccess) return sendDocumentNotFound(sender);
+
       const operations = await documentService.operations(event.documentId);
       if (!operations) return sendDocumentNotFound(sender);
 
@@ -96,10 +114,16 @@ async function handleClientEvent(event: ClientEvent, sender: WSContext) {
       break;
     }
     case ClientEventType.Document_Leave: {
-      leaveDocument(sender, event.documentId);
+      if (roomsOf(sender).includes(event.documentId)) {
+        leaveDocument(sender, event.documentId);
+      }
       break;
     }
     case ClientEventType.Document_Operations: {
+      if (!roomsOf(sender).includes(event.documentId)) {
+        return sendDocumentNotFound(sender);
+      }
+
       const operations = await documentService.apply(
         event.documentId,
         event.operations,

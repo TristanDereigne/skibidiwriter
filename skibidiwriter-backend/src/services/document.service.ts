@@ -1,7 +1,7 @@
 import { db } from "@/libs/db";
 import { documentTable } from "@/models/document.model";
 import { eqOrNull } from "@/libs/sql";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
 const PERSIST_DELAY = 500;
@@ -108,45 +108,68 @@ async function forget(ids: string[]) {
   }
 }
 
-async function findInFolder(folderId: string | null) {
+function accessibleTo(userId: string) {
+  return eq(documentTable.ownerId, userId);
+}
+
+async function hasAccess(id: string, userId: string) {
+  const [row] = await db
+    .select({ id: documentTable.id })
+    .from(documentTable)
+    .where(and(eq(documentTable.id, id), accessibleTo(userId)));
+
+  return !!row;
+}
+
+async function findInFolder(folderId: string | null, userId: string) {
   return await db
     .select(summarySelect)
     .from(documentTable)
-    .where(eqOrNull(documentTable.folderId, folderId));
+    .where(
+      and(eqOrNull(documentTable.folderId, folderId), accessibleTo(userId)),
+    );
 }
 
-async function findById(id: string) {
+async function findById(id: string, userId: string) {
   const [row] = await db
     .select(summarySelect)
     .from(documentTable)
-    .where(eq(documentTable.id, id));
+    .where(and(eq(documentTable.id, id), accessibleTo(userId)));
 
   return row;
 }
 
-async function create(name: string, folderId: string | null, content?: string) {
+async function create(
+  name: string,
+  folderId: string | null,
+  userId: string,
+  content?: string,
+) {
   const crdt = new TextCrdt("server");
   const operations = content ? crdt.setText(content) : [];
 
   const [row] = await db
     .insert(documentTable)
-    .values({ name, folderId, operations })
+    .values({ name, folderId, operations, ownerId: userId })
     .returning(summarySelect);
 
   return row!;
 }
 
-async function rename(id: string, name: string) {
+async function rename(id: string, name: string, userId: string) {
   const [row] = await db
     .update(documentTable)
     .set({ name })
-    .where(eq(documentTable.id, id))
+    .where(and(eq(documentTable.id, id), accessibleTo(userId)))
     .returning(summarySelect);
 
   return row;
 }
 
-async function remove(id: string) {
+async function remove(id: string, userId: string) {
+  const canAccess = await hasAccess(id, userId);
+  if (!canAccess) return;
+
   const opened = openDocuments.get(id);
   openDocuments.delete(id);
 
@@ -155,13 +178,14 @@ async function remove(id: string) {
 
   const [row] = await db
     .delete(documentTable)
-    .where(eq(documentTable.id, id))
+    .where(and(eq(documentTable.id, id), accessibleTo(userId)))
     .returning({ id: documentTable.id });
 
   return row;
 }
 
 export default {
+  hasAccess,
   operations,
   apply,
   release,
