@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Bubble, BubbleContent } from "@/components/ui/bubble";
+import { Badge } from "@/components/ui/badge.tsx";
+import { Bubble, BubbleContent } from "@/components/ui/bubble.tsx";
 import {
   Card,
   CardAction,
@@ -7,19 +7,19 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card.tsx";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from "@/components/ui/input-group";
+} from "@/components/ui/input-group.tsx";
 import {
   Message,
   MessageContent,
   MessageFooter,
-} from "@/components/ui/message";
+} from "@/components/ui/message.tsx";
 import {
   MessageScroller,
   MessageScrollerButton,
@@ -27,13 +27,13 @@ import {
   MessageScrollerItem,
   MessageScrollerProvider,
   MessageScrollerViewport,
-} from "@/components/ui/message-scroller";
+} from "@/components/ui/message-scroller.tsx";
 import { format } from "date-fns";
 import { SendIcon } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
-import { MESSAGE_MAX_LENGTH, type MessageDTO } from "skibidiwriter-shared";
-import { useSkibidiChat } from "./lib/chat";
-import { CONNECTION_STATUS_LABELS } from "./lib/realtime";
+import { MESSAGE_MAX_LENGTH, type MessageDTO } from "../../../../skibidiwriter-shared";
+import { useSkibidiChat } from "../../lib/chat.ts";
+import { CONNECTION_STATUS_LABELS } from "../../lib/realtime.ts";
 
 export default function Chat() {
   const { status, messages, sendMessage } = useSkibidiChat();
