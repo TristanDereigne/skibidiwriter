@@ -3,12 +3,11 @@ import ExplorerProvider from "@/components/sections/explorer/explorer-provider";
 import { useParams } from "react-router";
 
 export const ExplorerPage = () => {
+  const folderId = useParams().folderId ?? null;
 
-    const folderId = useParams().folderId ?? null;
-
-    return(
-        <ExplorerProvider key={folderId ?? "root"} folderId={folderId}>
-            <Explorer />
-        </ExplorerProvider>
-    );
+  return (
+    <ExplorerProvider key={folderId ?? "root"} folderId={folderId}>
+      <Explorer />
+    </ExplorerProvider>
+  );
 };

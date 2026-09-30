@@ -31,7 +31,10 @@ import {
 import { format } from "date-fns";
 import { SendIcon } from "lucide-react";
 import { useState, type SubmitEventHandler } from "react";
-import { MESSAGE_MAX_LENGTH, type MessageDTO } from "../../../../skibidiwriter-shared";
+import {
+  MESSAGE_MAX_LENGTH,
+  type MessageDTO,
+} from "../../../../skibidiwriter-shared";
 import { useSkibidiChat } from "../../lib/chat.ts";
 import { CONNECTION_STATUS_LABELS } from "../../lib/realtime.ts";
 

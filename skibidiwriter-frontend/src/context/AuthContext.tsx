@@ -27,8 +27,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const auth = useAuth();
     const userContext = useUserContext()
 
-    const { data: session, isPending } = authClient.useSession();
+  const { data: session, isPending } = authClient.useSession();
 
+  useEffect(() => {
+    if (session?.user) {
+      userContext.setUser(session?.user);
+      userContext.setUsername(session?.user.name);
+    }
+  }, [session?.user]);
     useEffect(() => {
         if(session?.user){
             userContext.setUser(session?.user);
@@ -49,8 +55,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
       login: async (email, password) => {
         await auth.signIn(email, password);
-        if(session?.user.name) {
-            userContext.setUsername(session?.user.name)
+        if (session?.user.name) {
+          userContext.setUsername(session?.user.name);
         }
       },
       logout: async () => {

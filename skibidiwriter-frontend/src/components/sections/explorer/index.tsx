@@ -1,5 +1,7 @@
 import { useDocuments } from "@/hooks/use-documents";
+import { useFiles } from "@/hooks/use-files";
 import { useFolders } from "@/hooks/use-folders";
+import ExplorerFile from "./explorer-file";
 import ExplorerDocument from "./explorer-document";
 import { useExplorer } from "./use-explorer";
 import { ExplorerEmpty, ExplorerNotFound } from "./explorer-empty";
@@ -109,7 +111,7 @@ export default function Explorer() {
         )}
       >
         <UploadCloudIcon className="size-10" />
-        <p className="text-sm font-medium">Drop text files to upload</p>
+        <p className="text-sm font-medium">Drop files to upload</p>
       </div>
     </div>
   );
@@ -119,6 +121,7 @@ function ExplorerContent() {
   const { folderId, isNotFound } = useExplorer();
   const documents = useDocuments(folderId);
   const folders = useFolders(folderId);
+  const files = useFiles(folderId);
 
   if (isNotFound)
     return (
@@ -127,9 +130,10 @@ function ExplorerContent() {
       </Centered>
     );
 
-  if (documents.isPending || folders.isPending) return <ExplorerSkeleton />;
+  if (documents.isPending || folders.isPending || files.isPending)
+    return <ExplorerSkeleton />;
 
-  if (!documents.data?.length && !folders.data?.length) {
+  if (!documents.data?.length && !folders.data?.length && !files.data?.length) {
     return (
       <Centered>
         <ExplorerEmpty />
@@ -144,6 +148,9 @@ function ExplorerContent() {
       ))}
       {documents.data?.map((document) => (
         <ExplorerDocument key={document.id} document={document} />
+      ))}
+      {files.data?.map((file) => (
+        <ExplorerFile key={file.id} file={file} />
       ))}
     </div>
   );

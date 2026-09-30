@@ -1,7 +1,7 @@
 export const ITEM_DRAG_TYPE = "application/x-skibidi-item";
 
 export interface DragItem {
-  kind: "folder" | "document";
+  kind: "folder" | "document" | "file";
   id: string;
 }
 

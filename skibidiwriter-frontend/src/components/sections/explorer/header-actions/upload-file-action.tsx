@@ -16,7 +16,6 @@ export default function UploadFileAction({ folderId }: Readonly<Props>) {
       <input
         ref={inputRef}
         type="file"
-        accept="text/*,.md,.markdown,.txt"
         multiple
         hidden
         onChange={(e) => {

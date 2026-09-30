@@ -8,18 +8,13 @@ import { editPath } from "@/lib/paths";
 import { FileTextIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import type { DocumentDTO } from "skibidiwriter-shared";
+import { dateFormat } from "@/lib/format";
 import { useExplorer } from "./use-explorer";
 import ExplorerItem from "./explorer-item";
 
 interface Props {
   document: DocumentDTO;
 }
-
-const dateFormat = new Intl.DateTimeFormat(undefined, {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-});
 
 export default function ExplorerDocument({ document }: Readonly<Props>) {
   const { createdId } = useExplorer();

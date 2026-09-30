@@ -4,11 +4,15 @@ import {
   ProgressValue,
 } from "@/components/ui/progress";
 import { toast } from "@/components/ui/toast";
+import { useUploadFile } from "@/hooks/use-files";
 import {
   DEFAULT_DOCUMENT_NAME,
   useCreateDocument,
 } from "@/hooks/use-documents";
-import { MAX_DOCUMENT_CONTENT_LENGTH } from "skibidiwriter-shared";
+import {
+  MAX_DOCUMENT_CONTENT_LENGTH,
+  MAX_FILE_SIZE_BYTES,
+} from "skibidiwriter-shared";
 
 const MIN_UPLOAD_DURATION = 900;
 
@@ -33,6 +37,7 @@ function isTextFile(file: File) {
 
 export function useUploadFiles(folderId: string | null) {
   const { mutateAsync: createDocument } = useCreateDocument();
+  const { mutateAsync: uploadFile } = useUploadFile();
 
   async function upload(file: File) {
     const id = toast.add({
@@ -47,19 +52,24 @@ export function useUploadFiles(folderId: string | null) {
       toast.update(id, { description: <UploadProgress value={value} /> });
 
     try {
-      if (!isTextFile(file)) throw new Error("Only text files are supported");
-      if (file.size > MAX_DOCUMENT_CONTENT_LENGTH) {
-        throw new Error("File too large");
+      if (file.size > MAX_FILE_SIZE_BYTES)
+        throw new Error(
+          `File too large (max ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} MB)`,
+        );
+
+      if (isTextFile(file) && file.size <= MAX_DOCUMENT_CONTENT_LENGTH) {
+        const content = await file.text();
+        setProgress(40);
+
+        await createDocument({
+          name: file.name.trim().slice(0, 255) || DEFAULT_DOCUMENT_NAME,
+          folderId,
+          content,
+        });
+      } else {
+        setProgress(40);
+        await uploadFile({ file, folderId });
       }
-
-      const content = await file.text();
-      setProgress(40);
-
-      await createDocument({
-        name: file.name.trim().slice(0, 255) || DEFAULT_DOCUMENT_NAME,
-        folderId,
-        content,
-      });
       setProgress(90);
 
       await sleep(Math.max(0, MIN_UPLOAD_DURATION - (Date.now() - startedAt)));
