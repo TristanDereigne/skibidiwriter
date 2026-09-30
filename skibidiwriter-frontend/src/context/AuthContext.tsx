@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/use-auth.ts";
 import { authClient } from "@/lib/auth-client";
 import {createContext, useContext, useEffect, useMemo} from "react";
 import {useUserContext} from "@/context/UserContext.tsx";
+import {formateDate} from "@/lib/utils.ts";
 
 type AuthContextType = {
   user: string | null;
@@ -32,6 +33,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if(session?.user){
             userContext.setUser(session?.user);
             userContext.setUsername(session?.user.name);
+            userContext.setEmail(session?.user.email);
+            userContext.setUserSince(formateDate(session?.user.createdAt));
         }
     }, [session?.user]);
 

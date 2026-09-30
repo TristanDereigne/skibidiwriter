@@ -7,33 +7,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {useNavigate} from "react-router";
-import {useUserContext} from "@/context/UserContext.tsx";
-import {useEffect, useState} from "react";
+import {ProfileRounded} from "@/components/sections/profile/profile-rounded.tsx";
 
 export function DropdownMenuProfile() {
 
     const navigate = useNavigate()
-    const user = useUserContext()
-
-    const [userFirstLetter, setUserFirstLetter] = useState<string | null>("")
-
-    useEffect(()=>{
-
-        if(user.username) {
-            let userFirstLetter = user.username[0].toUpperCase()
-            setUserFirstLetter(userFirstLetter)
-        }
-
-    }, [user.username])
-
 
     return (
         <DropdownMenu>
             <DropdownMenuTrigger
                 render={
-                    <button className={"cursor-pointer w-8 h-8 rounded-full flex justify-center items-center bg-[#432DD7]"}>
-                        <p className={"text-white"}>{userFirstLetter}</p>
-                    </button>
+                    <ProfileRounded width={32} height={32} textSize={16}/>
                 }
             />
             <DropdownMenuContent>
