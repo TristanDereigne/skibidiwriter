@@ -1,5 +1,6 @@
 import { toast } from "@/components/ui/toast";
 import { api } from "@/lib/api";
+import { saveBlob } from "@/lib/download";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const DOCUMENTS_QUERY_KEY = ["documents"];
@@ -92,14 +93,10 @@ export function useDownloadDocument() {
       const res = await api.documents[":id"].content.$get({ param: { id } });
       if (!res.ok) throw new Error("Failed to download document");
 
-      const url = URL.createObjectURL(
+      saveBlob(
         new Blob([await res.text()], { type: "text/plain;charset=utf-8" }),
+        toFileName(name),
       );
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = toFileName(name);
-      link.click();
-      URL.revokeObjectURL(url);
     },
     onError: (error) =>
       toast.add({
