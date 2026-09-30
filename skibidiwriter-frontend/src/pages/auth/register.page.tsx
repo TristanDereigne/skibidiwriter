@@ -1,5 +1,10 @@
 import { useNavigate } from "react-router";
 
+import { toast } from "@/components/ui/toast.tsx";
+import { AuthContext } from "@/context/AuthContext.tsx";
+import { useContext, useState, type SetStateAction } from "react";
+import { z } from "zod";
+import { Button } from "../../components/ui/button.tsx";
 import {
   Card,
   CardAction,
@@ -9,13 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.tsx";
-import { Label } from "../../components/ui/label.tsx";
 import { Input } from "../../components/ui/input.tsx";
-import { Button } from "../../components/ui/button.tsx";
-import { z } from "zod";
-import { useState, type SetStateAction, useContext } from "react";
-import { toast } from "@/components/ui/toast.tsx";
-import { AuthContext } from "@/context/AuthContext.tsx";
+import { Label } from "../../components/ui/label.tsx";
 
 export const RegisterPage = () => {
   let navigate = useNavigate();
@@ -125,8 +125,9 @@ export const RegisterPage = () => {
                   <Input
                     id="email"
                     type="email"
-                    value={email}
+                    autoComplete="email"
                     placeholder="m@example.com"
+                    value={email}
                     onChange={handleChange}
                     required
                   />
@@ -136,6 +137,7 @@ export const RegisterPage = () => {
                   <Input
                     id="pseudo"
                     type="text"
+                    autoComplete="username"
                     value={pseudo}
                     onChange={handleChange}
                     required
@@ -148,6 +150,7 @@ export const RegisterPage = () => {
                   <Input
                     id="password"
                     type="password"
+                    autoComplete="new-password"
                     value={password}
                     onChange={handleChange}
                     required
@@ -160,6 +163,7 @@ export const RegisterPage = () => {
                   <Input
                     id="verifyPassword"
                     type="password"
+                    autoComplete="new-password"
                     value={verifyPassword}
                     onChange={handleChange}
                     required

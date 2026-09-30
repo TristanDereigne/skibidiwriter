@@ -1,34 +1,48 @@
-import { Moon, Sun } from "lucide-react";
-
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useTheme } from "@/components/theme-provider";
+import { MoonIcon, SunIcon } from "lucide-react";
+import { useId, useState } from "react";
+import { useTheme } from "./theme-provider";
+import { Switch } from "./ui/switch";
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const id = useId();
+
+  const { theme, setTheme } = useTheme();
+  const [checked, setChecked] = useState(theme === "dark");
+
+  const toggleSwitch = () =>
+    setChecked((prev) => {
+      const newChecked = !prev;
+      setTheme(newChecked ? "dark" : "light");
+
+      return newChecked;
+    });
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger>
-          <Sun className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-          <span className="sr-only">Toggle theme</span>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div
+      className="group inline-flex items-center gap-2"
+      data-state={checked ? "checked" : "unchecked"}
+    >
+      <label
+        id={`${id}-light`}
+        className="group-data-checked:text-muted-foreground/70 text-left text-sm font-medium"
+        aria-controls={id}
+      >
+        <SunIcon className="size-4" aria-hidden="true" />
+      </label>
+      <Switch
+        id={id}
+        checked={checked}
+        onCheckedChange={toggleSwitch}
+        aria-labelledby={`${id}-dark ${id}-light`}
+        aria-label="Toggle between dark and light mode"
+      />
+      <span
+        id={`${id}-dark`}
+        className="group-data-unchecked:text-muted-foreground/70 text-right text-sm font-medium"
+        aria-controls={id}
+      >
+        <MoonIcon className="size-4" aria-hidden="true" />
+      </span>
+    </div>
   );
 }

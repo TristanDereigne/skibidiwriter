@@ -1,5 +1,10 @@
 import { useNavigate } from "react-router";
 
+import { toast } from "@/components/ui/toast.tsx";
+import { AuthContext } from "@/context/AuthContext.tsx";
+import { useContext, useState, type SetStateAction } from "react";
+import { z } from "zod";
+import { Button } from "../../components/ui/button.tsx";
 import {
   Card,
   CardAction,
@@ -9,13 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.tsx";
-import { Label } from "../../components/ui/label.tsx";
 import { Input } from "../../components/ui/input.tsx";
-import { Button } from "../../components/ui/button.tsx";
-import { z } from "zod";
-import { useState, type SetStateAction, useContext } from "react";
-import { toast } from "@/components/ui/toast.tsx";
-import { AuthContext } from "@/context/AuthContext.tsx";
+import { Label } from "../../components/ui/label.tsx";
 
 export const LoginPage = () => {
   let navigate = useNavigate();
@@ -103,8 +103,9 @@ export const LoginPage = () => {
                   <Input
                     id="email"
                     type="email"
-                    value={email}
                     placeholder="m@example.com"
+                    autoComplete="email"
+                    value={email}
                     onChange={handleChange}
                     required
                   />
@@ -116,6 +117,7 @@ export const LoginPage = () => {
                   <Input
                     id="password"
                     type="password"
+                    autoComplete="current-password"
                     value={password}
                     onChange={handleChange}
                     required
