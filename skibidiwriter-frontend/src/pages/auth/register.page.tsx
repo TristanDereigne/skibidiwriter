@@ -1,5 +1,9 @@
 import { useNavigate } from "react-router";
 
+import { AuthContext } from "@/context/AuthContext.tsx";
+import { useContext, useState, type SetStateAction } from "react";
+import { z } from "zod";
+import { Button } from "../../components/ui/button.tsx";
 import {
   Card,
   CardAction,
@@ -9,15 +13,10 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card.tsx";
-import { Label } from "../../components/ui/label.tsx";
 import { Input } from "../../components/ui/input.tsx";
-import { Button } from "../../components/ui/button.tsx";
-import { z } from "zod";
-import {useState, type SetStateAction, useContext} from "react";
-import { AuthContext } from '@/context/AuthContext.tsx'
+import { Label } from "../../components/ui/label.tsx";
 
 export const RegisterPage = () => {
-
   let navigate = useNavigate();
   const authContext = useContext(AuthContext);
 
@@ -31,7 +30,10 @@ export const RegisterPage = () => {
         /\w/,
         "Le pseudo ne peut contenir que des lettres, chiffres et underscore",
       ),
-    password: z.string().min(8, "8 caractères minimum").max(32, "32 caractères maximum"),
+    password: z
+      .string()
+      .min(8, "8 caractères minimum")
+      .max(32, "32 caractères maximum"),
   });
 
   const [email, setEmail] = useState("");
@@ -114,8 +116,9 @@ export const RegisterPage = () => {
                   <Input
                     id="email"
                     type="email"
-                    value={email}
+                    autoComplete="email"
                     placeholder="m@example.com"
+                    value={email}
                     onChange={handleChange}
                     required
                   />
@@ -125,6 +128,7 @@ export const RegisterPage = () => {
                   <Input
                     id="pseudo"
                     type="text"
+                    autoComplete="username"
                     value={pseudo}
                     onChange={handleChange}
                     required
@@ -137,6 +141,7 @@ export const RegisterPage = () => {
                   <Input
                     id="password"
                     type="password"
+                    autoComplete="new-password"
                     value={password}
                     onChange={handleChange}
                     required
@@ -149,6 +154,7 @@ export const RegisterPage = () => {
                   <Input
                     id="verifyPassword"
                     type="password"
+                    autoComplete="new-password"
                     value={verifyPassword}
                     onChange={handleChange}
                     required
