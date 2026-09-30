@@ -82,6 +82,13 @@ export const fileController = new Hono<AuthEnv>()
       !folderId || (await folderService.exists(folderId, userId));
     if (!folderExists) return ctx.json({ error: "Dossier introuvable" }, 404);
 
+    const nameTaken = await fileService.nameTaken(name, folderId, userId);
+    if (nameTaken)
+      return ctx.json(
+        { error: "Ce nom est déjà utilisé dans ce dossier" },
+        409,
+      );
+
     const row = await fileService.createDocument(
       name,
       folderId,
@@ -114,6 +121,17 @@ export const fileController = new Hono<AuthEnv>()
       if (!name.success)
         return ctx.json({ error: "Nom de fichier invalide" }, 400);
 
+      const nameTaken = await fileService.nameTaken(
+        name.data,
+        folderId,
+        userId,
+      );
+      if (nameTaken)
+        return ctx.json(
+          { error: "Ce nom est déjà utilisé dans ce dossier" },
+          409,
+        );
+
       const row = await fileService.createUpload(
         {
           name: name.data,
@@ -132,11 +150,26 @@ export const fileController = new Hono<AuthEnv>()
     validate("param", IdParamSchema),
     validate("json", RenameSchema),
     async (ctx) => {
-      const row = await fileService.rename(
-        ctx.req.valid("param").id,
-        ctx.req.valid("json").name,
-        ctx.get("userId"),
+      const userId = ctx.get("userId");
+      const { id } = ctx.req.valid("param");
+      const { name } = ctx.req.valid("json");
+
+      const file = await fileService.findById(id, userId);
+      if (!file) return ctx.json({ error: "Fichier introuvable" }, 404);
+
+      const nameTaken = await fileService.nameTaken(
+        name,
+        file.folderId,
+        userId,
+        id,
       );
+      if (nameTaken)
+        return ctx.json(
+          { error: "Ce nom est déjà utilisé dans ce dossier" },
+          409,
+        );
+
+      const row = await fileService.rename(id, name, userId);
       if (!row) return ctx.json({ error: "Fichier introuvable" }, 404);
 
       return ctx.json(toDTO(row), 200);
@@ -154,11 +187,24 @@ export const fileController = new Hono<AuthEnv>()
         !folderId || (await folderService.exists(folderId, userId));
       if (!folderExists) return ctx.json({ error: "Dossier introuvable" }, 404);
 
-      const row = await fileService.move(
-        ctx.req.valid("param").id,
+      const { id } = ctx.req.valid("param");
+
+      const file = await fileService.findById(id, userId);
+      if (!file) return ctx.json({ error: "Fichier introuvable" }, 404);
+
+      const nameTaken = await fileService.nameTaken(
+        file.name,
         folderId,
         userId,
+        id,
       );
+      if (nameTaken)
+        return ctx.json(
+          { error: "Ce nom est déjà utilisé dans ce dossier" },
+          409,
+        );
+
+      const row = await fileService.move(id, folderId, userId);
       if (!row) return ctx.json({ error: "Fichier introuvable" }, 404);
 
       return ctx.json(toDTO(row), 200);

@@ -61,6 +61,17 @@ export const folderController = new Hono<AuthEnv>()
       return ctx.json({ error: "Dossier parent introuvable" }, 404);
     }
 
+    const nameTaken = await folderService.nameTaken(
+      name,
+      parentId,
+      ctx.get("userId"),
+    );
+    if (nameTaken)
+      return ctx.json(
+        { error: "Ce nom est déjà utilisé dans ce dossier" },
+        409,
+      );
+
     const row = await folderService.create(name, parentId, ctx.get("userId"));
 
     return ctx.json(toDTO(row), 201);
@@ -70,11 +81,26 @@ export const folderController = new Hono<AuthEnv>()
     validate("param", IdParamSchema),
     validate("json", RenameSchema),
     async (ctx) => {
-      const row = await folderService.rename(
-        ctx.req.valid("param").id,
-        ctx.req.valid("json").name,
-        ctx.get("userId"),
+      const userId = ctx.get("userId");
+      const { id } = ctx.req.valid("param");
+      const { name } = ctx.req.valid("json");
+
+      const folder = await folderService.findById(id, userId);
+      if (!folder) return ctx.json({ error: "Dossier introuvable" }, 404);
+
+      const nameTaken = await folderService.nameTaken(
+        name,
+        folder.parentId,
+        userId,
+        id,
       );
+      if (nameTaken)
+        return ctx.json(
+          { error: "Ce nom est déjà utilisé dans ce dossier" },
+          409,
+        );
+
+      const row = await folderService.rename(id, name, userId);
       if (!row) return ctx.json({ error: "Dossier introuvable" }, 404);
 
       return ctx.json(toDTO(row), 200);
@@ -101,6 +127,21 @@ export const folderController = new Hono<AuthEnv>()
           );
         }
       }
+
+      const folder = await folderService.findById(id, userId);
+      if (!folder) return ctx.json({ error: "Dossier introuvable" }, 404);
+
+      const nameTaken = await folderService.nameTaken(
+        folder.name,
+        parentId,
+        userId,
+        id,
+      );
+      if (nameTaken)
+        return ctx.json(
+          { error: "Ce nom est déjà utilisé dans ce dossier" },
+          409,
+        );
 
       const row = await folderService.move(id, parentId, userId);
       if (!row) return ctx.json({ error: "Dossier introuvable" }, 404);

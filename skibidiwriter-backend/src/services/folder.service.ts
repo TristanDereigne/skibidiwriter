@@ -2,7 +2,7 @@ import { db } from "@/libs/db";
 import fileService from "@/services/file.service";
 import { fileTable, folderTable } from "@/models";
 import { eqOrNull } from "@/libs/sql";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, ne, sql } from "drizzle-orm";
 
 function ownedBy(userId: string) {
   return eq(folderTable.ownerId, userId);
@@ -15,11 +15,41 @@ async function findInFolder(parentId: string | null, userId: string) {
     .where(and(eqOrNull(folderTable.parentId, parentId), ownedBy(userId)));
 }
 
+async function findById(id: string, userId: string) {
+  const [row] = await db
+    .select()
+    .from(folderTable)
+    .where(and(eq(folderTable.id, id), ownedBy(userId)));
+
+  return row;
+}
+
 async function exists(id: string, userId: string) {
   const [row] = await db
     .select({ id: folderTable.id })
     .from(folderTable)
     .where(and(eq(folderTable.id, id), ownedBy(userId)));
+
+  return !!row;
+}
+
+async function nameTaken(
+  name: string,
+  parentId: string | null,
+  userId: string,
+  exceptId?: string,
+) {
+  const [row] = await db
+    .select({ id: folderTable.id })
+    .from(folderTable)
+    .where(
+      and(
+        eqOrNull(folderTable.parentId, parentId),
+        ownedBy(userId),
+        eq(sql`lower(${folderTable.name})`, sql`lower(${name})`),
+        exceptId ? ne(folderTable.id, exceptId) : undefined,
+      ),
+    );
 
   return !!row;
 }
@@ -137,7 +167,9 @@ async function remove(id: string, userId: string) {
 
 export default {
   findInFolder,
+  findById,
   exists,
+  nameTaken,
   path,
   create,
   rename,
