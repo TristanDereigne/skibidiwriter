@@ -49,12 +49,13 @@ export const folderController = new Hono<AuthEnv>()
       return ctx.json({ code: ErrorCode.Folder_ParentNotFound }, 404);
     }
 
-    const nameTaken = await folderService.nameTaken(
+    const isNameTaken = await folderService.isNameTaken(
       name,
       parentId,
       ctx.get("userId"),
     );
-    if (nameTaken) return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
+    if (isNameTaken)
+      return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
     const row = await folderService.create(name, parentId, ctx.get("userId"));
 
@@ -72,13 +73,13 @@ export const folderController = new Hono<AuthEnv>()
       const folder = await folderService.findById(id, userId);
       if (!folder) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-      const nameTaken = await folderService.nameTaken(
+      const isNameTaken = await folderService.isNameTaken(
         name,
         folder.parentId,
         userId,
         id,
       );
-      if (nameTaken)
+      if (isNameTaken)
         return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await folderService.rename(id, name, userId);
@@ -109,13 +110,13 @@ export const folderController = new Hono<AuthEnv>()
       const folder = await folderService.findById(id, userId);
       if (!folder) return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-      const nameTaken = await folderService.nameTaken(
+      const isNameTaken = await folderService.isNameTaken(
         folder.name,
         parentId,
         userId,
         id,
       );
-      if (nameTaken)
+      if (isNameTaken)
         return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await folderService.move(id, parentId, userId);

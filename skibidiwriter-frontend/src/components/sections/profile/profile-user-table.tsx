@@ -94,7 +94,7 @@ export const ProfileUserTable = () => {
           <TableRow>
             <TableCell colSpan={3}></TableCell>
             <TableCell className="text-right">
-              <Button variant="default" onclick={addNewAccount}>Ajouter un membre</Button>
+              <Button variant="default" onClick={addNewAccount}>Ajouter un membre</Button>
             </TableCell>
           </TableRow>
         </TableFooter>

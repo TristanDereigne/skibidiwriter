@@ -24,10 +24,10 @@ export default function TrailBreadcrumb({
   current,
   onRename,
 }: Readonly<Props>) {
-  const [renaming, setRenaming] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const trail = [
-    { id: null, name: "Explorer" },
+    { id: null, name: "Mon drive" },
     ...folders,
     ...(current === undefined ? [] : [{ id: "current", name: current }]),
   ];
@@ -38,7 +38,7 @@ export default function TrailBreadcrumb({
       <BreadcrumbList className="flex-nowrap text-sm">
         {trail.slice(0, -1).map((crumb) => (
           <Fragment key={crumb.id ?? "root"}>
-            <BreadcrumbItem>
+            <BreadcrumbItem className="shrink-0 whitespace-nowrap">
               <BreadcrumbLink render={<Link to={explorerPath(crumb.id)} />}>
                 {crumb.name}
               </BreadcrumbLink>
@@ -47,13 +47,13 @@ export default function TrailBreadcrumb({
           </Fragment>
         ))}
         <BreadcrumbItem className="min-w-0">
-          {renaming && onRename ? (
+          {isRenaming && onRename ? (
             <InlineNameInput
               className="w-56"
               name={last.name}
               label="Nom du document"
               onCommit={onRename}
-              onDone={() => setRenaming(false)}
+              onDone={() => setIsRenaming(false)}
             />
           ) : (
             <BreadcrumbPage
@@ -61,7 +61,7 @@ export default function TrailBreadcrumb({
                 "truncate font-semibold",
                 onRename && "cursor-text rounded px-1 hover:bg-muted",
               )}
-              onClick={onRename && (() => setRenaming(true))}
+              onClick={onRename && (() => setIsRenaming(true))}
               title={onRename && "Cliquer pour renommer"}
             >
               {last.name}

@@ -56,21 +56,21 @@ export const fileTransferController = new Hono<AuthEnv>()
         return ctx.json({ code: ErrorCode.File_TooLarge }, 413);
       }
 
-      const folderExists =
+      const isFolderFound =
         !folderId || (await folderService.exists(folderId, userId));
-      if (!folderExists)
+      if (!isFolderFound)
         return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       const name = NameSchema.safeParse(file.name.slice(0, 255));
       if (!name.success)
         return ctx.json({ code: ErrorCode.File_NameInvalid }, 400);
 
-      const nameTaken = await fileService.nameTaken(
+      const isNameTaken = await fileService.isNameTaken(
         name.data,
         folderId,
         userId,
       );
-      if (nameTaken)
+      if (isNameTaken)
         return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await fileService.createUpload(
