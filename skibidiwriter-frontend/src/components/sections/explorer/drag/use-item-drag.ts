@@ -8,19 +8,19 @@ import {
 
 interface Options {
   dragItem: DragItem;
-  draggable: boolean;
+  isDraggable: boolean;
   onDropItem?: (item: DragItem) => void;
 }
 
-export function useItemDrag({ dragItem, draggable, onDropItem }: Options) {
-  const [dropActive, setDropActive] = useState(false);
+export function useItemDrag({ dragItem, isDraggable, onDropItem }: Options) {
+  const [isDropActive, setIsDropActive] = useState(false);
 
   function canDrop(event: DragEvent) {
     return !!onDropItem && hasDragItem(event.dataTransfer);
   }
 
   const dragProps = {
-    draggable,
+    draggable: isDraggable,
     onDragStart: (event: DragEvent) => {
       event.dataTransfer.setData(ITEM_DRAG_TYPE, JSON.stringify(dragItem));
       event.dataTransfer.effectAllowed = "move";
@@ -29,11 +29,11 @@ export function useItemDrag({ dragItem, draggable, onDropItem }: Options) {
       if (!canDrop(event)) return;
       event.preventDefault();
       event.stopPropagation();
-      setDropActive(true);
+      setIsDropActive(true);
     },
-    onDragLeave: () => setDropActive(false),
+    onDragLeave: () => setIsDropActive(false),
     onDrop: (event: DragEvent) => {
-      setDropActive(false);
+      setIsDropActive(false);
       if (!canDrop(event)) return;
       event.preventDefault();
       event.stopPropagation();
@@ -43,5 +43,5 @@ export function useItemDrag({ dragItem, draggable, onDropItem }: Options) {
     },
   };
 
-  return { dropActive, dragProps };
+  return { isDropActive, dragProps };
 }

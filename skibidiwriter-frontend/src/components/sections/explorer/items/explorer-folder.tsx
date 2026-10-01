@@ -27,8 +27,8 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   const deleteFolder = useDeleteFolder();
   const moveFolder = useMoveFolder();
   const moveFile = useMoveFile();
-  const [infoOpen, setInfoOpen] = useState(false);
-  const { data: stats } = useFolderStats(folder.id, infoOpen);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const { data: stats } = useFolderStats(folder.id, isInfoOpen);
 
   function handleDrop(item: DragItem) {
     const onError = (error: Error) =>
@@ -73,8 +73,8 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
           value: stats ? formatBytes(stats.totalBytes) : "…",
         },
       ]}
-      onInfoOpenChange={setInfoOpen}
-      startRenaming={folder.id === createdId}
+      onInfoOpenChange={setIsInfoOpen}
+      shouldStartRenaming={folder.id === createdId}
       deleteDescription="Ce dossier et tout son contenu seront supprimés définitivement. Cette action est irréversible."
       isDeleting={deleteFolder.isPending}
       onOpen={() => navigate(explorerPath(folder.id))}

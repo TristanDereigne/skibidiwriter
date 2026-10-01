@@ -36,13 +36,14 @@ export const fileController = new Hono<AuthEnv>()
     const userId = ctx.get("userId");
     const { name, folderId, content } = ctx.req.valid("json");
 
-    const folderExists =
+    const isFolderFound =
       !folderId || (await folderService.exists(folderId, userId));
-    if (!folderExists)
+    if (!isFolderFound)
       return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
-    const nameTaken = await fileService.nameTaken(name, folderId, userId);
-    if (nameTaken) return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
+    const isNameTaken = await fileService.isNameTaken(name, folderId, userId);
+    if (isNameTaken)
+      return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
     const row = await fileService.createDocument(
       name,
@@ -65,13 +66,13 @@ export const fileController = new Hono<AuthEnv>()
       const file = await fileService.findById(id, userId);
       if (!file) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
-      const nameTaken = await fileService.nameTaken(
+      const isNameTaken = await fileService.isNameTaken(
         name,
         file.folderId,
         userId,
         id,
       );
-      if (nameTaken)
+      if (isNameTaken)
         return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await fileService.rename(id, name, userId);
@@ -88,9 +89,9 @@ export const fileController = new Hono<AuthEnv>()
       const userId = ctx.get("userId");
       const { folderId } = ctx.req.valid("json");
 
-      const folderExists =
+      const isFolderFound =
         !folderId || (await folderService.exists(folderId, userId));
-      if (!folderExists)
+      if (!isFolderFound)
         return ctx.json({ code: ErrorCode.Folder_NotFound }, 404);
 
       const { id } = ctx.req.valid("param");
@@ -98,13 +99,13 @@ export const fileController = new Hono<AuthEnv>()
       const file = await fileService.findById(id, userId);
       if (!file) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
-      const nameTaken = await fileService.nameTaken(
+      const isNameTaken = await fileService.isNameTaken(
         file.name,
         folderId,
         userId,
         id,
       );
-      if (nameTaken)
+      if (isNameTaken)
         return ctx.json({ code: ErrorCode.Name_AlreadyInUse }, 409);
 
       const row = await fileService.move(id, folderId, userId);
