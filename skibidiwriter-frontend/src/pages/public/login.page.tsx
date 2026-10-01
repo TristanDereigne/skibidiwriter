@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router";
 
 import { toast } from "@/components/ui/toast.tsx";
-import { AuthContext } from "@/context/AuthContext.tsx";
-import { useContext, useState, type SetStateAction } from "react";
+import { useAuthContext } from "@/context/AuthContext.tsx";
+import { useState, type SetStateAction, useEffect} from "react";
 import { z } from "zod";
 import { Button } from "../../components/ui/button.tsx";
 import {
@@ -19,7 +19,7 @@ import { Label } from "../../components/ui/label.tsx";
 
 export const LoginPage = () => {
   let navigate = useNavigate();
-  const authContext = useContext(AuthContext);
+  const authContext = useAuthContext();
 
   const registerSchema = z.object({
     email: z.email("Format d'email invalide"),
@@ -31,9 +31,21 @@ export const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
+  const [totp, setTotp] = useState("");
+
+  useEffect(() => {
+
+    if(authContext?.is2FAAccount) {
+      setIs2FAEnabled(true);
+    }
+
+  },[authContext?.is2FAAccount])
+
   const [errors, setErrors] = useState<{
     email?: string;
     password?: string;
+    totp?: string;
   }>({});
 
   const handleChange = (e: {
@@ -45,6 +57,10 @@ export const LoginPage = () => {
       setPassword(e.target.value);
     }
   };
+
+  const handleTotpChange = (e) => {
+    setTotp(e.target.value);
+  }
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
@@ -73,6 +89,18 @@ export const LoginPage = () => {
     }
   };
 
+  const handle2FASubmit = async (e: { preventDefault: () => void }) => {
+    e.preventDefault();
+    await authContext.verify2FA(totp)
+    if(authContext.is2FAEnabled) {
+      navigate("/");
+    } else {
+      setErrors({
+        totp: "Code invalide",
+      })
+    }
+  }
+
   return (
     <div
       className={
@@ -82,78 +110,125 @@ export const LoginPage = () => {
       <div className={"text-center text-6xl font-bold max-w-md w-full"}>
         <h1 className={"text-[#432DD7]"}>Skibidi Writer.</h1>
       </div>
-      <Card className="w-full max-w-md shadow-xl shadow-[#6957DF]/10">
-        <form
-          action=""
-          onSubmit={handleSubmit}
-          className={"w-full gap-2 flex flex-col"}
-        >
-          <CardHeader className={"flex flex-row"}>
-            <div className={"flex flex-col"}>
-              <CardTitle>Connexion</CardTitle>
-              <CardDescription>
-                Renseigner vos identifiants ci-dessous pour vous connecter
-              </CardDescription>
-            </div>
-            <CardAction>
-              <Button
-                variant="link"
-                className={"relative bottom-1"}
-                onClick={() => navigate("/register")}
+      {
+        !is2FAEnabled ? (
+            <Card className="w-full max-w-md shadow-xl shadow-[#6957DF]/10">
+              <form
+                  action=""
+                  onSubmit={handleSubmit}
+                  className={"w-full gap-2 flex flex-col"}
               >
-                S'inscrire ?
-              </Button>
-            </CardAction>
-          </CardHeader>
-          <CardContent>
-            <div className={"mt-4"}>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">E-mail</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    autoComplete="email"
-                    value={email}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <div className="flex items-center">
-                    <Label htmlFor="password">Mot de passe</Label>
+                <CardHeader className={"flex flex-row"}>
+                  <div className={"flex flex-col"}>
+                    <CardTitle>Connexion</CardTitle>
+                    <CardDescription>
+                      Renseigner vos identifiants ci-dessous pour vous connecter
+                    </CardDescription>
                   </div>
-                  <Input
-                    id="password"
-                    type="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex-col gap-2">
-            {errors.email && (
-              <p className={"mt-2 text-red-500"}>E-mail : {errors.email}</p>
-            )}
-            {errors.password && (
-              <p className={"mt-2 text-red-500"}>
-                Mot de passe: {errors.password}
-              </p>
-            )}
-            <Button type="submit" className="w-full">
-              Se connecter
-            </Button>
-            <Button variant="outline" className="w-full">
-              Se connecter avec Google
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+                  <CardAction>
+                    <Button
+                        variant="link"
+                        className={"relative bottom-1"}
+                        onClick={() => navigate("/register")}
+                    >
+                      S'inscrire ?
+                    </Button>
+                  </CardAction>
+                </CardHeader>
+                <CardContent>
+                  <div className={"mt-4"}>
+                    <div className="flex flex-col gap-6">
+                      <div className="grid gap-2">
+                        <Label htmlFor="email">E-mail</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            placeholder="m@example.com"
+                            autoComplete="email"
+                            value={email}
+                            onChange={handleChange}
+                            required
+                        />
+                      </div>
+                      <div className="grid gap-2">
+                        <div className="flex items-center">
+                          <Label htmlFor="password">Mot de passe</Label>
+                        </div>
+                        <Input
+                            id="password"
+                            type="password"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={handleChange}
+                            required
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex-col gap-2">
+                  {errors.email && (
+                      <p className={"mt-2 text-red-500"}>E-mail : {errors.email}</p>
+                  )}
+                  {errors.password && (
+                      <p className={"mt-2 text-red-500"}>
+                        Mot de passe: {errors.password}
+                      </p>
+                  )}
+                  <Button type="submit" className="w-full">
+                    Se connecter
+                  </Button>
+                </CardFooter>
+              </form>
+            </Card>
+        ) :
+            (
+                <Card className="w-full max-w-md shadow-xl shadow-[#6957DF]/10">
+                  <form
+                      action=""
+                      onSubmit={handle2FASubmit}
+                      className={"w-full gap-2 flex flex-col"}
+                  >
+                    <CardHeader className={"flex flex-row"}>
+                      <div className={"flex flex-col"}>
+                        <CardTitle>Connexion</CardTitle>
+                        <CardDescription>
+                          Renseigner votre code d'authentification à double facteurs pour vous connecter
+                        </CardDescription>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className={"mt-14"}>
+                        <div className="flex flex-col gap-6">
+                          <div className="grid gap-2">
+                            <Label htmlFor="email">Code TOTP</Label>
+                            <Input
+                                id="totp"
+                                type="text"
+                                value={totp}
+                                onChange={handleTotpChange}
+                                required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                    <CardFooter className="flex-col gap-2">
+
+                      {errors.totp && (
+                          <p className={"mt-2 text-red-500"}>
+                            2FA: {errors.totp}
+                          </p>
+                      )}
+                      <Button type="submit" className="w-full">
+                        S'authentifier
+                      </Button>
+                    </CardFooter>
+                  </form>
+                </Card>
+            )
+      }
+
     </div>
   );
 };

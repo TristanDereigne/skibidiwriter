@@ -17,7 +17,9 @@ type AuthContextType = {
   isLoggedIn: boolean;
   isPending: boolean;
   is2FAEnabled: boolean;
+  is2FAAccount: boolean;
   setIs2FAEnabled: (is2FAEnabled: boolean) => void;
+  setIs2FAAccount: (is2FAAccount: boolean) => void;
   enable2FA: (password: string) => Promise<string | undefined>;
   deactivate2FA: (password: string) => Promise<void>;
   verify2FA: (codeOTP: string) => Promise<boolean>;
@@ -41,6 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const userContext = useUserContext();
 
   const [is2FAEnabled, setIs2FAEnabled] = useState<boolean>(false);
+  const [is2FAAccount, setIs2FAAccount] = useState<boolean>(false);
 
   const { data: session, isPending } = authClient.useSession();
 
@@ -82,7 +85,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isLoggedIn,
       isPending,
       is2FAEnabled,
+      is2FAAccount,
       setIs2FAEnabled,
+      setIs2FAAccount,
       enable2FA: async (password) => {
         const response: EnableTwoFactorResult | undefined =
           await auth.enable2FA(password);
@@ -119,8 +124,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if(response?.twoFactorMethods) {
           const data: Login2FAResponse = response;
           console.log("Login for 2FA:", data.twoFactorMethods);
-
-
+          setIs2FAAccount(true)
         } else {
           const data: any = response.data;
           console.log("Login basic:", data);
