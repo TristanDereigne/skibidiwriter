@@ -8,33 +8,10 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { explorerPath } from "@/lib/paths";
-import { FolderIcon, FolderXIcon, PlusIcon } from "lucide-react";
+import { FolderXIcon } from "lucide-react";
 import { Link } from "react-router";
-import { useExplorer } from "./use-explorer";
 
-export function ExplorerEmpty() {
-  const { createDocument, isCreatingDocument } = useExplorer();
-
-  return (
-    <Empty>
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <FolderIcon />
-        </EmptyMedia>
-        <EmptyTitle>Aucun document</EmptyTitle>
-        <EmptyDescription>Créez votre premier document</EmptyDescription>
-      </EmptyHeader>
-      <EmptyContent>
-        <Button onClick={createDocument} disabled={isCreatingDocument}>
-          <PlusIcon />
-          Nouveau document
-        </Button>
-      </EmptyContent>
-    </Empty>
-  );
-}
-
-export function ExplorerNotFound() {
+export default function ExplorerNotFound() {
   return (
     <Empty>
       <EmptyHeader>

@@ -10,7 +10,7 @@ import { useNavigate } from "react-router";
 import type { FileDTO } from "skibidiwriter-shared";
 import ExplorerItem from "./explorer-item";
 import { dateFormat, dateTimeFormat, formatBytes } from "@/lib/format";
-import { useExplorer } from "./use-explorer";
+import { useExplorer } from "../context/use-explorer";
 
 const KIND_VIEW = {
   document: {

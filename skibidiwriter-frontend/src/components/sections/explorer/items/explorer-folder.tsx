@@ -12,8 +12,8 @@ import { explorerPath } from "@/lib/paths";
 import { FolderIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import type { FolderDTO } from "skibidiwriter-shared";
-import { useExplorer } from "./use-explorer";
-import type { DragItem } from "./drag-item";
+import { useExplorer } from "../context/use-explorer";
+import type { DragItem } from "../drag/drag-item";
 import ExplorerItem from "./explorer-item";
 
 interface Props {

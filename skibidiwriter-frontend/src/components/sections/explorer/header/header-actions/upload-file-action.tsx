@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { UploadIcon } from "lucide-react";
 import { useRef } from "react";
-import { useUploadFiles } from "../use-upload-files";
+import { useUploadFiles } from "../../use-upload-files";
 
 interface Props {
   folderId: string | null;

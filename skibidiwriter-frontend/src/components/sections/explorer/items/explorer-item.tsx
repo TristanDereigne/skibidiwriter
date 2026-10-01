@@ -2,12 +2,12 @@ import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { cn } from "cn";
 import { type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { type DragItem } from "./drag-item";
+import { type DragItem } from "../drag/drag-item";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
 import ExplorerInfoDialog, { type InfoRow } from "./explorer-info-dialog";
 import ExplorerItemLabel from "./explorer-item-label";
 import ExplorerItemMenu from "./explorer-item-menu";
-import { useItemDrag } from "./use-item-drag";
+import { useItemDrag } from "../drag/use-item-drag";
 
 interface Props {
   icon: LucideIcon;

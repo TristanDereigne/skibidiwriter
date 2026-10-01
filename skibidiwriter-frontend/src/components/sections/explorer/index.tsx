@@ -1,12 +1,8 @@
-import { useFiles } from "@/hooks/use-files";
-import { useFolders } from "@/hooks/use-folders";
-import { ExplorerEmpty, ExplorerNotFound } from "./explorer-empty";
-import ExplorerFile from "./explorer-file";
-import ExplorerFolder from "./explorer-folder";
-import ExplorerSkeleton from "./explorer-skeleton";
-import { useExplorer } from "./use-explorer";
+import { useExplorer } from "./context/use-explorer";
+import ExplorerContent from "./content/explorer-content";
+import SharedContent from "./content/shared-content";
 
-import ExplorerHeaderActions from "@/components/sections/explorer/header-actions";
+import ExplorerHeaderActions from "./header/header-actions";
 import AppHeader from "@/layout/app-header.tsx";
 import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import {
@@ -18,11 +14,13 @@ import {
 import { cn } from "cn";
 import { FilePlusIcon, FolderPlusIcon, UploadCloudIcon } from "lucide-react";
 import { useState } from "react";
-import { hasDragItem } from "./drag-item";
+import { hasDragItem } from "./drag/drag-item";
 import { useSearchParams } from "react-router";
-import ExplorerHeaderTabs from "./explorer-header-tabs";
-import { parseExplorerHeaderTab, type ExplorerHeaderTab } from "./explorer-tab";
-import SharedContent from "./shared-content";
+import ExplorerHeaderTabs from "./header/explorer-header-tabs";
+import {
+  parseExplorerHeaderTab,
+  type ExplorerHeaderTab,
+} from "./header/explorer-tab";
 import { useUploadFiles } from "./use-upload-files";
 
 export default function Explorer() {
@@ -114,47 +112,5 @@ export default function Explorer() {
         </div>
       </div>
     </>
-  );
-}
-
-function ExplorerContent() {
-  const { folderId, isNotFound } = useExplorer();
-  const folders = useFolders(folderId);
-  const files = useFiles(folderId);
-
-  if (isNotFound)
-    return (
-      <Centered>
-        <ExplorerNotFound />
-      </Centered>
-    );
-
-  if (folders.isPending || files.isPending) return <ExplorerSkeleton />;
-
-  if (!folders.data?.length && !files.data?.length) {
-    return (
-      <Centered>
-        <ExplorerEmpty />
-      </Centered>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(9rem,1fr))] gap-6">
-      {folders.data?.map((folder) => (
-        <ExplorerFolder key={folder.id} folder={folder} />
-      ))}
-      {files.data?.map((file) => (
-        <ExplorerFile key={file.id} file={file} />
-      ))}
-    </div>
-  );
-}
-
-function Centered({ children }: Readonly<{ children: React.ReactNode }>) {
-  return (
-    <div className="flex h-full w-full items-center justify-center">
-      {children}
-    </div>
   );
 }
