@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { formateDate } from "@/lib/utils.ts";
+import { realtime } from "@/lib/realtime.ts";
 
 type AuthContextType = {
   user: string | null;
@@ -64,10 +65,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [session?.user]);
 
+  const isLoggedIn = !!session;
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    realtime.connect();
+
+    return () => realtime.close();
+  }, [isLoggedIn]);
+
   const value = useMemo<AuthContextType>(
     () => ({
       user: session?.user.name ?? null,
-      isLoggedIn: !!session,
+      isLoggedIn,
       isPending,
       is2FAEnabled,
       setIs2FAEnabled,
@@ -111,7 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await authClient.signOut();
       },
     }),
-    [session, isPending, auth, check2FA, is2FAEnabled, userContext],
+    [session, isLoggedIn, isPending, auth, check2FA, is2FAEnabled, userContext],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
