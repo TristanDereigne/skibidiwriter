@@ -67,7 +67,7 @@ export const ProfileUserTable = () => {
                 Vous
               </Badge>)}</TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell>{user.role ? "Admin" : "Membre"}</TableCell>
+              <TableCell>{(user.role === "admin") ? "Admin" : "Membre"}</TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger
