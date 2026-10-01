@@ -55,7 +55,7 @@ export const EditPage = () => {
           folders={folders ?? []}
           current={isLoading ? "Chargement…" : (documentName ?? "Document")}
           onRename={
-            documentRowId
+            documentRowId && document?.isOwner
               ? (name) => rename({ id: documentRowId, name })
               : undefined
           }

@@ -20,7 +20,10 @@ export const fileShareController = new Hono<AuthEnv>()
     const isOwner = await fileService.isOwner(fileId, userId);
     if (!isOwner) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
-    const recipientIds = [...new Set(userIds)].filter((id) => id !== userId);
+    if (userIds.includes(userId))
+      return ctx.json({ code: ErrorCode.FileShare_SelfShare }, 400);
+
+    const recipientIds = [...new Set(userIds)];
 
     const areUsersFound = await userService.existAll(recipientIds);
     if (!areUsersFound) return ctx.json({ code: ErrorCode.User_NotFound }, 404);

@@ -112,6 +112,15 @@ async function findById(id: string, userId: string) {
   return row;
 }
 
+async function findOwnedById(id: string, userId: string) {
+  const [row] = await db
+    .select(summarySelect)
+    .from(fileTable)
+    .where(and(eq(fileTable.id, id), ownedBy(userId)));
+
+  return row;
+}
+
 async function createDocument(
   name: string,
   folderId: string | null,
@@ -320,6 +329,7 @@ export default {
   findInFolder,
   findSharedWith,
   findById,
+  findOwnedById,
   isNameTaken,
   createDocument,
   createUpload,

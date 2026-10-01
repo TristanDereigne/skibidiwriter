@@ -1,5 +1,5 @@
 import type { FileRow } from "@/models";
-import type { FileDTO } from "skibidiwriter-shared";
+import type { FileDetailDTO, FileDTO } from "skibidiwriter-shared";
 
 export function toFileDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
   return {
@@ -11,5 +11,18 @@ export function toFileDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
     sizeBytes: row.sizeBytes,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+export function toFileDetailDTO(
+  row: Omit<FileRow, "data" | "operations">,
+  userId: string,
+): FileDetailDTO {
+  const isOwner = row.ownerId === userId;
+
+  return {
+    ...toFileDTO(row),
+    folderId: isOwner ? row.folderId : null,
+    isOwner,
   };
 }

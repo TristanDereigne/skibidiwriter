@@ -1,6 +1,6 @@
 import type { AuthEnv } from "@/middleware/session.middleware";
 import { IdParamSchema, validate } from "@/libs/validation";
-import { toFileDTO } from "@/mappers/file.mapper";
+import { toFileDetailDTO, toFileDTO } from "@/mappers/file.mapper";
 import fileService from "@/services/file.service";
 import folderService from "@/services/folder.service";
 import { Hono } from "hono";
@@ -30,7 +30,7 @@ export const fileController = new Hono<AuthEnv>()
     );
     if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
-    return ctx.json(toFileDTO(row), 200);
+    return ctx.json(toFileDetailDTO(row, ctx.get("userId")), 200);
   })
   .post("/documents", validate("json", CreateDocumentSchema), async (ctx) => {
     const userId = ctx.get("userId");
@@ -63,7 +63,7 @@ export const fileController = new Hono<AuthEnv>()
       const { id } = ctx.req.valid("param");
       const { name } = ctx.req.valid("json");
 
-      const file = await fileService.findById(id, userId);
+      const file = await fileService.findOwnedById(id, userId);
       if (!file) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
       const isNameTaken = await fileService.isNameTaken(
@@ -96,7 +96,7 @@ export const fileController = new Hono<AuthEnv>()
 
       const { id } = ctx.req.valid("param");
 
-      const file = await fileService.findById(id, userId);
+      const file = await fileService.findOwnedById(id, userId);
       if (!file) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
 
       const isNameTaken = await fileService.isNameTaken(

@@ -7,6 +7,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.File_TooLarge]: "Fichier trop volumineux",
   [ErrorCode.File_NameInvalid]: "Nom de fichier invalide",
   [ErrorCode.User_NotFound]: "Utilisateur introuvable",
+  [ErrorCode.FileShare_SelfShare]:
+    "Impossible de partager un fichier avec vous-même",
   [ErrorCode.Folder_NotFound]: "Dossier introuvable",
   [ErrorCode.Folder_ParentNotFound]: "Dossier parent introuvable",
   [ErrorCode.Folder_MoveIntoItself]:

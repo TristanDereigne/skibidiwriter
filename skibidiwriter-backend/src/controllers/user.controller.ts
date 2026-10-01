@@ -52,7 +52,11 @@ export const userController = new Hono<AuthEnv>()
   .get("/search", validate("query", SearchQuerySchema), async (ctx) => {
     const { search } = ctx.req.valid("query");
 
-    const users = await userService.findUsersByName(search, 5);
+    const users = await userService.findUsersByName(
+      search,
+      5,
+      ctx.get("userId"),
+    );
 
     return ctx.json(users.map(toUserSummaryDTO));
   });

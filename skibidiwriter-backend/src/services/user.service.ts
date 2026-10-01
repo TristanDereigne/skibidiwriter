@@ -1,12 +1,16 @@
 import { db } from "@/libs/db";
 import { user } from "@/models";
-import { asc, eq, ilike, inArray } from "drizzle-orm";
+import { and, asc, eq, ilike, inArray, ne } from "drizzle-orm";
 
-async function findUsersByName(name: string, limit: number) {
+async function findUsersByName(
+  name: string,
+  limit: number,
+  excludedUserId: string,
+) {
   return await db
     .select()
     .from(user)
-    .where(ilike(user.name, `%${name}%`))
+    .where(and(ilike(user.name, `%${name}%`), ne(user.id, excludedUserId)))
     .orderBy(asc(user.name))
     .limit(limit);
 }
