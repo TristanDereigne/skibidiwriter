@@ -1,4 +1,4 @@
-import { type EnableTwoFactorResult, useAuth } from "@/hooks/use-auth.ts";
+import {type EnableTwoFactorResult, type Login2FAResponse, useAuth} from "@/hooks/use-auth.ts";
 import { authClient } from "@/lib/auth-client";
 import {
   createContext,
@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { formateDate } from "@/lib/utils.ts";
+import { realtime } from "@/lib/realtime.ts";
 
 type AuthContextType = {
   user: string | null;
@@ -54,6 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, [auth.check2FAEnabled]);
 
+
   useEffect(() => {
     if (session?.user) {
       userContext.setUser(session?.user);
@@ -64,10 +66,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [session?.user]);
 
+  const isLoggedIn = !!session;
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    realtime.connect();
+
+    return () => realtime.close();
+  }, [isLoggedIn]);
+
   const value = useMemo<AuthContextType>(
     () => ({
       user: session?.user.name ?? null,
-      isLoggedIn: !!session,
+      isLoggedIn,
       isPending,
       is2FAEnabled,
       setIs2FAEnabled,
@@ -102,16 +114,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await auth.signIn(email, password);
       },
       login: async (email, password) => {
-        await auth.signIn(email, password);
+        const response: Login2FAResponse | any = await auth.signIn(email, password);
+
+        if(response?.twoFactorMethods) {
+          const data: Login2FAResponse = response;
+          console.log("Login for 2FA:", data.twoFactorMethods);
+
+
+        } else {
+          const data: any = response.data;
+          console.log("Login basic:", data);
+        }
+
         if (session?.user.name) {
           userContext.setUsername(session?.user.name);
         }
+
       },
       logout: async () => {
         await authClient.signOut();
       },
     }),
-    [session, isPending, auth, check2FA, is2FAEnabled, userContext],
+    [session, isLoggedIn, isPending, auth, check2FA, is2FAEnabled, userContext],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

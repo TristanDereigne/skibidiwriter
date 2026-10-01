@@ -25,6 +25,8 @@ export const Profile2faDialog = () => {
   const [OTP, setOTP] = useState("");
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 
+  const [isOpen, setIsOpen] = useState(false);
+
   useEffect(() => {
     if (authContext.is2FAEnabled) {
       setIs2FAEnabled(true);
@@ -72,19 +74,20 @@ export const Profile2faDialog = () => {
     const isVerifSucceed = await authContext.verify2FA(OTP);
     if (isVerifSucceed) {
       setQrCodeURI("");
+      setIsOpen(false);
     }
     setOTP("");
   };
 
   const handle2FADeactivateSubmit = async (e) => {
     e.preventDefault();
-    console.log("test");
     await authContext.deactivate2FA(password2FA);
+    setIsOpen(false);
     setPassword2FA("");
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger>
         <Switch
           id="switch-share-1"
