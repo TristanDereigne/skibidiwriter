@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input.tsx";
 import { z } from "zod";
 
 import { ProfileSettingsContent } from "@/components/sections/profile/profile-settings-content.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
+import { ProfileUserTable } from "@/components/sections/profile/profile-user-table.tsx";
 
 export const ProfilePage = () => {
   const navigate = useNavigate();
@@ -25,6 +27,7 @@ export const ProfilePage = () => {
   const [isEditing, setEditing] = useState(false);
   const [emailValue, setEmailValue] = useState("");
   const [isTimeout, setIsTimeout] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [errors, setErrors] = useState<{
     email?: string;
@@ -55,6 +58,14 @@ export const ProfilePage = () => {
     setHeaderChildren,
     setHeaderActions,
   ]);
+
+  useEffect(() => {
+    if (authContext?.isAdmin) {
+      setIsAdmin(true);
+    } else {
+      setIsAdmin(false);
+    }
+  }, [authContext?.isAdmin]);
 
   const handleDisconnect = () => {
     console.log("Disconnecting...");
@@ -97,7 +108,7 @@ export const ProfilePage = () => {
   return (
     <div
       className={
-        "flex flex-col items-center justify-center mt-8 gap-12 flex-1 mb-8"
+        "flex flex-col items-center justify-center mt-8 gap-8 flex-1 mb-8"
       }
     >
       <div className={"flex flex-col items-center justify-center gap-2"}>
@@ -114,40 +125,56 @@ export const ProfilePage = () => {
           <UserGroup color={"#432DD7"} />
           <p>Membre depuis {userContext.userSince}</p>
         </div>
+
+        <div className={"flex flex-row"}>
+          {isAdmin ? (
+            <Badge className="bg-purple-50 text-[#432DD7] dark:bg-[#432DD7] dark:text-purple-300">
+              Admin
+            </Badge>
+          ) : (
+            <Badge>Membre</Badge>
+          )}
+        </div>
       </div>
       <div className={"w-10/12"}>
         <Separator />
+      </div>
+
+      <div className={"w-10/12"}>
+        <ProfileUserTable />
       </div>
 
       <div className={"flex flex-col justify-between w-10/12 flex-1"}>
         <div className={"flex flex-row items-center justify-between gap-4"}>
           <ProfileSettingsContent />
         </div>
-        <div
-          className={"relative w-full flex justify-center items-center gap-2"}
-        >
-          {isEditing ? (
-            <Button variant="outline" size="icon" onClick={onSave}>
-              <Save />
-            </Button>
-          ) : (
-            <Button variant="outline" size="icon" onClick={onEdit}>
-              <Pencil />
-            </Button>
-          )}
-          {errors.email && isTimeout && (
-            <p className={"absolute -top-13 mt-2 text-red-500"}>
-              L'email est mal formaté
-            </p>
-          )}
-          <Button
-            variant="destructive"
-            className={"cursor-pointer"}
-            onClick={handleDisconnect}
-          >
-            Se déconnecter
+      </div>
+      <div
+        className={
+          "relative w-full flex justify-center items-center gap-2 mb-4"
+        }
+      >
+        {isEditing ? (
+          <Button variant="outline" size="icon" onClick={onSave}>
+            <Save />
           </Button>
-        </div>
+        ) : (
+          <Button variant="outline" size="icon" onClick={onEdit}>
+            <Pencil />
+          </Button>
+        )}
+        {errors.email && isTimeout && (
+          <p className={"absolute -top-13 mt-2 text-red-500"}>
+            L'email est mal formaté
+          </p>
+        )}
+        <Button
+          variant="destructive"
+          className={"cursor-pointer"}
+          onClick={handleDisconnect}
+        >
+          Se déconnecter
+        </Button>
       </div>
     </div>
   );

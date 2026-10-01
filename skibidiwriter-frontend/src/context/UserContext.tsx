@@ -2,16 +2,21 @@ import { createContext, useContext, useMemo, useState } from "react";
 import type { User } from "better-auth";
 import { useUser } from "@/hooks/use-user.ts";
 
+import { type UsersDto } from "skibidiwriter-shared";
+
 type UserContextType = {
   user: User | null;
   username: string | null;
   email: string | null;
   userSince: string | null;
+  usersForAdmin: UsersDto[] | null;
+  setUsersForAdmin: (users: UsersDto[] | null) => void;
   setUser: (user: User | null) => void;
   setUsername: (username: string | null) => void;
   setEmail: (email: string | null) => void;
   setUserSince: (userSince: string | null) => void;
   updateEmail: (email: string) => void;
+  getUsersForAdmin: () => void;
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -29,6 +34,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [username, setUsername] = useState<string | null>("");
   const [email, setEmail] = useState<string | null>("");
   const [userSince, setUserSince] = useState<string | null>(null);
+  const [usersForAdmin, setUsersForAdmin] = useState<UsersDto[] | null>(null);
 
   const updateEmail = async (email: string) => {
     userHook.updateEmail.mutate(email, {
@@ -43,29 +49,35 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const getUsersForAdmin = async () => {
+    userHook.getUsers.mutate(undefined, {
+      onSuccess: (response: UsersDto[]) => {
+        if (response) {
+          setUsersForAdmin(response);
+        }
+      },
+      onError: (error) => {
+        console.error("Error while getting users for admin :", error);
+      },
+    });
+  };
+
   const value = useMemo<UserContextType>(
     () => ({
       user,
       username,
       userSince,
       email,
+      usersForAdmin,
+      setUsersForAdmin,
       setUser,
       setUsername,
       setEmail,
       setUserSince,
       updateEmail,
+      getUsersForAdmin,
     }),
-    [
-      user,
-      email,
-      username,
-      userSince,
-      setUser,
-      setUsername,
-      setEmail,
-      setUserSince,
-      updateEmail,
-    ],
+    [user, email, usersForAdmin, setUser, setEmail],
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

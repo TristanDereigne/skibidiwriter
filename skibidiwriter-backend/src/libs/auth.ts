@@ -20,4 +20,16 @@ export const auth = betterAuth({
   }),
   trustedOrigins: [env.FRONTEND_URL_NO_SLASH],
   plugins: [twoFactor()],
+
+  user: {
+    additionalFields: {
+      isAdmin: {
+        type: "boolean",
+        defaultValue: false,
+        required: true,
+        input: false,
+        returned: true,
+      },
+    },
+  },
 });

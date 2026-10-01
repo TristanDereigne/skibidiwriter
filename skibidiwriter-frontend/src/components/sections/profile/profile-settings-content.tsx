@@ -13,7 +13,9 @@ export const ProfileSettingsContent = () => {
     <div className={"w-full grid grid-cols-1 lg:grid-cols-2 gap-4"}>
       <FieldLabel
         htmlFor="switch-share"
-        className={"h-28 sm:h-28 lg:h-28 flex flex-col justify-center items-center"}
+        className={
+          "h-28 sm:h-28 lg:h-28 flex flex-col justify-center items-center"
+        }
       >
         <Field orientation="horizontal" className={"w-full h-full"}>
           <FieldContent className={"min-w-0"}>
@@ -29,7 +31,9 @@ export const ProfileSettingsContent = () => {
 
       <FieldLabel
         htmlFor="switch-share"
-        className={"h-28 sm:h-28 lg:h-28 flex flex-col justify-center items-center"}
+        className={
+          "h-28 sm:h-28 lg:h-28 flex flex-col justify-center items-center"
+        }
       >
         <Field orientation="horizontal" className={"w-full h-full"}>
           <FieldContent className={"min-w-0"}>
@@ -40,38 +44,6 @@ export const ProfileSettingsContent = () => {
             </FieldDescription>
           </FieldContent>
           <Switch id="switch-share-2" disabled />
-        </Field>
-      </FieldLabel>
-
-      <FieldLabel
-        htmlFor="switch-share"
-        className={"h-28 sm:h-28 lg:h-28 flex flex-col justify-center items-center"}
-      >
-        <Field orientation="horizontal" className={"w-full h-full"}>
-          <FieldContent className={"min-w-0"}>
-            <FieldTitle>Share across devices</FieldTitle>
-            <FieldDescription>
-              Focus is shared across devices, and turns off when you leave the
-              app.
-            </FieldDescription>
-          </FieldContent>
-          <Switch id="switch-share-3" disabled />
-        </Field>
-      </FieldLabel>
-
-      <FieldLabel
-        htmlFor="switch-share"
-        className={"h-28 sm:h-28 lg:h-28 flex flex-col justify-center items-center"}
-      >
-        <Field orientation="horizontal" className={"w-full h-full"}>
-          <FieldContent className={"min-w-0"}>
-            <FieldTitle>Share across devices</FieldTitle>
-            <FieldDescription>
-              Focus is shared across devices, and turns off when you leave the
-              app.
-            </FieldDescription>
-          </FieldContent>
-          <Switch id="switch-share-4" disabled />
         </Field>
       </FieldLabel>
     </div>

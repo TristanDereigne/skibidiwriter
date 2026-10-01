@@ -1,4 +1,8 @@
-import {type EnableTwoFactorResult, type Login2FAResponse, useAuth} from "@/hooks/use-auth.ts";
+import {
+  type EnableTwoFactorResult,
+  type Login2FAResponse,
+  useAuth,
+} from "@/hooks/use-auth.ts";
 import { authClient } from "@/lib/auth-client";
 import {
   createContext,
@@ -18,6 +22,8 @@ type AuthContextType = {
   isPending: boolean;
   is2FAEnabled: boolean;
   is2FAAccount: boolean;
+  isAdmin: boolean;
+  setIsAdmin: (value: boolean) => void;
   setIs2FAEnabled: (is2FAEnabled: boolean) => void;
   setIs2FAAccount: (is2FAAccount: boolean) => void;
   enable2FA: (password: string) => Promise<string | undefined>;
@@ -45,6 +51,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [is2FAEnabled, setIs2FAEnabled] = useState<boolean>(false);
   const [is2FAAccount, setIs2FAAccount] = useState<boolean>(false);
 
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
   const { data: session, isPending } = authClient.useSession();
 
   const check2FA = useCallback(() => {
@@ -57,7 +65,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
     });
   }, [auth.check2FAEnabled]);
-
 
   useEffect(() => {
     if (session?.user) {
@@ -74,6 +81,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (!isLoggedIn) return;
 
+    auth.checkIsAdmin.mutate(undefined, {
+      onSuccess: (response) => {
+        if (response === "admin") {
+          setIsAdmin(true);
+          userContext.getUsersForAdmin();
+        } else {
+          setIsAdmin(false);
+        }
+      },
+      onError: (error) => {
+        console.error("Error while checking admin role:", error);
+      },
+    });
+
     realtime.connect();
 
     return () => realtime.close();
@@ -86,6 +107,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isPending,
       is2FAEnabled,
       is2FAAccount,
+      isAdmin,
+      setIsAdmin,
       setIs2FAEnabled,
       setIs2FAAccount,
       enable2FA: async (password) => {
@@ -119,25 +142,35 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await auth.signIn(email, password);
       },
       login: async (email, password) => {
-        const response: Login2FAResponse | any = await auth.signIn(email, password);
+        const response: Login2FAResponse | any = await auth.signIn(
+          email,
+          password,
+        );
 
-        if(response?.twoFactorMethods) {
-          setIs2FAAccount(true)
+        if (response?.twoFactorMethods) {
+          setIs2FAAccount(true);
         }
 
         if (session?.user.name) {
           userContext.setUsername(session?.user.name);
         }
-
       },
       logout: async () => {
         setIs2FAAccount(false);
         setIs2FAEnabled(false);
         await authClient.signOut();
-
       },
     }),
-    [session, isLoggedIn, isPending, auth, check2FA, is2FAEnabled, userContext],
+    [
+      isPending,
+      auth,
+      check2FA,
+      is2FAEnabled,
+      userContext,
+      is2FAAccount,
+      isAdmin,
+      session?.user,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

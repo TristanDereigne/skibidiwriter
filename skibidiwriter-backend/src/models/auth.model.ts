@@ -20,7 +20,7 @@ export const user = pgTable("user", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
-  isAdmin: boolean("isAdmin").default(false),
+  isAdmin: boolean("isAdmin").default(false).notNull(),
 });
 
 export const session = pgTable(

@@ -24,8 +24,12 @@ export type VerifyResponse = {
 
 export type Login2FAResponse = {
   twoFactorRedirect: boolean;
-  twoFactorMethods:string[] | null
-}
+  twoFactorMethods: string[] | null;
+};
+
+export type IsAdminResponse = {
+  role: "user" | "admin";
+};
 
 export function useAuth() {
   const signUp = async (email: string, password: string, name: string) => {
@@ -127,6 +131,20 @@ export function useAuth() {
     },
   });
 
+  const checkIsAdmin = useMutation({
+    mutationFn: async (): Promise<string> => {
+      const response = await api.users.admin.$get();
+
+      if (!response.ok) {
+        throw new Error("Error while checking if admin");
+      }
+
+      const data = (await response.json()) as IsAdminResponse;
+
+      return data.role;
+    },
+  });
+
   return {
     signUp,
     signIn,
@@ -134,5 +152,6 @@ export function useAuth() {
     verify2FA,
     check2FAEnabled,
     deactivate2FA,
+    checkIsAdmin,
   };
 }

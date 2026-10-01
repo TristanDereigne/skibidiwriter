@@ -3,8 +3,11 @@ import type { AuthEnv } from "@/middleware/session.middleware";
 import { HTTPException } from "hono/http-exception";
 import {
   checkTwoFactorEnabled,
+  getUsers,
   updateUserEmail,
 } from "@/services/user.service";
+
+import { type UsersDto } from "skibidiwriter-shared";
 
 export const userController = new Hono<AuthEnv>()
   .post("/email", async (ctx) => {
@@ -49,5 +52,36 @@ export const userController = new Hono<AuthEnv>()
       }
     } else {
       ctx.status(404);
+    }
+  })
+  .get("/admin", async (ctx) => {
+    const user = ctx.get("user");
+    const isAdmin: boolean = user.isAdmin;
+
+    if (isAdmin) {
+      ctx.status(200);
+      return ctx.json({ role: "admin" });
+    } else {
+      ctx.status(200);
+      return ctx.json({ role: "user" });
+    }
+  })
+
+  .get("/users", async (ctx) => {
+    const user = ctx.get("user");
+    const isAdmin: boolean = user.isAdmin;
+
+    if (isAdmin) {
+      //retrieve all users (in organization for future)
+      const users: UsersDto[] | null = await getUsers();
+      if (users) {
+        ctx.status(200);
+        return ctx.json(users);
+      } else {
+        ctx.status(200);
+        return ctx.json([]);
+      }
+    } else {
+      ctx.status(401);
     }
   });
