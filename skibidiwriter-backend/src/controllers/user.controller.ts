@@ -56,7 +56,7 @@ export const userController = new Hono<AuthEnv>()
   })
   .get("/admin", async (ctx) => {
     const user = ctx.get("user");
-    const isAdmin: boolean = user.isAdmin;
+    const isAdmin: boolean = user.role === "admin";
 
     if (isAdmin) {
       ctx.status(200);
@@ -69,7 +69,7 @@ export const userController = new Hono<AuthEnv>()
 
   .get("/users", async (ctx) => {
     const user = ctx.get("user");
-    const isAdmin: boolean = user.isAdmin;
+    const isAdmin: boolean = user.role === "admin";
 
     if (isAdmin) {
       //retrieve all users (in organization for future)

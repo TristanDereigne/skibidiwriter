@@ -2,7 +2,7 @@ import { env } from "@/libs/env";
 import * as schemas from "@/models";
 
 import { betterAuth } from "better-auth";
-import { twoFactor } from "better-auth/plugins";
+import {admin, twoFactor} from "better-auth/plugins";
 
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
@@ -19,17 +19,12 @@ export const auth = betterAuth({
     schema: schemas,
   }),
   trustedOrigins: [env.FRONTEND_URL_NO_SLASH],
-  plugins: [twoFactor()],
-
-  user: {
-    additionalFields: {
-      isAdmin: {
-        type: "boolean",
-        defaultValue: false,
-        required: true,
-        input: false,
-        returned: true,
-      },
-    },
-  },
+  plugins: [
+      twoFactor(),
+      admin({
+      defaultRole: "user",
+      adminRoles: ["admin"],
+      adminUserIds: [env.ADMIN_ID]
+      })
+  ],
 });

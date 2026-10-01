@@ -11,6 +11,7 @@ const schema = z.object({
   DATABASE_URL: z.url(),
   FRONTEND_URL: z.url(),
   FRONTEND_URL_NO_SLASH: z.url(),
+  ADMIN_ID: z.string(),
 });
 
 export const env = schema.parse(process.env);
