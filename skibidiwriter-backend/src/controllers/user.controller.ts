@@ -4,9 +4,10 @@ import type { AuthEnv } from "@/middleware/session.middleware";
 import userService from "@/services/user.service";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { UsernameSearchSchema } from "skibidiwriter-shared";
 import z from "zod";
 
-const SearchQuerySchema = z.object({ search: z.string() });
+const SearchQuerySchema = z.object({ search: UsernameSearchSchema });
 
 export const userController = new Hono<AuthEnv>()
   .post("/email", async (ctx) => {

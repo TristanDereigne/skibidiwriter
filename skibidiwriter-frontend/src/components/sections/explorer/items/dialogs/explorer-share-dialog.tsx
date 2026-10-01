@@ -23,15 +23,10 @@ interface Props {
 }
 
 export default function ExplorerShareDialog({ fileId }: Readonly<Props>) {
-  const { shareDialog } = useExplorerItem();
-
-  return <ShareDialog key={shareDialog.isOpen.toString()} fileId={fileId} />;
-}
-
-function ShareDialog({ fileId }: Readonly<Props>) {
   const { name, shareDialog } = useExplorerItem();
   const shareFile = useShareFile();
   const [search, setSearch] = useState("");
+  const [inputKey, setInputKey] = useState(0);
   const [selectedUsers, setSelectedUsers] = useState<UserSummaryDTO[]>([]);
   const { data: users = [] } = useUserSearch(search);
 
@@ -56,8 +51,16 @@ function ShareDialog({ fileId }: Readonly<Props>) {
         : [...prev, user],
     );
 
+  const reset = (isOpen: boolean) => {
+    if (isOpen) return;
+
+    setSearch("");
+    setInputKey((key) => key + 1);
+    setSelectedUsers([]);
+  };
+
   return (
-    <Dialog {...shareDialog.dialogProps}>
+    <Dialog {...shareDialog.dialogProps} onOpenChangeComplete={reset}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle className="break-all">Partager "{name}"</DialogTitle>
@@ -66,6 +69,7 @@ function ShareDialog({ fileId }: Readonly<Props>) {
         <Field>
           <FieldLabel>Partager avec</FieldLabel>
           <Input
+            key={inputKey}
             placeholder="Nom d'utilisateur"
             onChange={(ev) => onSearchChange(ev.target.value)}
           />
