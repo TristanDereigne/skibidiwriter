@@ -1,10 +1,6 @@
-import { useState, type DragEvent } from "react";
-import {
-  hasDragItem,
-  ITEM_DRAG_TYPE,
-  readDragItem,
-  type DragItem,
-} from "./drag-item";
+import type { DragEvent } from "react";
+import { ITEM_DRAG_TYPE, type DragItem } from "./drag-item";
+import { useItemDrop } from "./use-item-drop";
 
 interface Options {
   dragItem: DragItem;
@@ -13,33 +9,14 @@ interface Options {
 }
 
 export function useItemDrag({ dragItem, isDraggable, onDropItem }: Options) {
-  const [isDropActive, setIsDropActive] = useState(false);
-
-  function canDrop(event: DragEvent) {
-    return !!onDropItem && hasDragItem(event.dataTransfer);
-  }
+  const { isDropActive, dropProps } = useItemDrop(onDropItem);
 
   const dragProps = {
+    ...dropProps,
     draggable: isDraggable,
     onDragStart: (event: DragEvent) => {
       event.dataTransfer.setData(ITEM_DRAG_TYPE, JSON.stringify(dragItem));
       event.dataTransfer.effectAllowed = "move";
-    },
-    onDragOver: (event: DragEvent) => {
-      if (!canDrop(event)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setIsDropActive(true);
-    },
-    onDragLeave: () => setIsDropActive(false),
-    onDrop: (event: DragEvent) => {
-      setIsDropActive(false);
-      if (!canDrop(event)) return;
-      event.preventDefault();
-      event.stopPropagation();
-
-      const item = readDragItem(event.dataTransfer);
-      if (item) onDropItem?.(item);
     },
   };
 

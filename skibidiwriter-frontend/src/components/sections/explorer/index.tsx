@@ -7,11 +7,13 @@ import ExplorerContent from "./content/explorer-content";
 import { useExplorer } from "./context/use-explorer";
 import FileDropOverlay from "./drag/file-drop-overlay";
 import { useFileDrop } from "./drag/use-file-drop";
+import { useMoveItem } from "./drag/use-move-item";
 import ExplorerHeaderActions from "./header/header-actions";
 
 export default function Explorer() {
   const { createDocument, createFolder, path, folderId } = useExplorer();
   const { isDraggingFiles, dropProps } = useFileDrop(folderId);
+  const moveItem = useMoveItem();
 
   return (
     <>
@@ -26,11 +28,9 @@ export default function Explorer() {
       >
         <SectionTabs />
       </AppHeader>
-      {folderId && (
-        <div className="px-6 pt-3">
-          <TrailBreadcrumb folders={path} />
-        </div>
-      )}
+      <div className="px-6 pt-3">
+        <TrailBreadcrumb folders={path} onDropItem={moveItem} />
+      </div>
       <div className="relative flex min-h-0 w-full flex-1 flex-col">
         <ContextMenu>
           <ContextMenuTrigger
