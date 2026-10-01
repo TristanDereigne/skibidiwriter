@@ -1,6 +1,15 @@
 import { db } from "@/libs/db";
 import { user } from "@/models";
-import { eq, ilike } from "drizzle-orm";
+import { asc, eq, ilike } from "drizzle-orm";
+
+async function findUsersByName(name: string, limit: number) {
+  return await db
+    .select({ id: user.id, name: user.name, image: user.image })
+    .from(user)
+    .where(ilike(user.name, `%${name}%`))
+    .orderBy(asc(user.name))
+    .limit(limit);
+}
 
 const updateUserEmail = async (oldEmail: string, email: string) => {
   try {
@@ -28,17 +37,8 @@ const checkTwoFactorEnabled = async (email: string) => {
   }
 };
 
-async function findManyByName(search: string, limit: number) {
-  return await db
-    .select()
-    .from(user)
-    .where(ilike(user.name, `%${search}%`))
-    .orderBy(user.name)
-    .limit(limit);
-}
-
 export default {
   updateUserEmail,
   checkTwoFactorEnabled,
-  findManyByName,
+  findUsersByName,
 };
