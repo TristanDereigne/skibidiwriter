@@ -33,7 +33,7 @@ async function exists(id: string, userId: string) {
   return !!row;
 }
 
-async function nameTaken(
+async function isNameTaken(
   name: string,
   parentId: string | null,
   userId: string,
@@ -169,7 +169,7 @@ export default {
   findInFolder,
   findById,
   exists,
-  nameTaken,
+  isNameTaken,
   path,
   create,
   rename,

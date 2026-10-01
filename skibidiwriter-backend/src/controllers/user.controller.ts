@@ -1,13 +1,13 @@
-import { Hono } from "hono";
+import { validate } from "@/libs/validation";
+import { toUserSummaryDTO } from "@/mappers/user.mapper";
 import type { AuthEnv } from "@/middleware/session.middleware";
+import userService from "@/services/user.service";
+import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import {
-  checkTwoFactorEnabled,
-  getUsers,
-  updateUserEmail,
-} from "@/services/user.service";
+import { UsernameSearchSchema, type UsersDto } from "skibidiwriter-shared";
+import z from "zod";
 
-import { type UsersDto } from "skibidiwriter-shared";
+const SearchQuerySchema = z.object({ search: UsernameSearchSchema });
 
 export const userController = new Hono<AuthEnv>()
   .post("/email", async (ctx) => {
@@ -23,16 +23,14 @@ export const userController = new Hono<AuthEnv>()
 
     if (body.email && user) {
       try {
-        await updateUserEmail(actualEmail, newEmail);
+        await userService.updateUserEmail(actualEmail, newEmail);
       } catch (error) {
-        ctx.status(500);
-        return ctx.json({ statut: "error", message: error });
+        return ctx.json({ statut: "error", message: error }, 500);
       }
-      ctx.status(200);
-      return ctx.json({ statut: "success", email: newEmail });
+
+      return ctx.json({ statut: "success", email: newEmail }, 200);
     } else {
-      ctx.status(400);
-      return ctx.json({ statut: "Request is malformated" });
+      return ctx.json({ statut: "Request is malformated" }, 400);
     }
   })
   .get("/authtwofactor", async (ctx) => {
@@ -41,18 +39,16 @@ export const userController = new Hono<AuthEnv>()
 
     if (userEmail) {
       const isTwoFactorEnabled: boolean | null | undefined =
-        await checkTwoFactorEnabled(userEmail);
+        await userService.checkTwoFactorEnabled(userEmail);
 
       if (isTwoFactorEnabled) {
-        ctx.status(200);
-        return ctx.json({ two_factor_enabled: true });
-      } else {
-        ctx.status(200);
-        return ctx.json({ two_factor_enabled: false });
+        return ctx.json({ two_factor_enabled: true }, 200);
       }
-    } else {
-      ctx.status(404);
+
+      return ctx.json({ two_factor_enabled: false }, 200);
     }
+
+    ctx.status(404);
   })
   .get("/admin", async (ctx) => {
     const user = ctx.get("user");
@@ -66,14 +62,12 @@ export const userController = new Hono<AuthEnv>()
       return ctx.json({ role: "user" });
     }
   })
-
   .get("/users", async (ctx) => {
     const user = ctx.get("user");
     const isAdmin: boolean = user.role === "admin";
 
     if (isAdmin) {
-      //retrieve all users (in organization for future)
-      const users: UsersDto[] | null = await getUsers();
+      const users: UsersDto[] | null = await userService.getUsers();
       if (users) {
         ctx.status(200);
         return ctx.json(users);
@@ -84,4 +78,15 @@ export const userController = new Hono<AuthEnv>()
     } else {
       ctx.status(401);
     }
+  })
+  .get("/search", validate("query", SearchQuerySchema), async (ctx) => {
+    const { search } = ctx.req.valid("query");
+
+    const users = await userService.findUsersByName(
+      search,
+      5,
+      ctx.get("userId"),
+    );
+
+    return ctx.json(users.map(toUserSummaryDTO));
   });

@@ -1,7 +1,8 @@
 import { db } from "@/libs/db";
 import { eqOrNull } from "@/libs/sql";
-import { fileTable } from "@/models";
-import { and, eq, getColumns, ne, sql } from "drizzle-orm";
+import { fileTable, user } from "@/models";
+import { fileShareTable } from "@/models/file-share.model";
+import { and, desc, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
 const PERSIST_DELAY = 500;
@@ -21,8 +22,25 @@ const {
   ...summarySelect
 } = getColumns(fileTable);
 
-function accessibleTo(userId: string) {
+function ownedBy(userId: string) {
   return eq(fileTable.ownerId, userId);
+}
+
+function accessibleTo(userId: string) {
+  return or(
+    ownedBy(userId),
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(fileShareTable)
+        .where(
+          and(
+            eq(fileShareTable.fileId, fileTable.id),
+            eq(fileShareTable.userId, userId),
+          ),
+        ),
+    ),
+  );
 }
 
 async function hasAccess(id: string, userId: string) {
@@ -34,14 +52,37 @@ async function hasAccess(id: string, userId: string) {
   return !!row;
 }
 
+async function isOwner(id: string, userId: string) {
+  const [row] = await db
+    .select({ id: fileTable.id })
+    .from(fileTable)
+    .where(and(eq(fileTable.id, id), ownedBy(userId)));
+
+  return !!row;
+}
+
 async function findInFolder(folderId: string | null, userId: string) {
   return await db
     .select(summarySelect)
     .from(fileTable)
-    .where(and(eqOrNull(fileTable.folderId, folderId), accessibleTo(userId)));
+    .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)));
 }
 
-async function nameTaken(
+async function findSharedWith(userId: string) {
+  return await db
+    .select({
+      file: summarySelect,
+      owner: { id: user.id, name: user.name },
+      sharedAt: fileShareTable.createdAt,
+    })
+    .from(fileShareTable)
+    .innerJoin(fileTable, eq(fileTable.id, fileShareTable.fileId))
+    .innerJoin(user, eq(user.id, fileTable.ownerId))
+    .where(eq(fileShareTable.userId, userId))
+    .orderBy(desc(fileShareTable.createdAt));
+}
+
+async function isNameTaken(
   name: string,
   folderId: string | null,
   userId: string,
@@ -53,7 +94,7 @@ async function nameTaken(
     .where(
       and(
         eqOrNull(fileTable.folderId, folderId),
-        accessibleTo(userId),
+        ownedBy(userId),
         eq(sql`lower(${fileTable.name})`, sql`lower(${name})`),
         exceptId ? ne(fileTable.id, exceptId) : undefined,
       ),
@@ -67,6 +108,15 @@ async function findById(id: string, userId: string) {
     .select(summarySelect)
     .from(fileTable)
     .where(and(eq(fileTable.id, id), accessibleTo(userId)));
+
+  return row;
+}
+
+async function findOwnedById(id: string, userId: string) {
+  const [row] = await db
+    .select(summarySelect)
+    .from(fileTable)
+    .where(and(eq(fileTable.id, id), ownedBy(userId)));
 
   return row;
 }
@@ -119,7 +169,7 @@ async function rename(id: string, name: string, userId: string) {
   const [row] = await db
     .update(fileTable)
     .set({ name })
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)))
+    .where(and(eq(fileTable.id, id), ownedBy(userId)))
     .returning(summarySelect);
 
   return row;
@@ -129,7 +179,7 @@ async function move(id: string, folderId: string | null, userId: string) {
   const [row] = await db
     .update(fileTable)
     .set({ folderId })
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)))
+    .where(and(eq(fileTable.id, id), ownedBy(userId)))
     .returning(summarySelect);
 
   return row;
@@ -138,7 +188,7 @@ async function move(id: string, folderId: string | null, userId: string) {
 async function remove(id: string, userId: string) {
   const [row] = await db
     .delete(fileTable)
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)))
+    .where(and(eq(fileTable.id, id), ownedBy(userId)))
     .returning({ id: fileTable.id });
 
   if (row) await forget([id]);
@@ -275,9 +325,12 @@ async function forget(ids: string[]) {
 
 export default {
   hasAccess,
+  isOwner,
   findInFolder,
+  findSharedWith,
   findById,
-  nameTaken,
+  findOwnedById,
+  isNameTaken,
   createDocument,
   createUpload,
   rename,

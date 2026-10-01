@@ -3,11 +3,11 @@ import DocumentEditor from "@/components/sections/document/document-editor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
-import { HeaderContext } from "@/context/HeaderContext";
 import { useDownloadFile, useFile, useRenameFile } from "@/hooks/use-files";
 import { useFolderPath } from "@/hooks/use-folders";
 import { CONNECTION_STATUS_LABELS, useConnectionStatus } from "@/lib/realtime";
-import { useContext, useEffect } from "react";
+import AppHeader from "@/layout/app-header.tsx";
+import { cn } from "cn";
 import { useParams } from "react-router";
 
 export const EditPage = () => {
@@ -17,66 +17,55 @@ export const EditPage = () => {
   const { mutate: rename } = useRenameFile();
   const { mutate: download } = useDownloadFile();
   const status = useConnectionStatus();
-  const headerContext = useContext(HeaderContext);
-  const setHeaderChildren = headerContext?.setHeaderChildren;
-  const setHeaderActions = headerContext?.setHeaderActions;
-
   const documentRowId = document?.id;
   const documentName = document?.name;
 
-  useEffect(() => {
-    setHeaderChildren?.(
-      <TrailBreadcrumb
-        folders={folders ?? []}
-        current={isLoading ? "Chargement…" : (documentName ?? "Document")}
-        onRename={
-          documentRowId
-            ? (name) => rename({ id: documentRowId, name })
-            : undefined
-        }
-      />,
-    );
-    setHeaderActions?.(
-      <>
-        <Badge variant={status === "connected" ? "secondary" : "outline"}>
-          {CONNECTION_STATUS_LABELS[status]}
-        </Badge>
-        {documentRowId && (
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="ml-2 text-muted-foreground"
-            aria-label="Télécharger le document"
-            title="Télécharger le document"
-            onClick={() => download(documentRowId)}
-          >
-            <DownloadIcon />
-          </Button>
-        )}
-      </>,
-    );
-
-    return () => {
-      setHeaderChildren?.(null);
-      setHeaderActions?.(null);
-    };
-  }, [
-    setHeaderChildren,
-    setHeaderActions,
-    folders,
-    isLoading,
-    documentName,
-    documentRowId,
-    rename,
-    download,
-    status,
-  ]);
-
   return (
-    <main className="mx-auto min-h-0 w-full max-w-3xl flex-1 px-6 py-8">
-      {documentId && (
-        <DocumentEditor key={documentId} documentId={documentId} />
-      )}
-    </main>
+    <>
+      <AppHeader
+        actions={
+          <>
+            <Badge variant={status === "connected" ? "secondary" : "outline"}>
+              <span
+                className={cn(
+                  "size-2 rounded-full sm:hidden",
+                  status === "connected" ? "bg-emerald-500" : "bg-amber-500",
+                )}
+              />
+              <span className="max-sm:sr-only">
+                {CONNECTION_STATUS_LABELS[status]}
+              </span>
+            </Badge>
+            {documentRowId && (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="ml-2 text-muted-foreground"
+                aria-label="Télécharger le document"
+                title="Télécharger le document"
+                onClick={() => download(documentRowId)}
+              >
+                <DownloadIcon />
+              </Button>
+            )}
+          </>
+        }
+      >
+        <TrailBreadcrumb
+          folders={folders ?? []}
+          current={isLoading ? "Chargement…" : (documentName ?? "Document")}
+          onRename={
+            documentRowId && document?.isOwner
+              ? (name) => rename({ id: documentRowId, name })
+              : undefined
+          }
+        />
+      </AppHeader>
+      <main className="mx-auto min-h-0 w-full max-w-3xl flex-1 px-6 py-8">
+        {documentId && (
+          <DocumentEditor key={documentId} documentId={documentId} />
+        )}
+      </main>
+    </>
   );
 };

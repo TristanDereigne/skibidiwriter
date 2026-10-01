@@ -25,3 +25,7 @@ export interface FileDTO {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface FileDetailDTO extends FileDTO {
+  isOwner: boolean;
+}
