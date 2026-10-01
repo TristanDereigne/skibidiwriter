@@ -4,7 +4,7 @@ import { asc, eq, ilike } from "drizzle-orm";
 
 async function findUsersByName(name: string, limit: number) {
   return await db
-    .select({ id: user.id, name: user.name, image: user.image })
+    .select()
     .from(user)
     .where(ilike(user.name, `%${name}%`))
     .orderBy(asc(user.name))
