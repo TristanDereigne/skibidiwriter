@@ -26,11 +26,7 @@ class RealtimeClient {
   #openListeners = new Set<() => void>();
   #reconnectAttempts = 0;
   #reconnectTimer: ReturnType<typeof setTimeout> | undefined;
-  #closed = false;
-
-  constructor() {
-    this.#connect();
-  }
+  #closed = true;
 
   getStatus = () => this.#status;
 
@@ -61,10 +57,19 @@ class RealtimeClient {
     return true;
   }
 
+  connect() {
+    if (!this.#closed) return;
+
+    this.#closed = false;
+    this.#reconnectAttempts = 0;
+    this.#connect();
+  }
+
   close() {
     this.#closed = true;
     clearTimeout(this.#reconnectTimer);
     this.#ws?.close();
+    this.#ws = null;
   }
 
   #connect() {
