@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState, type SetStateAction } from "react";
-import { HeaderContext } from "@/context/HeaderContext.tsx";
+import AppHeader from "@/layout/app-header.tsx";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { ProfileRounded } from "@/components/sections/profile/profile-rounded.tsx";
 import { Pencil, Save, UserGroup } from "lucide-react";
@@ -15,12 +15,8 @@ import { ProfileSettingsContent } from "@/components/sections/profile/profile-se
 export const ProfilePage = () => {
   const navigate = useNavigate();
 
-  const headerContext = useContext(HeaderContext);
   const authContext = useContext(AuthContext);
   const userContext = useUserContext();
-
-  const setHeaderChildren = headerContext?.setHeaderChildren;
-  const setHeaderActions = headerContext?.setHeaderActions;
 
   const [isEditing, setEditing] = useState(false);
   const [emailValue, setEmailValue] = useState("");
@@ -35,26 +31,10 @@ export const ProfilePage = () => {
   });
 
   useEffect(() => {
-    if (userContext.username) {
-      setHeaderChildren?.(
-        <h2 className="font-semibold">{userContext.username}</h2>,
-      );
-    }
-
     if (userContext.email) {
       setEmailValue(userContext.email);
     }
-
-    return () => {
-      setHeaderChildren?.(null);
-      setHeaderActions?.(null);
-    };
-  }, [
-    userContext.username,
-    userContext.email,
-    setHeaderChildren,
-    setHeaderActions,
-  ]);
+  }, [userContext.email]);
 
   const handleDisconnect = () => {
     console.log("Disconnecting...");
@@ -95,60 +75,65 @@ export const ProfilePage = () => {
   };
 
   return (
-    <div
-      className={
-        "flex flex-col items-center justify-center mt-8 gap-12 flex-1 mb-8"
-      }
-    >
-      <div className={"flex flex-col items-center justify-center gap-2"}>
-        <ProfileRounded width={64} height={64} textSize={32} />
-        <p className={"font-bold text-lg"}>{userContext.username}</p>
+    <>
+      <AppHeader>
+        <h2 className="font-semibold">{userContext.username}</h2>
+      </AppHeader>
+      <div
+        className={
+          "flex flex-col items-center justify-center mt-8 gap-12 flex-1 mb-8"
+        }
+      >
+        <div className={"flex flex-col items-center justify-center gap-2"}>
+          <ProfileRounded width={64} height={64} textSize={32} />
+          <p className={"font-bold text-lg"}>{userContext.username}</p>
 
-        {isEditing ? (
-          <Input value={emailValue} onChange={handleEmailChange} />
-        ) : (
-          <p className={""}>{userContext.email}</p>
-        )}
-
-        <div className={"flex flex-row gap-2"}>
-          <UserGroup color={"#432DD7"} />
-          <p>Membre depuis {userContext.userSince}</p>
-        </div>
-      </div>
-      <div className={"w-10/12"}>
-        <Separator />
-      </div>
-
-      <div className={"flex flex-col justify-between w-10/12 flex-1"}>
-        <div className={"flex flex-row items-center justify-between gap-4"}>
-          <ProfileSettingsContent />
-        </div>
-        <div
-          className={"relative w-full flex justify-center items-center gap-2"}
-        >
           {isEditing ? (
-            <Button variant="outline" size="icon" onClick={onSave}>
-              <Save />
-            </Button>
+            <Input value={emailValue} onChange={handleEmailChange} />
           ) : (
-            <Button variant="outline" size="icon" onClick={onEdit}>
-              <Pencil />
-            </Button>
+            <p className={""}>{userContext.email}</p>
           )}
-          {errors.email && isTimeout && (
-            <p className={"absolute -top-13 mt-2 text-red-500"}>
-              L'email est mal formaté
-            </p>
-          )}
-          <Button
-            variant="destructive"
-            className={"cursor-pointer"}
-            onClick={handleDisconnect}
+
+          <div className={"flex flex-row gap-2"}>
+            <UserGroup color={"#432DD7"} />
+            <p>Membre depuis {userContext.userSince}</p>
+          </div>
+        </div>
+        <div className={"w-10/12"}>
+          <Separator />
+        </div>
+
+        <div className={"flex flex-col justify-between w-10/12 flex-1"}>
+          <div className={"flex flex-row items-center justify-between gap-4"}>
+            <ProfileSettingsContent />
+          </div>
+          <div
+            className={"relative w-full flex justify-center items-center gap-2"}
           >
-            Se déconnecter
-          </Button>
+            {isEditing ? (
+              <Button variant="outline" size="icon" onClick={onSave}>
+                <Save />
+              </Button>
+            ) : (
+              <Button variant="outline" size="icon" onClick={onEdit}>
+                <Pencil />
+              </Button>
+            )}
+            {errors.email && isTimeout && (
+              <p className={"absolute -top-13 mt-2 text-red-500"}>
+                L'email est mal formaté
+              </p>
+            )}
+            <Button
+              variant="destructive"
+              className={"cursor-pointer"}
+              onClick={handleDisconnect}
+            >
+              Se déconnecter
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };

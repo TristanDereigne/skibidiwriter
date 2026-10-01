@@ -9,7 +9,6 @@ import Public from "./layout/public.tsx";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster, ToastProvider } from "@/components/ui/toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { HeaderProvider } from "@/context/HeaderContext.tsx";
 import { UserProvider } from "@/context/UserContext.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "./context/AuthContext.tsx";
@@ -29,22 +28,20 @@ createRoot(document.getElementById("root")!).render(
         <ThemeProvider>
           <TooltipProvider>
             <ToastProvider>
-              <HeaderProvider>
-                <BrowserRouter>
-                  <Routes>
-                    <Route element={<Public />}>
-                      <Route path="login" element={<LoginPage />} />
-                      <Route path="register" element={<RegisterPage />} />
-                    </Route>
-                    <Route element={<App />}>
-                      <Route path="profile" element={<ProfilePage />} />
-                      <Route path="/:folderId?" element={<ExplorerPage />} />
-                      <Route path="edit/:documentId" element={<EditPage />} />
-                    </Route>
-                  </Routes>
-                </BrowserRouter>
-                <Toaster />
-              </HeaderProvider>
+              <BrowserRouter>
+                <Routes>
+                  <Route element={<Public />}>
+                    <Route path="login" element={<LoginPage />} />
+                    <Route path="register" element={<RegisterPage />} />
+                  </Route>
+                  <Route element={<App />}>
+                    <Route path="profile" element={<ProfilePage />} />
+                    <Route path="/:folderId?" element={<ExplorerPage />} />
+                    <Route path="edit/:documentId" element={<EditPage />} />
+                  </Route>
+                </Routes>
+              </BrowserRouter>
+              <Toaster />
             </ToastProvider>
           </TooltipProvider>
         </ThemeProvider>
