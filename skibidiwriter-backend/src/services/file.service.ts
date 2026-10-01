@@ -1,8 +1,8 @@
 import { db } from "@/libs/db";
 import { eqOrNull } from "@/libs/sql";
-import { fileTable } from "@/models";
+import { fileTable, user } from "@/models";
 import { fileShareTable } from "@/models/file-share.model";
-import { and, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
 const PERSIST_DELAY = 500;
@@ -66,6 +66,20 @@ async function findInFolder(folderId: string | null, userId: string) {
     .select(summarySelect)
     .from(fileTable)
     .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)));
+}
+
+async function findSharedWith(userId: string) {
+  return await db
+    .select({
+      file: summarySelect,
+      owner: { id: user.id, name: user.name },
+      sharedAt: fileShareTable.createdAt,
+    })
+    .from(fileShareTable)
+    .innerJoin(fileTable, eq(fileTable.id, fileShareTable.fileId))
+    .innerJoin(user, eq(user.id, fileTable.ownerId))
+    .where(eq(fileShareTable.userId, userId))
+    .orderBy(desc(fileShareTable.createdAt));
 }
 
 async function isNameTaken(
@@ -304,6 +318,7 @@ export default {
   hasAccess,
   isOwner,
   findInFolder,
+  findSharedWith,
   findById,
   isNameTaken,
   createDocument,

@@ -1,25 +1,17 @@
-import { db } from "@/libs/db";
 import { validate } from "@/libs/validation";
-import { toFileShareDTO } from "@/mappers/file-share.mapper";
-import { AuthEnv } from "@/middleware/session.middleware";
-import { fileShareTable } from "@/models";
+import { toFileShareDTO, toSharedFileDTO } from "@/mappers/file-share.mapper";
+import type { AuthEnv } from "@/middleware/session.middleware";
 import fileShareService from "@/services/file-share.service";
 import fileService from "@/services/file.service";
 import userService from "@/services/user.service";
-import { eq } from "drizzle-orm";
 import { Hono } from "hono";
 import { CreateFileSharesSchema, ErrorCode } from "skibidiwriter-shared";
 
 export const fileShareController = new Hono<AuthEnv>()
   .get("/", async (ctx) => {
-    const userId = ctx.get("userId");
+    const rows = await fileService.findSharedWith(ctx.get("userId"));
 
-    const shares = await db
-      .select()
-      .from(fileShareTable)
-      .where(eq(fileShareTable.userId, userId));
-
-    return ctx.json(shares.map(toFileShareDTO));
+    return ctx.json(rows.map(toSharedFileDTO));
   })
   .post("/", validate("json", CreateFileSharesSchema), async (ctx) => {
     const userId = ctx.get("userId");

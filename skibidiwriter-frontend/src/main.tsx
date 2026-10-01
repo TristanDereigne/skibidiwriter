@@ -18,6 +18,7 @@ import { RegisterPage } from "@/pages/public/register.page.tsx";
 import { EditPage } from "./pages/app/edit.page.tsx";
 import { ExplorerPage } from "./pages/app/explorer.page.tsx";
 import { ProfilePage } from "./pages/app/profile.page.tsx";
+import { SharedPage } from "./pages/app/shared.page.tsx";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ createRoot(document.getElementById("root")!).render(
                   </Route>
                   <Route element={<App />}>
                     <Route path="profile" element={<ProfilePage />} />
+                    <Route path="shared" element={<SharedPage />} />
                     <Route path="/:folderId?" element={<ExplorerPage />} />
                     <Route path="edit/:documentId" element={<EditPage />} />
                   </Route>

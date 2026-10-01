@@ -8,9 +8,7 @@ interface Props {
   folder: FolderDTO;
 }
 
-export default function ExplorerFolderInfoDialog({
-  folder,
-}: Readonly<Props>) {
+export default function ExplorerFolderInfoDialog({ folder }: Readonly<Props>) {
   const { infoDialog } = useExplorerItem();
   const { data: stats } = useFolderStats(folder.id, infoDialog.isOpen);
 
