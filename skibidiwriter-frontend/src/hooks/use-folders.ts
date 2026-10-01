@@ -34,10 +34,10 @@ export function useFolderPath(id: string | null) {
   });
 }
 
-export function useFolderStats(id: string, enabled: boolean) {
+export function useFolderStats(id: string, isEnabled: boolean) {
   return useQuery({
     queryKey: [...FOLDERS_QUERY_KEY, "stats", id],
-    enabled,
+    enabled: isEnabled,
     queryFn: async () => {
       const res = await api.folders[":id"].stats.$get({ param: { id } });
       if (!res.ok) return null;

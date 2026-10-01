@@ -59,7 +59,7 @@ async function findInFolder(folderId: string | null, userId: string) {
     .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)));
 }
 
-async function nameTaken(
+async function isNameTaken(
   name: string,
   folderId: string | null,
   userId: string,
@@ -295,7 +295,7 @@ export default {
   hasAccess,
   findInFolder,
   findById,
-  nameTaken,
+  isNameTaken,
   createDocument,
   createUpload,
   rename,

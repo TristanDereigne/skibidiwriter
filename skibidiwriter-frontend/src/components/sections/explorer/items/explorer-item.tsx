@@ -17,7 +17,7 @@ interface Props {
   subtitle: string;
   infoRows: InfoRow[];
   onInfoOpenChange?: (open: boolean) => void;
-  startRenaming: boolean;
+  shouldStartRenaming: boolean;
   deleteDescription: string;
   isDeleting: boolean;
   dragItem: DragItem;
@@ -37,7 +37,7 @@ export default function ExplorerItem({
   subtitle,
   infoRows,
   onInfoOpenChange,
-  startRenaming,
+  shouldStartRenaming,
   deleteDescription,
   isDeleting,
   dragItem,
@@ -48,33 +48,33 @@ export default function ExplorerItem({
   onRename,
   onDelete,
 }: Readonly<Props>) {
-  const [renaming, setRenaming] = useState(startRenaming);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [infoOpen, setInfoOpenState] = useState(false);
-  const { dropActive, dragProps } = useItemDrag({
+  const [isRenaming, setIsRenaming] = useState(shouldStartRenaming);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isInfoOpen, setIsInfoOpenState] = useState(false);
+  const { isDropActive, dragProps } = useItemDrag({
     dragItem,
-    draggable: !renaming,
+    isDraggable: !isRenaming,
     onDropItem,
   });
 
   useEffect(() => {
-    if (startRenaming) setRenaming(true);
-  }, [startRenaming]);
+    if (shouldStartRenaming) setIsRenaming(true);
+  }, [shouldStartRenaming]);
 
-  function setInfoOpen(open: boolean) {
-    setInfoOpenState(open);
+  function setIsInfoOpen(open: boolean) {
+    setIsInfoOpenState(open);
     onInfoOpenChange?.(open);
   }
 
   function handleKeyDown(event: React.KeyboardEvent) {
-    if (renaming || (event.target as HTMLElement).tagName === "INPUT") return;
+    if (isRenaming || (event.target as HTMLElement).tagName === "INPUT") return;
 
     if (event.key === "F2") {
       event.preventDefault();
-      setRenaming(true);
+      setIsRenaming(true);
     } else if (event.key === "Delete" || event.key === "Backspace") {
       event.preventDefault();
-      setDeleteOpen(true);
+      setIsDeleteOpen(true);
     }
   }
 
@@ -86,8 +86,8 @@ export default function ExplorerItem({
             <div
               className={cn(
                 "group flex flex-col items-center gap-2 rounded-2xl border border-transparent p-3 text-center hover:bg-muted/40",
-                startRenaming && "border-primary/40 bg-primary/5",
-                dropActive && "border-primary bg-primary/10",
+                shouldStartRenaming && "border-primary/40 bg-primary/5",
+                isDropActive && "border-primary bg-primary/10",
               )}
               tabIndex={-1}
               onKeyDown={handleKeyDown}
@@ -110,23 +110,23 @@ export default function ExplorerItem({
             name={name}
             nameLabel={nameLabel}
             subtitle={subtitle}
-            renaming={renaming}
+            isRenaming={isRenaming}
             onOpen={onOpen}
             onRename={onRename}
-            onRenameDone={() => setRenaming(false)}
+            onRenameDone={() => setIsRenaming(false)}
           />
         </ContextMenuTrigger>
         <ExplorerItemMenu
-          onRename={() => setRenaming(true)}
+          onRename={() => setIsRenaming(true)}
           onDownload={onDownload}
-          onDelete={() => setDeleteOpen(true)}
-          onInfo={() => setInfoOpen(true)}
+          onDelete={() => setIsDeleteOpen(true)}
+          onInfo={() => setIsInfoOpen(true)}
         />
       </ContextMenu>
 
       <ExplorerDeleteDialog
-        open={deleteOpen}
-        onOpenChange={setDeleteOpen}
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
         title={`Supprimer "${name}" ?`}
         description={deleteDescription}
         isPending={isDeleting}
@@ -134,8 +134,8 @@ export default function ExplorerItem({
       />
 
       <ExplorerInfoDialog
-        open={infoOpen}
-        onOpenChange={setInfoOpen}
+        open={isInfoOpen}
+        onOpenChange={setIsInfoOpen}
         title={`Informations de "${name}"`}
         rows={infoRows}
       />

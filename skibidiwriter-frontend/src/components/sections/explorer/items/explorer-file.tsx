@@ -65,7 +65,7 @@ export default function ExplorerFile({ file }: Readonly<Props>) {
           value: dateTimeFormat.format(new Date(file.updatedAt)),
         },
       ]}
-      startRenaming={file.id === createdId}
+      shouldStartRenaming={file.id === createdId}
       deleteDescription={`Ce ${noun} sera supprimé définitivement. Cette action est irréversible.`}
       isDeleting={deleteFile.isPending}
       onPrefetch={isDocument ? () => prefetchDocument(file.id) : undefined}

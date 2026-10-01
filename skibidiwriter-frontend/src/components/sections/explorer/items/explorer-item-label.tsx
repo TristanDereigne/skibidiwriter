@@ -4,7 +4,7 @@ interface Props {
   name: string;
   nameLabel: string;
   subtitle: string;
-  renaming: boolean;
+  isRenaming: boolean;
   onOpen: () => void;
   onRename: (name: string) => void;
   onRenameDone: () => void;
@@ -14,14 +14,14 @@ export default function ExplorerItemLabel({
   name,
   nameLabel,
   subtitle,
-  renaming,
+  isRenaming,
   onOpen,
   onRename,
   onRenameDone,
 }: Readonly<Props>) {
   return (
     <div className="w-full">
-      {renaming ? (
+      {isRenaming ? (
         <InlineNameInput
           className="text-center"
           name={name}

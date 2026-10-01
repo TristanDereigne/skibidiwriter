@@ -24,7 +24,7 @@ export default function TrailBreadcrumb({
   current,
   onRename,
 }: Readonly<Props>) {
-  const [renaming, setRenaming] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const trail = [
     { id: null, name: "Explorer" },
@@ -47,13 +47,13 @@ export default function TrailBreadcrumb({
           </Fragment>
         ))}
         <BreadcrumbItem className="min-w-0">
-          {renaming && onRename ? (
+          {isRenaming && onRename ? (
             <InlineNameInput
               className="w-56"
               name={last.name}
               label="Nom du document"
               onCommit={onRename}
-              onDone={() => setRenaming(false)}
+              onDone={() => setIsRenaming(false)}
             />
           ) : (
             <BreadcrumbPage
@@ -61,7 +61,7 @@ export default function TrailBreadcrumb({
                 "truncate font-semibold",
                 onRename && "cursor-text rounded px-1 hover:bg-muted",
               )}
-              onClick={onRename && (() => setRenaming(true))}
+              onClick={onRename && (() => setIsRenaming(true))}
               title={onRename && "Cliquer pour renommer"}
             >
               {last.name}

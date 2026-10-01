@@ -26,7 +26,7 @@ import { useUploadFiles } from "./use-upload-files";
 export default function Explorer() {
   const { createDocument, createFolder, path, folderId } = useExplorer();
   const uploadFiles = useUploadFiles(folderId);
-  const [draggingFiles, setDraggingFiles] = useState(false);
+  const [isDraggingFiles, setIsDraggingFiles] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const tab = parseExplorerHeaderTab(searchParams.get("tab"));
 
@@ -66,7 +66,7 @@ export default function Explorer() {
                 onDragOver={(event: React.DragEvent) => {
                   if (!isFileDrag(event)) return;
                   event.preventDefault();
-                  setDraggingFiles(true);
+                  setIsDraggingFiles(true);
                 }}
                 onDragLeave={(event: React.DragEvent) => {
                   if (
@@ -74,10 +74,10 @@ export default function Explorer() {
                   ) {
                     return;
                   }
-                  setDraggingFiles(false);
+                  setIsDraggingFiles(false);
                 }}
                 onDrop={(event: React.DragEvent) => {
-                  setDraggingFiles(false);
+                  setIsDraggingFiles(false);
                   if (!isFileDrag(event)) return;
                   event.preventDefault();
                   uploadFiles(Array.from(event.dataTransfer.files));
@@ -99,10 +99,10 @@ export default function Explorer() {
           </ContextMenuContent>
         </ContextMenu>
         <div
-          aria-hidden={!draggingFiles}
+          aria-hidden={!isDraggingFiles}
           className={cn(
             "pointer-events-none absolute inset-3 flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-primary bg-background/80 text-primary opacity-0 backdrop-blur-sm transition-opacity duration-150",
-            draggingFiles && "opacity-100",
+            isDraggingFiles && "opacity-100",
           )}
         >
           <UploadCloudIcon className="size-10" />
