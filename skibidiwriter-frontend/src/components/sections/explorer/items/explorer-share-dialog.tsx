@@ -1,5 +1,12 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -10,15 +17,14 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDebounced } from "@/hooks/use-debounched";
 import { api, errorMessage } from "@/lib/api";
+import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
+import { Check } from "lucide-react";
 import { useState } from "react";
-
-export interface InfoRow {
-  label: string;
-  value: string;
-}
+import type { UserSummaryDTO } from "skibidiwriter-shared";
 
 interface Props {
   open: boolean;
@@ -32,6 +38,7 @@ export default function ExplorerShareDialog({
   fileName,
 }: Readonly<Props>) {
   const [search, setSearch] = useState("");
+  const [selectedUsers, setSelectedUsers] = useState<UserSummaryDTO[]>([]);
 
   const { data: users = [] } = useQuery({
     queryKey: ["users", search],
@@ -46,6 +53,19 @@ export default function ExplorerShareDialog({
   });
 
   const onSearchChange = useDebounced(setSearch, 300);
+
+  const selectedIds = new Set(selectedUsers.map((u) => u.id));
+  const shownUsers = [
+    ...selectedUsers,
+    ...users.filter((u) => !selectedIds.has(u.id)),
+  ];
+
+  const toggleUser = (user: UserSummaryDTO) =>
+    setSelectedUsers((prev) =>
+      prev.some((u) => u.id === user.id)
+        ? prev.filter((u) => u.id !== user.id)
+        : [...prev, user],
+    );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,28 +82,68 @@ export default function ExplorerShareDialog({
           />
         </Field>
 
-        {users.map((user) => (
-          <Card key={user.name} className="flex-row gap-3 items-center">
-            <CardHeader>
-              <Avatar className="size-10">
-                <AvatarFallback>
-                  {user.name.slice(0, 1).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-col gap-1">
-                <p className="font-semibold">{user.name}</p>
-                <p className="text-muted-foreground">
-                  Partager "{fileName}" avec {user.name}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+        {shownUsers.length > 0 && (
+          <ScrollArea className="*:data-[slot=scroll-area-viewport]:max-h-72">
+            <div className="flex flex-col gap-2 p-1">
+              {shownUsers.map((user) => {
+                const isSelected = selectedIds.has(user.id);
+
+                return (
+                  <label key={user.id}>
+                    <Card
+                      className={cn(
+                        "flex-row gap-5 items-center p-2 cursor-pointer transition-colors",
+                        isSelected
+                          ? "border-primary bg-primary/5 ring-1 ring-primary"
+                          : "hover:bg-muted/50",
+                      )}
+                    >
+                      <CardHeader className="px-3">
+                        <Avatar className="size-10">
+                          <AvatarFallback
+                            className={cn(
+                              "transition-colors",
+                              isSelected &&
+                                "bg-primary text-primary-foreground",
+                            )}
+                          >
+                            {isSelected ? (
+                              <Check className="size-5" />
+                            ) : (
+                              user.name.slice(0, 1).toUpperCase()
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                      </CardHeader>
+                      <CardContent className="w-full">
+                        <div className="flex flex-col gap-1">
+                          <p className="font-semibold">{user.name}</p>
+                          <p className="text-muted-foreground">
+                            Partager "{fileName}" avec {user.name}
+                          </p>
+                        </div>
+                      </CardContent>
+                      <CardFooter>
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={() => toggleUser(user)}
+                        />
+                      </CardFooter>
+                    </Card>
+                  </label>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        )}
 
         <DialogFooter>
           <DialogClose>Fermer</DialogClose>
+          <Button disabled={!selectedUsers.length}>
+            {selectedUsers.length
+              ? `Partager avec ${selectedUsers.length} utilisateur${selectedUsers.length > 1 ? "s" : ""}`
+              : "Partager"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -144,6 +144,7 @@ export default function ExplorerItem({
       />
 
       <ExplorerShareDialog
+        key={isShareOpen.toString()} // trigger a force rerender
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
         fileName={name}
