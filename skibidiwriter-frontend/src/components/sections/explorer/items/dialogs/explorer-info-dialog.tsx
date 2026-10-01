@@ -6,30 +6,27 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useExplorerItem } from "../context/use-explorer-item";
 
-export interface InfoRow {
+interface InfoRow {
   label: string;
   value: string;
 }
 
 interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
   rows: InfoRow[];
 }
 
-export default function ExplorerInfoDialog({
-  open,
-  onOpenChange,
-  title,
-  rows,
-}: Readonly<Props>) {
+export default function ExplorerInfoDialog({ rows }: Readonly<Props>) {
+  const { name, infoDialog } = useExplorerItem();
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...infoDialog.dialogProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="break-all">{title}</DialogTitle>
+          <DialogTitle className="break-all">
+            Informations de "{name}"
+          </DialogTitle>
         </DialogHeader>
         <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-sm">
           {rows.map(({ label, value }) => (

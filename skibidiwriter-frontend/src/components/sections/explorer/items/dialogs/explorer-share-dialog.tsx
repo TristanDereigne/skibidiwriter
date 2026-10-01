@@ -25,18 +25,16 @@ import { useQuery } from "@tanstack/react-query";
 import { Check } from "lucide-react";
 import { useState } from "react";
 import type { UserSummaryDTO } from "skibidiwriter-shared";
+import { useExplorerItem } from "../context/use-explorer-item";
 
-interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  fileName: string;
+export default function ExplorerShareDialog() {
+  const { shareDialog } = useExplorerItem();
+
+  return <ShareDialog key={shareDialog.isOpen.toString()} />;
 }
 
-export default function ExplorerShareDialog({
-  open,
-  onOpenChange,
-  fileName,
-}: Readonly<Props>) {
+function ShareDialog() {
+  const { name, shareDialog } = useExplorerItem();
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<UserSummaryDTO[]>([]);
 
@@ -68,10 +66,10 @@ export default function ExplorerShareDialog({
     );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...shareDialog.dialogProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="break-all">Partager "{fileName}"</DialogTitle>
+          <DialogTitle className="break-all">Partager "{name}"</DialogTitle>
         </DialogHeader>
 
         <Field>
@@ -119,7 +117,7 @@ export default function ExplorerShareDialog({
                         <div className="flex flex-col gap-1">
                           <p className="font-semibold">{user.name}</p>
                           <p className="text-muted-foreground">
-                            Partager "{fileName}" avec {user.name}
+                            Partager "{name}" avec {user.name}
                           </p>
                         </div>
                       </CardContent>

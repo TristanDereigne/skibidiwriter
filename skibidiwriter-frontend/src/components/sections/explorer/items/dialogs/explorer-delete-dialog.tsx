@@ -8,29 +8,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useExplorerItem } from "../context/use-explorer-item";
 
 interface Props {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  title: string;
   description: string;
   isPending: boolean;
   onConfirm: () => void;
 }
 
 export default function ExplorerDeleteDialog({
-  open,
-  onOpenChange,
-  title,
   description,
   isPending,
   onConfirm,
 }: Readonly<Props>) {
+  const { name, deleteDialog } = useExplorerItem();
+
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog {...deleteDialog.dialogProps}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogTitle>Supprimer "{name}" ?</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

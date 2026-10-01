@@ -1,19 +1,19 @@
+import { toast } from "@/components/ui/toast";
 import { useMoveFile } from "@/hooks/use-files";
 import {
   useDeleteFolder,
-  useFolderStats,
   useMoveFolder,
   useRenameFolder,
 } from "@/hooks/use-folders";
-import { toast } from "@/components/ui/toast";
-import { useState } from "react";
-import { dateTimeFormat, formatBytes } from "@/lib/format";
 import { explorerPath } from "@/lib/paths";
 import { FolderIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import type { FolderDTO } from "skibidiwriter-shared";
 import { useExplorer } from "../context/use-explorer";
 import type { DragItem } from "../drag/drag-item";
+import ExplorerItemProvider from "./context/explorer-item-provider";
+import ExplorerDeleteDialog from "./dialogs/explorer-delete-dialog";
+import ExplorerFolderInfoDialog from "./dialogs/explorer-folder-info-dialog";
 import ExplorerItem from "./explorer-item";
 
 interface Props {
@@ -27,8 +27,6 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   const deleteFolder = useDeleteFolder();
   const moveFolder = useMoveFolder();
   const moveFile = useMoveFile();
-  const [isInfoOpen, setIsInfoOpen] = useState(false);
-  const { data: stats } = useFolderStats(folder.id, isInfoOpen);
 
   function handleDrop(item: DragItem) {
     const onError = (error: Error) =>
@@ -46,40 +44,27 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   }
 
   return (
-    <ExplorerItem
-      icon={FolderIcon}
-      iconClassName="fill-amber-400/25 text-amber-500"
-      dragItem={{ kind: "folder", id: folder.id }}
-      onDropItem={handleDrop}
+    <ExplorerItemProvider
       name={folder.name}
-      nameLabel="Nom du dossier"
-      subtitle="Dossier"
-      infoRows={[
-        { label: "Type", value: "Dossier" },
-        {
-          label: "Créé le",
-          value: dateTimeFormat.format(new Date(folder.createdAt)),
-        },
-        {
-          label: "Modifié le",
-          value: dateTimeFormat.format(new Date(folder.updatedAt)),
-        },
-        {
-          label: "Fichiers",
-          value: stats ? String(stats.fileCount) : "…",
-        },
-        {
-          label: "Taille totale",
-          value: stats ? formatBytes(stats.totalBytes) : "…",
-        },
-      ]}
-      onInfoOpenChange={setIsInfoOpen}
-      shouldStartRenaming={folder.id === createdId}
-      deleteDescription="Ce dossier et tout son contenu seront supprimés définitivement. Cette action est irréversible."
-      isDeleting={deleteFolder.isPending}
-      onOpen={() => navigate(explorerPath(folder.id))}
-      onRename={(name) => renameFolder.mutate({ id: folder.id, name })}
-      onDelete={() => deleteFolder.mutate(folder.id)}
-    />
+      isJustCreated={folder.id === createdId}
+    >
+      <ExplorerItem
+        icon={FolderIcon}
+        iconClassName="fill-amber-400/25 text-amber-500"
+        dragItem={{ kind: "folder", id: folder.id }}
+        onDropItem={handleDrop}
+        nameLabel="Nom du dossier"
+        subtitle="Dossier"
+        onOpen={() => navigate(explorerPath(folder.id))}
+        onRename={(name) => renameFolder.mutate({ id: folder.id, name })}
+      />
+
+      <ExplorerDeleteDialog
+        description="Ce dossier et tout son contenu seront supprimés définitivement. Cette action est irréversible."
+        isPending={deleteFolder.isPending}
+        onConfirm={() => deleteFolder.mutate(folder.id)}
+      />
+      <ExplorerFolderInfoDialog folder={folder} />
+    </ExplorerItemProvider>
   );
 }

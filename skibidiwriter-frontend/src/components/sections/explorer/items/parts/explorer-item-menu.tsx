@@ -10,25 +10,23 @@ import {
   Trash2Icon,
   UserPlusIcon,
 } from "lucide-react";
+import { useExplorerItem } from "../context/use-explorer-item";
 
 interface Props {
-  onRename: VoidFunction;
+  isShareable: boolean;
   onDownload?: VoidFunction;
-  onShare: VoidFunction;
-  onDelete: VoidFunction;
-  onInfo: VoidFunction;
 }
 
 export default function ExplorerItemMenu({
-  onRename,
+  isShareable,
   onDownload,
-  onShare,
-  onDelete,
-  onInfo,
 }: Readonly<Props>) {
+  const { startRenaming, shareDialog, deleteDialog, infoDialog } =
+    useExplorerItem();
+
   return (
     <ContextMenuContent>
-      <ContextMenuItem onClick={onRename}>
+      <ContextMenuItem onClick={startRenaming}>
         <PencilIcon />
         Renommer
       </ContextMenuItem>
@@ -38,17 +36,19 @@ export default function ExplorerItemMenu({
           Télécharger
         </ContextMenuItem>
       )}
-      <ContextMenuItem onClick={onShare}>
-        <UserPlusIcon />
-        Partager
-      </ContextMenuItem>
+      {isShareable && (
+        <ContextMenuItem onClick={shareDialog.open}>
+          <UserPlusIcon />
+          Partager
+        </ContextMenuItem>
+      )}
       <ContextMenuSeparator />
-      <ContextMenuItem variant="destructive" onClick={onDelete}>
+      <ContextMenuItem variant="destructive" onClick={deleteDialog.open}>
         <Trash2Icon />
         Supprimer
       </ContextMenuItem>
       <ContextMenuSeparator />
-      <ContextMenuItem onClick={onInfo}>
+      <ContextMenuItem onClick={infoDialog.open}>
         <InfoIcon />
         Informations
       </ContextMenuItem>

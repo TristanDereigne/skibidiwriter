@@ -1,24 +1,21 @@
 import InlineNameInput from "@/components/shared/inline-name-input";
+import { useExplorerItem } from "../context/use-explorer-item";
 
 interface Props {
-  name: string;
   nameLabel: string;
   subtitle: string;
-  isRenaming: boolean;
   onOpen: () => void;
   onRename: (name: string) => void;
-  onRenameDone: () => void;
 }
 
 export default function ExplorerItemLabel({
-  name,
   nameLabel,
   subtitle,
-  isRenaming,
   onOpen,
   onRename,
-  onRenameDone,
 }: Readonly<Props>) {
+  const { name, isRenaming, stopRenaming } = useExplorerItem();
+
   return (
     <div className="w-full">
       {isRenaming ? (
@@ -27,7 +24,7 @@ export default function ExplorerItemLabel({
           name={name}
           label={nameLabel}
           onCommit={onRename}
-          onDone={onRenameDone}
+          onDone={stopRenaming}
         />
       ) : (
         <button
