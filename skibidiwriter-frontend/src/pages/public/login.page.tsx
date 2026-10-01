@@ -93,6 +93,8 @@ export const LoginPage = () => {
     e.preventDefault();
     await authContext.verify2FA(totp)
     if(authContext.is2FAEnabled) {
+      setIs2FAEnabled(false);
+      authContext.setIs2FAAccount(false);
       navigate("/");
     } else {
       setErrors({
