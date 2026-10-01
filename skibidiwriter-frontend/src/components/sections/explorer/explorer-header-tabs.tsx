@@ -1,6 +1,5 @@
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-type ExplorerHeaderTab = "self" | "shared";
+import { parseExplorerHeaderTab, type ExplorerHeaderTab } from "./explorer-tab";
 
 const EXPLORER_HEADER_TAB_SPECS: {
   [Value in ExplorerHeaderTab]: { value: Value; label: string };
@@ -9,9 +8,20 @@ const EXPLORER_HEADER_TAB_SPECS: {
   shared: { value: "shared", label: "Partagés avec moi" },
 };
 
-export default function ExplorerHeaderTabs() {
+interface Props {
+  value: ExplorerHeaderTab;
+  onValueChange: (value: ExplorerHeaderTab) => void;
+}
+
+export default function ExplorerHeaderTabs({
+  value,
+  onValueChange,
+}: Readonly<Props>) {
   return (
-    <Tabs>
+    <Tabs
+      value={value}
+      onValueChange={(next) => onValueChange(parseExplorerHeaderTab(next))}
+    >
       <TabsList>
         {Object.values(EXPLORER_HEADER_TAB_SPECS).map((spec) => (
           <TabsTrigger key={spec.value} value={spec.value}>

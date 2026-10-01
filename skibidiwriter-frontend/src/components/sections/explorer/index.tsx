@@ -19,13 +19,22 @@ import { cn } from "cn";
 import { FilePlusIcon, FolderPlusIcon, UploadCloudIcon } from "lucide-react";
 import { useState } from "react";
 import { hasDragItem } from "./drag-item";
+import { useSearchParams } from "react-router";
 import ExplorerHeaderTabs from "./explorer-header-tabs";
+import { parseExplorerHeaderTab, type ExplorerHeaderTab } from "./explorer-tab";
+import SharedContent from "./shared-content";
 import { useUploadFiles } from "./use-upload-files";
 
 export default function Explorer() {
   const { createDocument, createFolder, path, folderId } = useExplorer();
   const uploadFiles = useUploadFiles(folderId);
   const [draggingFiles, setDraggingFiles] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = parseExplorerHeaderTab(searchParams.get("tab"));
+
+  function changeTab(next: ExplorerHeaderTab) {
+    setSearchParams(next === "self" ? {} : { tab: next });
+  }
 
   function isFileDrag(event: React.DragEvent) {
     return (
@@ -47,7 +56,7 @@ export default function Explorer() {
       >
         <div className="flex items-center gap-5">
           <TrailBreadcrumb folders={path} />
-          <ExplorerHeaderTabs />
+          <ExplorerHeaderTabs value={tab} onValueChange={changeTab} />
         </div>
       </AppHeader>
       <div className="relative flex min-h-0 w-full flex-1 flex-col">
@@ -78,7 +87,7 @@ export default function Explorer() {
               />
             }
           >
-            <ExplorerContent />
+            {tab === "self" ? <ExplorerContent /> : <SharedContent />}
           </ContextMenuTrigger>
           <ContextMenuContent>
             <ContextMenuItem onClick={createFolder}>
