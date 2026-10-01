@@ -21,6 +21,7 @@ import { useEffect, useState } from "react";
 import type { UsersDto } from "skibidiwriter-shared";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
+import {ProfileAddMembers} from "@/components/sections/profile/profile-add-members.tsx";
 
 export const ProfileUserTable = () => {
   const userContext = useUserContext();
@@ -99,9 +100,7 @@ export const ProfileUserTable = () => {
           <TableRow>
             <TableCell colSpan={3}></TableCell>
             <TableCell className="text-right">
-              <Button variant="default" onClick={addNewAccount}>
-                Ajouter un membre
-              </Button>
+              <ProfileAddMembers />
             </TableCell>
           </TableRow>
         </TableFooter>
