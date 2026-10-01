@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { toast } from "@/components/ui/toast.tsx";
 import { AuthContext } from "@/context/AuthContext.tsx";
 import { useContext, useState, type SetStateAction } from "react";
+import { UsernameSchema } from "skibidiwriter-shared";
 import { z } from "zod";
 import { Button } from "../../components/ui/button.tsx";
 import {
@@ -23,14 +24,7 @@ export const RegisterPage = () => {
 
   const registerSchema = z.object({
     email: z.email("Format d'email invalide"),
-    pseudo: z
-      .string()
-      .min(3, "3 caractères minimum")
-      .max(20, "20 caractères maximum")
-      .regex(
-        /\w/,
-        "Le pseudo ne peut contenir que des lettres, chiffres et underscore",
-      ),
+    pseudo: UsernameSchema,
     password: z
       .string()
       .min(8, "8 caractères minimum")

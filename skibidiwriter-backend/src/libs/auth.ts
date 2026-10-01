@@ -2,9 +2,11 @@ import { env } from "@/libs/env";
 import * as schemas from "@/models";
 
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { twoFactor } from "better-auth/plugins";
 
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { UsernameSchema } from "skibidiwriter-shared";
 import { db } from "./db";
 
 export const auth = betterAuth({
@@ -18,6 +20,22 @@ export const auth = betterAuth({
     provider: "pg",
     schema: schemas,
   }),
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (newUser) => {
+          const username = UsernameSchema.safeParse(newUser.name);
+          if (!username.success) {
+            throw new APIError("BAD_REQUEST", {
+              message: username.error.issues[0]?.message,
+            });
+          }
+
+          return { data: { ...newUser, name: username.data } };
+        },
+      },
+    },
+  },
   trustedOrigins: [env.FRONTEND_URL_NO_SLASH],
   plugins: [twoFactor()],
 });

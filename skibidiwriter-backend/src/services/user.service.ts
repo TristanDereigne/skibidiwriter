@@ -1,6 +1,15 @@
 import { db } from "@/libs/db";
 import { user } from "@/models";
-import { eq } from "drizzle-orm";
+import { asc, eq, ilike } from "drizzle-orm";
+
+export const findUsersByName = async (name: string, limit: number) => {
+  return await db
+    .select({ id: user.id, name: user.name, image: user.image })
+    .from(user)
+    .where(ilike(user.name, `%${name}%`))
+    .orderBy(asc(user.name))
+    .limit(limit);
+};
 
 export const updateUserEmail = async (oldEmail: string, email: string) => {
   try {
