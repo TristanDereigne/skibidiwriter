@@ -1,4 +1,4 @@
-import { type EnableTwoFactorResult, useAuth } from "@/hooks/use-auth.ts";
+import {type EnableTwoFactorResult, type Login2FAResponse, useAuth} from "@/hooks/use-auth.ts";
 import { authClient } from "@/lib/auth-client";
 import {
   createContext,
@@ -54,6 +54,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
   }, [auth.check2FAEnabled]);
 
+
   useEffect(() => {
     if (session?.user) {
       userContext.setUser(session?.user);
@@ -102,10 +103,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         await auth.signIn(email, password);
       },
       login: async (email, password) => {
-        await auth.signIn(email, password);
+        const response: Login2FAResponse | any = await auth.signIn(email, password);
+
+        if(response?.twoFactorMethods) {
+          const data: Login2FAResponse = response;
+          console.log("Login for 2FA:", data.twoFactorMethods);
+
+
+        } else {
+          const data: any = response.data;
+          console.log("Login basic:", data);
+        }
+
         if (session?.user.name) {
           userContext.setUsername(session?.user.name);
         }
+
       },
       logout: async () => {
         await authClient.signOut();

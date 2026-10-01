@@ -22,6 +22,11 @@ export type VerifyResponse = {
   error: { code?: string; message?: string } | null;
 };
 
+export type Login2FAResponse = {
+  twoFactorRedirect: boolean;
+  twoFactorMethods:string[] | null
+}
+
 export function useAuth() {
   const signUp = async (email: string, password: string, name: string) => {
     const { data, error } = await authClient.signUp.email({
@@ -35,7 +40,6 @@ export function useAuth() {
       throw new Error(error.message);
     }
 
-    console.log("Signup réussi:", data);
     return data;
   };
 
@@ -50,7 +54,6 @@ export function useAuth() {
       throw new Error(error.message);
     }
 
-    console.log("Signin réussi:", data);
     return data;
   };
 
