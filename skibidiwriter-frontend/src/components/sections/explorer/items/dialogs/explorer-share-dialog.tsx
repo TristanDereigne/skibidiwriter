@@ -19,6 +19,7 @@ import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDebounced } from "@/hooks/use-debounched";
+import { useShareFile } from "@/hooks/use-file-shares";
 import { api, errorMessage } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -27,14 +28,19 @@ import { useState } from "react";
 import type { UserSummaryDTO } from "skibidiwriter-shared";
 import { useExplorerItem } from "../context/use-explorer-item";
 
-export default function ExplorerShareDialog() {
-  const { shareDialog } = useExplorerItem();
-
-  return <ShareDialog key={shareDialog.isOpen.toString()} />;
+interface Props {
+  fileId: string;
 }
 
-function ShareDialog() {
+export default function ExplorerShareDialog({ fileId }: Readonly<Props>) {
+  const { shareDialog } = useExplorerItem();
+
+  return <ShareDialog key={shareDialog.isOpen.toString()} fileId={fileId} />;
+}
+
+function ShareDialog({ fileId }: Readonly<Props>) {
   const { name, shareDialog } = useExplorerItem();
+  const shareFile = useShareFile();
   const [search, setSearch] = useState("");
   const [selectedUsers, setSelectedUsers] = useState<UserSummaryDTO[]>([]);
 
@@ -57,6 +63,12 @@ function ShareDialog() {
     ...selectedUsers,
     ...users.filter((u) => !selectedIds.has(u.id)),
   ];
+
+  const handleShare = () =>
+    shareFile.mutate(
+      { fileId, userIds: selectedUsers.map((u) => u.id) },
+      { onSuccess: shareDialog.close },
+    );
 
   const toggleUser = (user: UserSummaryDTO) =>
     setSelectedUsers((prev) =>
@@ -137,7 +149,10 @@ function ShareDialog() {
 
         <DialogFooter>
           <DialogClose>Fermer</DialogClose>
-          <Button disabled={!selectedUsers.length}>
+          <Button
+            disabled={!selectedUsers.length || shareFile.isPending}
+            onClick={handleShare}
+          >
             {selectedUsers.length
               ? `Partager avec ${selectedUsers.length} utilisateur${selectedUsers.length > 1 ? "s" : ""}`
               : "Partager"}

@@ -6,6 +6,7 @@ export function useDisclosure(initialOpen = false) {
   return {
     isOpen,
     open: () => setIsOpen(true),
+    close: () => setIsOpen(false),
     dialogProps: { open: isOpen, onOpenChange: setIsOpen },
   };
 }

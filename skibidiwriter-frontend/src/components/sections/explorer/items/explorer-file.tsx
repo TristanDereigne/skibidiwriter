@@ -71,7 +71,7 @@ export default function ExplorerFile({ file }: Readonly<Props>) {
         isPending={deleteFile.isPending}
         onConfirm={() => deleteFile.mutate(file.id)}
       />
-      <ExplorerShareDialog />
+      <ExplorerShareDialog fileId={file.id} />
       <ExplorerFileInfoDialog file={file} typeLabel={typeLabel} />
     </ExplorerItemProvider>
   );

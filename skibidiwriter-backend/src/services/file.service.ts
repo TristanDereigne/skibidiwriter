@@ -52,6 +52,15 @@ async function hasAccess(id: string, userId: string) {
   return !!row;
 }
 
+async function isOwner(id: string, userId: string) {
+  const [row] = await db
+    .select({ id: fileTable.id })
+    .from(fileTable)
+    .where(and(eq(fileTable.id, id), ownedBy(userId)));
+
+  return !!row;
+}
+
 async function findInFolder(folderId: string | null, userId: string) {
   return await db
     .select(summarySelect)
@@ -293,6 +302,7 @@ async function forget(ids: string[]) {
 
 export default {
   hasAccess,
+  isOwner,
   findInFolder,
   findById,
   isNameTaken,

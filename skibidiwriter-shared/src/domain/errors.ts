@@ -4,6 +4,7 @@ export const ErrorCode = {
   File_NotFound: "file/not-found",
   File_TooLarge: "file/too-large",
   File_NameInvalid: "file/name-invalid",
+  User_NotFound: "user/not-found",
   Folder_NotFound: "folder/not-found",
   Folder_ParentNotFound: "folder/parent-not-found",
   Folder_MoveIntoItself: "folder/move-into-itself",

@@ -1,6 +1,6 @@
 import { db } from "@/libs/db";
 import { user } from "@/models";
-import { asc, eq, ilike } from "drizzle-orm";
+import { asc, eq, ilike, inArray } from "drizzle-orm";
 
 async function findUsersByName(name: string, limit: number) {
   return await db
@@ -9,6 +9,17 @@ async function findUsersByName(name: string, limit: number) {
     .where(ilike(user.name, `%${name}%`))
     .orderBy(asc(user.name))
     .limit(limit);
+}
+
+async function existAll(ids: string[]) {
+  if (!ids.length) return true;
+
+  const rows = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(inArray(user.id, ids));
+
+  return rows.length === ids.length;
 }
 
 const updateUserEmail = async (oldEmail: string, email: string) => {
@@ -41,4 +52,5 @@ export default {
   updateUserEmail,
   checkTwoFactorEnabled,
   findUsersByName,
+  existAll,
 };
