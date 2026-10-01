@@ -24,11 +24,13 @@ export default function Explorer() {
           />
         }
       >
-        <div className="flex items-center gap-5">
-          <TrailBreadcrumb folders={path} />
-          <SectionTabs />
-        </div>
+        <SectionTabs />
       </AppHeader>
+      {folderId && (
+        <div className="px-6 pt-3">
+          <TrailBreadcrumb folders={path} />
+        </div>
+      )}
       <div className="relative flex min-h-0 w-full flex-1 flex-col">
         <ContextMenu>
           <ContextMenuTrigger

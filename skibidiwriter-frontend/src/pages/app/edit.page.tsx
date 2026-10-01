@@ -7,6 +7,7 @@ import { useDownloadFile, useFile, useRenameFile } from "@/hooks/use-files";
 import { useFolderPath } from "@/hooks/use-folders";
 import { CONNECTION_STATUS_LABELS, useConnectionStatus } from "@/lib/realtime";
 import AppHeader from "@/layout/app-header.tsx";
+import { cn } from "cn";
 import { useParams } from "react-router";
 
 export const EditPage = () => {
@@ -25,7 +26,15 @@ export const EditPage = () => {
         actions={
           <>
             <Badge variant={status === "connected" ? "secondary" : "outline"}>
-              {CONNECTION_STATUS_LABELS[status]}
+              <span
+                className={cn(
+                  "size-2 rounded-full sm:hidden",
+                  status === "connected" ? "bg-emerald-500" : "bg-amber-500",
+                )}
+              />
+              <span className="max-sm:sr-only">
+                {CONNECTION_STATUS_LABELS[status]}
+              </span>
             </Badge>
             {documentRowId && (
               <Button

@@ -1,6 +1,18 @@
 import { Button } from "@/components/ui/button";
-import { FilePlusIcon, FolderPlusIcon } from "lucide-react";
-import UploadFileAction from "./upload-file-action";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  FilePlusIcon,
+  FolderPlusIcon,
+  PlusIcon,
+  UploadIcon,
+} from "lucide-react";
+import { useRef } from "react";
+import UploadFileInput from "./upload-file-input";
 
 interface Props {
   createFolder: () => void;
@@ -13,29 +25,31 @@ export default function ExplorerHeaderActions({
   createDocument,
   folderId,
 }: Readonly<Props>) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
     <>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className="text-muted-foreground"
-        aria-label="Nouveau dossier"
-        title="Nouveau dossier"
-        onClick={createFolder}
-      >
-        <FolderPlusIcon />
-      </Button>
-      <Button
-        variant="ghost"
-        size="icon-sm"
-        className="text-muted-foreground"
-        aria-label="Nouveau document"
-        title="Nouveau document"
-        onClick={createDocument}
-      >
-        <FilePlusIcon />
-      </Button>
-      <UploadFileAction folderId={folderId} />
+      <UploadFileInput ref={inputRef} folderId={folderId} />
+      <DropdownMenu>
+        <DropdownMenuTrigger render={<Button size="sm" aria-label="Nouveau" />}>
+          <PlusIcon />
+          <span className="max-sm:hidden">Nouveau</span>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="min-w-52">
+          <DropdownMenuItem onClick={createFolder}>
+            <FolderPlusIcon />
+            Nouveau dossier
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={createDocument}>
+            <FilePlusIcon />
+            Nouveau document
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => inputRef.current?.click()}>
+            <UploadIcon />
+            Téléverser des fichiers
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </>
   );
 }

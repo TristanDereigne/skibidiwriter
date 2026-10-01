@@ -27,7 +27,7 @@ export default function TrailBreadcrumb({
   const [isRenaming, setIsRenaming] = useState(false);
 
   const trail = [
-    { id: null, name: "Explorer" },
+    { id: null, name: "Mon drive" },
     ...folders,
     ...(current === undefined ? [] : [{ id: "current", name: current }]),
   ];
@@ -38,7 +38,7 @@ export default function TrailBreadcrumb({
       <BreadcrumbList className="flex-nowrap text-sm">
         {trail.slice(0, -1).map((crumb) => (
           <Fragment key={crumb.id ?? "root"}>
-            <BreadcrumbItem>
+            <BreadcrumbItem className="shrink-0 whitespace-nowrap">
               <BreadcrumbLink render={<Link to={explorerPath(crumb.id)} />}>
                 {crumb.name}
               </BreadcrumbLink>

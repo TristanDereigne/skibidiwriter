@@ -1,21 +1,19 @@
 import { Separator } from "@/components/ui/separator.tsx";
 
 import { DropdownMenuProfile } from "@/components/sections/header/dropdown-menu-profile.tsx";
-import { ModeToggle } from "../components/mode-toggle.tsx";
 
 interface Props {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   actions?: React.ReactNode;
 }
 
 export default function AppHeader({ children, actions }: Readonly<Props>) {
   return (
     <>
-      <header className="mx-10 flex h-16 shrink-0 items-center justify-between px-6">
-        {children}
-        {actions && <div className="ml-auto flex items-center">{actions}</div>}
-        <div className={"flex flex-row gap-4"}>
-          <ModeToggle />
+      <header className="flex h-16 shrink-0 items-center justify-between gap-3 px-6">
+        <div className="flex min-w-0 items-center gap-5">{children}</div>
+        <div className="flex shrink-0 items-center gap-2">
+          {actions}
           <DropdownMenuProfile />
         </div>
       </header>
