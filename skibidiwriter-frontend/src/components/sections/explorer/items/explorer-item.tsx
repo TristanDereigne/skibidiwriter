@@ -3,11 +3,12 @@ import { cn } from "cn";
 import { type LucideIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { type DragItem } from "../drag/drag-item";
+import { useItemDrag } from "../drag/use-item-drag";
 import ExplorerDeleteDialog from "./explorer-delete-dialog";
 import ExplorerInfoDialog, { type InfoRow } from "./explorer-info-dialog";
 import ExplorerItemLabel from "./explorer-item-label";
 import ExplorerItemMenu from "./explorer-item-menu";
-import { useItemDrag } from "../drag/use-item-drag";
+import ExplorerShareDialog from "./explorer-share-dialog";
 
 interface Props {
   icon: LucideIcon;
@@ -50,6 +51,7 @@ export default function ExplorerItem({
 }: Readonly<Props>) {
   const [renaming, setRenaming] = useState(startRenaming);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [infoOpen, setInfoOpenState] = useState(false);
   const { dropActive, dragProps } = useItemDrag({
     dragItem,
@@ -119,6 +121,7 @@ export default function ExplorerItem({
         <ExplorerItemMenu
           onRename={() => setRenaming(true)}
           onDownload={onDownload}
+          onShare={() => setShareOpen(true)}
           onDelete={() => setDeleteOpen(true)}
           onInfo={() => setInfoOpen(true)}
         />
@@ -138,6 +141,12 @@ export default function ExplorerItem({
         onOpenChange={setInfoOpen}
         title={`Informations de "${name}"`}
         rows={infoRows}
+      />
+
+      <ExplorerShareDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        title={`Partager "${name}"`}
       />
     </>
   );

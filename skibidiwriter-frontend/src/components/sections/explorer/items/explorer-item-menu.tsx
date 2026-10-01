@@ -3,18 +3,26 @@ import {
   ContextMenuItem,
   ContextMenuSeparator,
 } from "@/components/ui/context-menu";
-import { DownloadIcon, InfoIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  DownloadIcon,
+  InfoIcon,
+  PencilIcon,
+  Trash2Icon,
+  UserPlusIcon,
+} from "lucide-react";
 
 interface Props {
-  onRename: () => void;
-  onDownload?: () => void;
-  onDelete: () => void;
-  onInfo: () => void;
+  onRename: VoidFunction;
+  onDownload?: VoidFunction;
+  onShare: VoidFunction;
+  onDelete: VoidFunction;
+  onInfo: VoidFunction;
 }
 
 export default function ExplorerItemMenu({
   onRename,
   onDownload,
+  onShare,
   onDelete,
   onInfo,
 }: Readonly<Props>) {
@@ -30,6 +38,10 @@ export default function ExplorerItemMenu({
           Télécharger
         </ContextMenuItem>
       )}
+      <ContextMenuItem onClick={onShare}>
+        <UserPlusIcon />
+        Partager
+      </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem variant="destructive" onClick={onDelete}>
         <Trash2Icon />
