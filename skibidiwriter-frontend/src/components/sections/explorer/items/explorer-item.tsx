@@ -146,7 +146,7 @@ export default function ExplorerItem({
       <ExplorerShareDialog
         open={isShareOpen}
         onOpenChange={setIsShareOpen}
-        title={`Partager "${name}"`}
+        fileName={name}
       />
     </>
   );

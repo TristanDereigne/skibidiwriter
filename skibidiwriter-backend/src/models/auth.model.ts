@@ -1,16 +1,16 @@
 import { relations } from "drizzle-orm/_relations";
 import {
-  pgTable,
-  text,
-  timestamp,
   boolean,
   index,
   integer,
+  pgTable,
+  text,
+  timestamp,
 } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  name: text("name").unique().notNull(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
@@ -21,6 +21,7 @@ export const user = pgTable("user", {
     .notNull(),
   twoFactorEnabled: boolean("two_factor_enabled").default(false),
 });
+export type UserRow = typeof user.$inferSelect;
 
 export const session = pgTable(
   "session",

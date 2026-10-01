@@ -6,3 +6,4 @@ export * from "./folder";
 export * from "./messages";
 export * from "./name";
 export * from "./socket";
+export * from "./user";

@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useUserContext } from "@/context/UserContext.tsx";
+import { useEffect, useState } from "react";
 
 export const ProfileRounded = ({
   width,
