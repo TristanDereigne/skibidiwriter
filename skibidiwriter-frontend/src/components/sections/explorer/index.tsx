@@ -19,6 +19,7 @@ import { cn } from "cn";
 import { FilePlusIcon, FolderPlusIcon, UploadCloudIcon } from "lucide-react";
 import { useContext, useEffect, useState } from "react";
 import { hasDragItem } from "./drag-item";
+import ExplorerHeaderTabs from "./explorer-header-tabs";
 import { useUploadFiles } from "./use-upload-files";
 
 export default function Explorer() {
@@ -28,7 +29,12 @@ export default function Explorer() {
   const setHeaderActions = headerContext?.setHeaderActions;
 
   useEffect(() => {
-    setHeaderChildren?.(<TrailBreadcrumb folders={path} />);
+    setHeaderChildren?.(
+      <div className="flex gap-5 items-center">
+        <TrailBreadcrumb folders={path} />
+        <ExplorerHeaderTabs />
+      </div>,
+    );
     setHeaderActions?.(
       <ExplorerHeaderActions
         createDocument={createDocument}

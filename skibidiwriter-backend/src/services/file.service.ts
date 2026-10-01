@@ -1,7 +1,8 @@
 import { db } from "@/libs/db";
 import { eqOrNull } from "@/libs/sql";
 import { fileTable } from "@/models";
-import { and, eq, getColumns, ne, sql } from "drizzle-orm";
+import { fileShareTable } from "@/models/file-share.model";
+import { and, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
 import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
 
 const PERSIST_DELAY = 500;
@@ -21,8 +22,25 @@ const {
   ...summarySelect
 } = getColumns(fileTable);
 
-function accessibleTo(userId: string) {
+function ownedBy(userId: string) {
   return eq(fileTable.ownerId, userId);
+}
+
+function accessibleTo(userId: string) {
+  return or(
+    ownedBy(userId),
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(fileShareTable)
+        .where(
+          and(
+            eq(fileShareTable.fileId, fileTable.id),
+            eq(fileShareTable.userId, userId),
+          ),
+        ),
+    ),
+  );
 }
 
 async function hasAccess(id: string, userId: string) {
@@ -38,7 +56,7 @@ async function findInFolder(folderId: string | null, userId: string) {
   return await db
     .select(summarySelect)
     .from(fileTable)
-    .where(and(eqOrNull(fileTable.folderId, folderId), accessibleTo(userId)));
+    .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)));
 }
 
 async function nameTaken(
@@ -53,7 +71,7 @@ async function nameTaken(
     .where(
       and(
         eqOrNull(fileTable.folderId, folderId),
-        accessibleTo(userId),
+        ownedBy(userId),
         eq(sql`lower(${fileTable.name})`, sql`lower(${name})`),
         exceptId ? ne(fileTable.id, exceptId) : undefined,
       ),
@@ -119,7 +137,7 @@ async function rename(id: string, name: string, userId: string) {
   const [row] = await db
     .update(fileTable)
     .set({ name })
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)))
+    .where(and(eq(fileTable.id, id), ownedBy(userId)))
     .returning(summarySelect);
 
   return row;
@@ -129,7 +147,7 @@ async function move(id: string, folderId: string | null, userId: string) {
   const [row] = await db
     .update(fileTable)
     .set({ folderId })
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)))
+    .where(and(eq(fileTable.id, id), ownedBy(userId)))
     .returning(summarySelect);
 
   return row;
@@ -138,7 +156,7 @@ async function move(id: string, folderId: string | null, userId: string) {
 async function remove(id: string, userId: string) {
   const [row] = await db
     .delete(fileTable)
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)))
+    .where(and(eq(fileTable.id, id), ownedBy(userId)))
     .returning({ id: fileTable.id });
 
   if (row) await forget([id]);
