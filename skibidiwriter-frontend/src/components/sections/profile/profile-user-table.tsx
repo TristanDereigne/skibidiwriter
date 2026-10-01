@@ -20,16 +20,14 @@ import { useEffect, useState } from "react";
 
 import type { UsersDto } from "skibidiwriter-shared";
 import { useUserContext } from "@/context/UserContext.tsx";
-import {Badge} from "@/components/ui/badge.tsx";
+import { Badge } from "@/components/ui/badge.tsx";
 
 export const ProfileUserTable = () => {
   const userContext = useUserContext();
 
   const [users, setUsers] = useState<UsersDto[]>([]);
 
-  const addNewAccount = () => {
-
-  }
+  const addNewAccount = () => {};
 
   useEffect(() => {
     if (userContext.usersForAdmin) {
@@ -63,11 +61,18 @@ export const ProfileUserTable = () => {
         <TableBody>
           {users.map((user: UsersDto) => (
             <TableRow key={user.email}>
-              <TableCell className="font-medium">{user.name} {(user.email==userContext.email)&&(<Badge className="relative left-1 bg-purple-50 text-[#432DD7] dark:bg-[#432DD7] dark:text-purple-300">
-                Vous
-              </Badge>)}</TableCell>
+              <TableCell className="font-medium">
+                {user.name}{" "}
+                {user.email == userContext.email && (
+                  <Badge className="relative left-1 bg-purple-50 text-[#432DD7] dark:bg-[#432DD7] dark:text-purple-300">
+                    Vous
+                  </Badge>
+                )}
+              </TableCell>
               <TableCell>{user.email}</TableCell>
-              <TableCell>{(user.role === "admin") ? "Admin" : "Membre"}</TableCell>
+              <TableCell>
+                {user.role === "admin" ? "Admin" : "Membre"}
+              </TableCell>
               <TableCell className="text-right">
                 <DropdownMenu>
                   <DropdownMenuTrigger
@@ -94,7 +99,9 @@ export const ProfileUserTable = () => {
           <TableRow>
             <TableCell colSpan={3}></TableCell>
             <TableCell className="text-right">
-              <Button variant="default" onClick={addNewAccount}>Ajouter un membre</Button>
+              <Button variant="default" onClick={addNewAccount}>
+                Ajouter un membre
+              </Button>
             </TableCell>
           </TableRow>
         </TableFooter>

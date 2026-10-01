@@ -38,11 +38,11 @@ export const auth = betterAuth({
   },
   trustedOrigins: [env.FRONTEND_URL_NO_SLASH],
   plugins: [
-      twoFactor(),
-      admin({
+    twoFactor(),
+    admin({
       defaultRole: "user",
       adminRoles: ["admin"],
-      adminUserIds: [env.ADMIN_ID]
-      })
+      adminUserIds: [env.ADMIN_ID],
+    }),
   ],
 });
