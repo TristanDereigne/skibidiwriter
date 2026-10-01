@@ -33,7 +33,7 @@ export function DropdownMenuProfile() {
       <DropdownMenuTrigger>
         <ProfileRounded width={32} height={32} textSize={16} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent className="min-w-48">
         <DropdownMenuGroup>
           <DropdownMenuItem onClick={() => navigate("/")}>
             Explorateur
