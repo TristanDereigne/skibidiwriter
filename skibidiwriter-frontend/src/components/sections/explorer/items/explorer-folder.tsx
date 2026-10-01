@@ -1,16 +1,10 @@
-import { toast } from "@/components/ui/toast";
-import { useMoveFile } from "@/hooks/use-files";
-import {
-  useDeleteFolder,
-  useMoveFolder,
-  useRenameFolder,
-} from "@/hooks/use-folders";
+import { useDeleteFolder, useRenameFolder } from "@/hooks/use-folders";
 import { explorerPath } from "@/lib/paths";
 import { FolderIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 import type { FolderDTO } from "skibidiwriter-shared";
 import { useExplorer } from "../context/use-explorer";
-import type { DragItem } from "../drag/drag-item";
+import { useMoveItem } from "../drag/use-move-item";
 import ExplorerItemProvider from "./context/explorer-item-provider";
 import ExplorerDeleteDialog from "./dialogs/explorer-delete-dialog";
 import ExplorerFolderInfoDialog from "./dialogs/explorer-folder-info-dialog";
@@ -25,23 +19,7 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
   const navigate = useNavigate();
   const renameFolder = useRenameFolder();
   const deleteFolder = useDeleteFolder();
-  const moveFolder = useMoveFolder();
-  const moveFile = useMoveFile();
-
-  function handleDrop(item: DragItem) {
-    const onError = (error: Error) =>
-      toast.add({
-        title: "Déplacement impossible",
-        description: error.message,
-        type: "error",
-      });
-
-    if (item.kind === "file") {
-      moveFile.mutate({ id: item.id, folderId: folder.id }, { onError });
-    } else if (item.id !== folder.id) {
-      moveFolder.mutate({ id: item.id, parentId: folder.id }, { onError });
-    }
-  }
+  const moveItem = useMoveItem();
 
   return (
     <ExplorerItemProvider
@@ -52,7 +30,7 @@ export default function ExplorerFolder({ folder }: Readonly<Props>) {
         icon={FolderIcon}
         iconClassName="fill-amber-400/25 text-amber-500"
         dragItem={{ kind: "folder", id: folder.id }}
-        onDropItem={handleDrop}
+        onDropItem={(item) => moveItem(item, folder.id)}
         nameLabel="Nom du dossier"
         subtitle="Dossier"
         onOpen={() => navigate(explorerPath(folder.id))}

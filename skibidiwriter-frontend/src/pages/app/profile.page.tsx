@@ -125,10 +125,12 @@ export const ProfilePage = () => {
         </div>
 
         <div className={"w-10/12"}>
+          <h2 className={"font-semibold mb-2"}>Membres</h2>
           <ProfileUserTable />
         </div>
 
-        <div className={"flex flex-col justify-between w-10/12 flex-1"}>
+        <div className={"flex flex-col w-10/12 flex-1"}>
+          <h2 className={"font-semibold mb-2"}>Paramètres</h2>
           <div className={"flex flex-row items-center justify-between gap-4"}>
             <ProfileSettingsContent />
           </div>
