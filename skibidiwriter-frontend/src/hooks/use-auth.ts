@@ -99,7 +99,7 @@ export function useAuth() {
     const { data, error }: VerifyResponse =
       await authClient.twoFactor.verifyTotp({
         code: codeOTP,
-        trustDevice: true,
+        trustDevice: false,
       });
 
     if (error) {

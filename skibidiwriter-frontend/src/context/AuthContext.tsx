@@ -122,12 +122,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const response: Login2FAResponse | any = await auth.signIn(email, password);
 
         if(response?.twoFactorMethods) {
-          const data: Login2FAResponse = response;
-          console.log("Login for 2FA:", data.twoFactorMethods);
           setIs2FAAccount(true)
-        } else {
-          const data: any = response.data;
-          console.log("Login basic:", data);
         }
 
         if (session?.user.name) {
@@ -136,7 +131,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       },
       logout: async () => {
+        setIs2FAAccount(false);
+        setIs2FAEnabled(false);
         await authClient.signOut();
+
       },
     }),
     [session, isLoggedIn, isPending, auth, check2FA, is2FAEnabled, userContext],
