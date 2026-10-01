@@ -23,6 +23,7 @@ export const app = new Hono()
       origin: env.FRONTEND_URL_NO_SLASH,
       credentials: true,
       allowHeaders: ["Content-Type", "Authorization"],
+      exposeHeaders: ["Content-Disposition"],
       allowMethods: ["POST", "GET", "PATCH", "OPTIONS", "DELETE"],
     }),
   )
