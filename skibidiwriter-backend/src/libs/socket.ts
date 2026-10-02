@@ -1,9 +1,10 @@
 import type { WSContext } from "hono/ws";
-import type { ServerEvent } from "skibidiwriter-shared";
+import type { ServerEvent, UserSummaryDTO } from "skibidiwriter-shared";
 
 // Hono hands out a new WSContext per event, so connections are keyed by the underlying socket.
 const connections = new Map<unknown, WSContext>();
 const rooms = new Map<string, Map<unknown, WSContext>>();
+const presence = new Map<string, Map<unknown, UserSummaryDTO>>();
 
 const keyOf = (ws: WSContext) => ws.raw ?? ws;
 
@@ -40,6 +41,37 @@ export function roomsOf(ws: WSContext): string[] {
   const key = keyOf(ws);
 
   return [...rooms].filter(([, room]) => room.has(key)).map(([id]) => id);
+}
+
+export function markPresent(
+  roomId: string,
+  ws: WSContext,
+  user: UserSummaryDTO,
+): boolean {
+  let room = presence.get(roomId);
+  if (!room) {
+    room = new Map();
+    presence.set(roomId, room);
+  }
+
+  if (room.has(keyOf(ws))) return false;
+
+  room.set(keyOf(ws), user);
+  return true;
+}
+
+export function markAbsent(roomId: string, ws: WSContext): boolean {
+  const room = presence.get(roomId);
+  if (!room?.delete(keyOf(ws))) return false;
+
+  if (room.size === 0) presence.delete(roomId);
+  return true;
+}
+
+export function presentUsers(roomId: string): UserSummaryDTO[] {
+  const users = presence.get(roomId)?.values() ?? [];
+
+  return [...new Map([...users].map((user) => [user.id, user])).values()];
 }
 
 export function send(ws: WSContext, event: ServerEvent) {

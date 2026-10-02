@@ -4,6 +4,9 @@ import {
   broadcastToRoom,
   joinRoom,
   leaveRoom,
+  markAbsent,
+  markPresent,
+  presentUsers,
   removeConnection,
   roomsOf,
   send,
@@ -20,10 +23,14 @@ import {
   ErrorCode,
   ServerEventType,
   type ClientEvent,
+  type UserSummaryDTO,
 } from "skibidiwriter-shared";
 
 export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
-  const userId = ctx.get("userId");
+  const user: UserSummaryDTO = {
+    id: ctx.get("userId"),
+    name: ctx.get("user").name,
+  };
   let connection: WSContext | undefined;
   let queue: Promise<void> = Promise.resolve();
 
@@ -45,7 +52,7 @@ export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
       }
 
       queue = queue
-        .then(() => handleClientEvent(result.data, ws, userId))
+        .then(() => handleClientEvent(result.data, ws, user))
         .catch((error) => console.error("Socket event failed", error));
 
       await queue;
@@ -86,7 +93,7 @@ function parseClientEvent(
 async function handleClientEvent(
   event: ClientEvent,
   sender: WSContext,
-  userId: string,
+  user: UserSummaryDTO,
 ) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
@@ -96,7 +103,7 @@ async function handleClientEvent(
       break;
     }
     case ClientEventType.Document_Join: {
-      const canAccess = await fileService.hasAccess(event.documentId, userId);
+      const canAccess = await fileService.hasAccess(event.documentId, user.id);
       if (!canAccess) return sendDocumentNotFound(sender);
 
       const operations = await fileService.operations(event.documentId);
@@ -140,13 +147,31 @@ async function handleClientEvent(
       }
       break;
     }
+    case ClientEventType.Document_Present: {
+      if (!roomsOf(sender).includes(event.documentId)) return;
+
+      if (markPresent(event.documentId, sender, user)) {
+        broadcastParticipants(event.documentId);
+      }
+      break;
+    }
   }
 }
 
 function leaveDocument(connection: WSContext, documentId: string) {
-  if (leaveRoom(connection, documentId)) {
-    void fileService.release(documentId);
-  }
+  const wasPresent = markAbsent(documentId, connection);
+  const isEmpty = leaveRoom(connection, documentId);
+
+  if (wasPresent) broadcastParticipants(documentId);
+  if (isEmpty) void fileService.release(documentId);
+}
+
+function broadcastParticipants(documentId: string) {
+  broadcastToRoom(documentId, {
+    type: ServerEventType.Document_Participants,
+    documentId,
+    participants: presentUsers(documentId),
+  });
 }
 
 function sendDocumentNotFound(ws: WSContext) {

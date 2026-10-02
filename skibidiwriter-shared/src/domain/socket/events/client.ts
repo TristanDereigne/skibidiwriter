@@ -7,6 +7,7 @@ export const ClientEventType = {
   Document_Join: "document_join",
   Document_Leave: "document_leave",
   Document_Operations: "document_operations",
+  Document_Present: "document_present",
 } as const;
 export type ClientEventType =
   (typeof ClientEventType)[keyof typeof ClientEventType];
@@ -28,6 +29,10 @@ export const ClientEventSchema = z.discriminatedUnion("type", [
     type: z.literal(ClientEventType.Document_Operations),
     documentId: z.uuid(),
     operations: z.array(DocumentOperationSchema),
+  }),
+  z.object({
+    type: z.literal(ClientEventType.Document_Present),
+    documentId: z.uuid(),
   }),
 ]);
 export type ClientEvent = z.infer<typeof ClientEventSchema>;

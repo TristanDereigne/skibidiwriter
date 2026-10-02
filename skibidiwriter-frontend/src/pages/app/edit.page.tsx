@@ -1,5 +1,6 @@
 import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
 import DocumentEditor from "@/components/sections/document/document-editor";
+import DocumentParticipants from "@/components/sections/document/document-participants";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { DownloadIcon } from "lucide-react";
@@ -25,6 +26,7 @@ export const EditPage = () => {
       <AppHeader
         actions={
           <>
+            {documentId && <DocumentParticipants documentId={documentId} />}
             <Badge variant={status === "connected" ? "secondary" : "outline"}>
               <span
                 className={cn(

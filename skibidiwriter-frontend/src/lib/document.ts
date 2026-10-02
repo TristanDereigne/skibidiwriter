@@ -4,10 +4,12 @@ import {
   ServerEventType,
   TextCrdt,
   type DocumentOperation,
+  type UserSummaryDTO,
 } from "skibidiwriter-shared";
 import { realtime, useConnectionStatus } from "./realtime";
 
 const PREFETCH_TTL = 15_000;
+const NO_PARTICIPANTS: UserSummaryDTO[] = [];
 
 class DocumentSession {
   readonly #crdt = new TextCrdt(crypto.randomUUID());
@@ -16,6 +18,7 @@ class DocumentSession {
   #joined = false;
   #users = 0;
   #expiry: ReturnType<typeof setTimeout> | undefined;
+  #participants = NO_PARTICIPANTS;
 
   readonly id: string;
 
@@ -24,6 +27,8 @@ class DocumentSession {
   }
 
   getText = () => this.#text;
+
+  getParticipants = () => this.#participants;
 
   subscribe = (subscriber: () => void) => {
     this.#subscribers.add(subscriber);
@@ -37,7 +42,10 @@ class DocumentSession {
       type: ClientEventType.Document_Join,
       documentId: this.id,
     });
-    if (this.#joined) this.#sendOperations(this.#crdt.toOperations());
+    if (!this.#joined) return;
+
+    this.#sendOperations(this.#crdt.toOperations());
+    this.#sendPresence();
   }
 
   prefetch() {
@@ -52,7 +60,9 @@ class DocumentSession {
     clearTimeout(this.#expiry);
     this.#users++;
     sessions.set(this.id, this);
-    if (!this.#joined) this.join();
+
+    if (this.#joined) this.#sendPresence();
+    else this.join();
   }
 
   release() {
@@ -67,6 +77,7 @@ class DocumentSession {
       documentId: this.id,
     });
     this.#joined = false;
+    this.setParticipants(NO_PARTICIPANTS);
     if (sessions.get(this.id) === this) sessions.delete(this.id);
   }
 
@@ -80,6 +91,22 @@ class DocumentSession {
     this.#emit();
   };
 
+  setParticipants(participants: UserSummaryDTO[]) {
+    if (participants === this.#participants) return;
+
+    this.#participants = participants;
+    this.#notify();
+  }
+
+  #sendPresence() {
+    if (!this.#joined || this.#users === 0) return;
+
+    realtime.send({
+      type: ClientEventType.Document_Present,
+      documentId: this.id,
+    });
+  }
+
   #sendOperations(operations: DocumentOperation[]) {
     if (operations.length === 0) return;
 
@@ -92,6 +119,10 @@ class DocumentSession {
 
   #emit() {
     this.#text = this.#crdt.text;
+    this.#notify();
+  }
+
+  #notify() {
     for (const subscriber of this.#subscribers) subscriber();
   }
 }
@@ -117,10 +148,26 @@ realtime.onOpen(() => {
 });
 
 realtime.onEvent((event) => {
-  if (event.type === ServerEventType.Document_Operations) {
-    sessions.get(event.documentId)?.apply(event.operations);
+  switch (event.type) {
+    case ServerEventType.Document_Operations:
+      sessions.get(event.documentId)?.apply(event.operations);
+      break;
+    case ServerEventType.Document_Participants:
+      sessions.get(event.documentId)?.setParticipants(event.participants);
+      break;
   }
 });
+
+export function useDocumentParticipants(documentId: string) {
+  const status = useConnectionStatus();
+  const session = useMemo(() => sessionFor(documentId), [documentId]);
+  const participants = useSyncExternalStore(
+    session.subscribe,
+    session.getParticipants,
+  );
+
+  return status === "connected" ? participants : NO_PARTICIPANTS;
+}
 
 export function useSkibidiDocument(documentId: string) {
   const status = useConnectionStatus();
