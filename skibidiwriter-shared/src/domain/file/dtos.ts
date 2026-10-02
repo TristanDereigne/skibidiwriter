@@ -1,5 +1,6 @@
 import z from "zod";
 import { NameSchema } from "../name";
+import type { UserSummaryDTO } from "../user";
 
 export const MAX_FILE_SIZE_BYTES = 8 * 1024 * 1024;
 export const MAX_DOCUMENT_CONTENT_LENGTH = 200_000;
@@ -22,6 +23,7 @@ export interface FileDTO {
   kind: FileKind;
   mimeType: string;
   sizeBytes: number;
+  lastModifiedBy: UserSummaryDTO | null;
   createdAt: string;
   updatedAt: string;
 }

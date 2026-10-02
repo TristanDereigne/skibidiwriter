@@ -34,6 +34,9 @@ export const fileTable = pgTable(
     ownerId: text("owner_id").references(() => user.id, {
       onDelete: "cascade",
     }),
+    lastModifiedById: text("last_modified_by_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

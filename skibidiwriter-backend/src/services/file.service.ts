@@ -14,6 +14,7 @@ import {
   or,
   sql,
 } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import {
   Snapshot,
   TextCrdt,
@@ -25,6 +26,7 @@ const DOCUMENT_MIME_TYPE = "text/markdown";
 
 interface OpenDocument {
   crdt: TextCrdt;
+  lastEditorId?: string;
   persistTimer?: ReturnType<typeof setTimeout>;
 }
 
@@ -34,8 +36,23 @@ const releasing = new Map<string, Promise<void>>();
 const {
   data: _data,
   snapshot: _snapshot,
-  ...summarySelect
+  lastModifiedById: _lastModifiedById,
+  ...fileColumns
 } = getColumns(fileTable);
+
+const editor = alias(user, "editor");
+
+const summarySelect = {
+  ...fileColumns,
+  lastModifiedBy: { id: editor.id, name: editor.name },
+};
+
+function selectSummary() {
+  return db
+    .select(summarySelect)
+    .from(fileTable)
+    .leftJoin(editor, eq(editor.id, fileTable.lastModifiedById));
+}
 
 function ownedBy(userId: string) {
   return eq(fileTable.ownerId, userId);
@@ -95,25 +112,30 @@ async function isOwner(id: string, userId: string) {
 }
 
 async function findInFolder(folderId: string | null, userId: string) {
-  return await db
-    .select(summarySelect)
-    .from(fileTable)
+  return await selectSummary()
     .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)))
     .orderBy(asc(sql`lower(${fileTable.name})`));
 }
 
 async function findSharedWith(userId: string) {
-  return await db
+  const rows = await db
     .select({
-      file: summarySelect,
+      file: fileColumns,
+      lastModifiedBy: summarySelect.lastModifiedBy,
       owner: { id: user.id, name: user.name },
       sharedAt: fileShareTable.createdAt,
     })
     .from(fileShareTable)
     .innerJoin(fileTable, eq(fileTable.id, fileShareTable.fileId))
     .innerJoin(user, eq(user.id, fileTable.ownerId))
+    .leftJoin(editor, eq(editor.id, fileTable.lastModifiedById))
     .where(eq(fileShareTable.userId, userId))
     .orderBy(desc(fileShareTable.createdAt));
+
+  return rows.map(({ file, lastModifiedBy, ...rest }) => ({
+    ...rest,
+    file: { ...file, lastModifiedBy },
+  }));
 }
 
 async function isNameTaken(
@@ -138,19 +160,17 @@ async function isNameTaken(
 }
 
 async function findById(id: string, userId: string) {
-  const [row] = await db
-    .select(summarySelect)
-    .from(fileTable)
-    .where(and(eq(fileTable.id, id), accessibleTo(userId)));
+  const [row] = await selectSummary().where(
+    and(eq(fileTable.id, id), accessibleTo(userId)),
+  );
 
   return row;
 }
 
 async function findOwnedById(id: string, userId: string) {
-  const [row] = await db
-    .select(summarySelect)
-    .from(fileTable)
-    .where(and(eq(fileTable.id, id), ownedBy(userId)));
+  const [row] = await selectSummary().where(
+    and(eq(fileTable.id, id), ownedBy(userId)),
+  );
 
   return row;
 }
@@ -174,10 +194,11 @@ async function createDocument(
       folderId,
       snapshot: crdt.snapshot(),
       ownerId: userId,
+      lastModifiedById: userId,
     })
-    .returning(summarySelect);
+    .returning({ id: fileTable.id });
 
-  return row!;
+  return (await findOwnedById(row!.id, userId))!;
 }
 
 async function createUpload(
@@ -193,30 +214,33 @@ async function createUpload(
       sizeBytes: file.data.length,
       folderId,
       ownerId: userId,
+      lastModifiedById: userId,
     })
-    .returning(summarySelect);
+    .returning({ id: fileTable.id });
 
-  return row!;
+  return (await findOwnedById(row!.id, userId))!;
 }
 
 async function rename(id: string, name: string, userId: string) {
   const [row] = await db
     .update(fileTable)
-    .set({ name })
+    .set({ name, lastModifiedById: userId })
     .where(and(eq(fileTable.id, id), ownedBy(userId)))
-    .returning(summarySelect);
+    .returning({ id: fileTable.id });
+  if (!row) return;
 
-  return row;
+  return await findOwnedById(row.id, userId);
 }
 
 async function move(id: string, folderId: string | null, userId: string) {
   const [row] = await db
     .update(fileTable)
-    .set({ folderId })
+    .set({ folderId, lastModifiedById: userId })
     .where(and(eq(fileTable.id, id), ownedBy(userId)))
-    .returning(summarySelect);
+    .returning({ id: fileTable.id });
+  if (!row) return;
 
-  return row;
+  return await findOwnedById(row.id, userId);
 }
 
 async function remove(id: string, userId: string) {
@@ -300,6 +324,7 @@ async function persist(id: string, document: OpenDocument) {
     .set({
       snapshot: document.crdt.snapshot(),
       sizeBytes: Buffer.byteLength(document.crdt.text),
+      lastModifiedById: document.lastEditorId,
     })
     .where(eq(fileTable.id, id));
 }
@@ -313,6 +338,7 @@ async function operations(id: string): Promise<DocumentOperation[] | null> {
 async function apply(
   id: string,
   incoming: DocumentOperation[],
+  userId: string,
 ): Promise<DocumentOperation[] | null> {
   const document = await open(id);
   if (!document) return null;
@@ -320,6 +346,7 @@ async function apply(
   const applied = document.crdt.apply(incoming);
 
   if (applied.length > 0) {
+    document.lastEditorId = userId;
     clearTimeout(document.persistTimer);
     document.persistTimer = setTimeout(
       () => void persist(id, document),

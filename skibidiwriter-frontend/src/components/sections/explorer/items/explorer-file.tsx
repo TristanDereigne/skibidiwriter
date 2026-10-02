@@ -43,7 +43,12 @@ export default function ExplorerFile({ file }: Readonly<Props>) {
         dragItem={{ kind: "file", id: file.id }}
         nameLabel={nameLabel}
         isShareable
-        subtitle={dateFormat.format(new Date(file.updatedAt))}
+        subtitle={[
+          dateFormat.format(new Date(file.updatedAt)),
+          file.lastModifiedBy?.name,
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         onPrefetch={isDocument ? () => prefetchDocument(file.id) : undefined}
         onOpen={isDocument ? () => navigate(editPath(file.id)) : download}
         onDownload={download}

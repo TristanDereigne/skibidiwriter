@@ -146,6 +146,7 @@ async function handleClientEvent(
       const operations = await fileService.apply(
         event.documentId,
         event.operations,
+        user.id,
       );
       if (!operations) return sendDocumentNotFound(sender);
 

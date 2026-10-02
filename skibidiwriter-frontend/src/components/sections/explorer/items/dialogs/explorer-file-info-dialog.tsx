@@ -25,6 +25,7 @@ export default function ExplorerFileInfoDialog({
           label: "Modifié le",
           value: dateTimeFormat.format(new Date(file.updatedAt)),
         },
+        { label: "Modifié par", value: file.lastModifiedBy?.name ?? "—" },
       ]}
     />
   );

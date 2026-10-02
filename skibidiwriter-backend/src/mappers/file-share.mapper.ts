@@ -1,6 +1,6 @@
-import type { FileRow, FileShareRow, UserRow } from "@/models";
+import type { FileShareRow, UserRow } from "@/models";
 import type { FileShareDTO, SharedFileDTO } from "skibidiwriter-shared";
-import { toFileDTO } from "./file.mapper";
+import { toFileDTO, type FileSummaryRow } from "./file.mapper";
 import { toUserSummaryDTO } from "./user.mapper";
 
 export function toFileShareDTO(row: FileShareRow): FileShareDTO {
@@ -11,7 +11,7 @@ export function toFileShareDTO(row: FileShareRow): FileShareDTO {
 }
 
 interface SharedFileRow {
-  file: Omit<FileRow, "data" | "snapshot">;
+  file: FileSummaryRow;
   owner: Pick<UserRow, "id" | "name">;
   sharedAt: Date;
 }
