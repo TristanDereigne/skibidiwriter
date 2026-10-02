@@ -46,6 +46,10 @@ export const ProfileUserTable = () => {
     }
   }, [userContext.usersForAdmin]);
 
+  const handleUserDelete = async (email: string) => {
+    await userContext.deleteUser(email);
+  };
+
   return (
     <div className="max-h-72 overflow-y-auto border border-purple rounded-sm">
       <Table>
@@ -82,10 +86,13 @@ export const ProfileUserTable = () => {
                     }
                   />
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Bannir</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      Delete
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => handleUserDelete(user.email)}
+                    >
+                      Supprimer
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

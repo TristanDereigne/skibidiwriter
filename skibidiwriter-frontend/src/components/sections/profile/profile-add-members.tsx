@@ -64,6 +64,11 @@ export const ProfileAddMembers = () => {
       await userContext.createUser(email, password, name, role);
     }
     setIsOpen(false);
+    setName("");
+    setEmail("");
+    setPassword("");
+    setRoleInput("");
+    setPasswordConfirm("");
   };
 
   return (
@@ -137,8 +142,8 @@ export const ProfileAddMembers = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectItem value="membre">Membre</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="Membre">Membre</SelectItem>
+                    <SelectItem value="Admin">Admin</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>

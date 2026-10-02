@@ -51,9 +51,9 @@ export function useUser() {
     return newUser.user;
   };
 
-  const deleteUser = async (userEmail): Promise<boolean> => {
-    const { data: deletedUser, error } = await authClient.admin.removeUser({
-      userId: "user-id",
+  const deleteUser = async (user: UsersDto): Promise<boolean> => {
+    const { error } = await authClient.admin.removeUser({
+      userId: user.id,
     });
 
     if (error) {
@@ -68,5 +68,6 @@ export function useUser() {
     updateEmail,
     getUsers,
     createUser,
+    deleteUser,
   };
 }

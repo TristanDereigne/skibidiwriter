@@ -24,6 +24,7 @@ type UserContextType = {
     name: string,
     role: "user" | "admin",
   ) => Promise<UserWithRole | null>;
+  deleteUser: (email: string) => Promise<true | null | undefined>;
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -89,6 +90,25 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const deleteUser = async (email: string) => {
+    if (usersForAdmin) {
+      const userToDelete = usersForAdmin.find(
+        (userInList) => userInList.email === email,
+      );
+      if (userToDelete) {
+        const isDeleted: boolean = await userHook.deleteUser(userToDelete);
+        if (isDeleted) {
+          await getUsersForAdmin();
+          return true;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+  };
+
   const value = useMemo<UserContextType>(
     () => ({
       user,
@@ -104,6 +124,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       updateEmail,
       getUsersForAdmin,
       createUser,
+      deleteUser,
     }),
     [user, email, usersForAdmin, setUser, setEmail],
   );

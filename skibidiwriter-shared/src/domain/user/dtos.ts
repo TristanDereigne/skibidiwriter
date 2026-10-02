@@ -3,4 +3,9 @@ export interface UserSummaryDTO {
   name: string;
 }
 
-export type UsersDto = { name: string; email: string; role: string };
+export type UsersDto = {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+};

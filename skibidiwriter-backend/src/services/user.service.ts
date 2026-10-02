@@ -39,7 +39,12 @@ const updateUserEmail = async (oldEmail: string, email: string) => {
 const getUsers = async () => {
   try {
     const response: UsersDto[] = await db
-      .select({ name: user.name, email: user.email, role: user.role })
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      })
       .from(user);
 
     if (response) {
