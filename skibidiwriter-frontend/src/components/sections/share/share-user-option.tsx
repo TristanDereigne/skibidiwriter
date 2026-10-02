@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import UserAvatar from "@/components/shared/user-avatar";
 import {
   Card,
   CardContent,
@@ -34,20 +34,16 @@ export default function ShareUserOption({
         )}
       >
         <CardHeader className="px-3">
-          <Avatar className="size-10">
-            <AvatarFallback
-              className={cn(
-                "transition-colors",
-                isSelected && "bg-primary text-primary-foreground",
-              )}
-            >
-              {isSelected ? (
-                <Check className="size-5" />
-              ) : (
-                user.name.slice(0, 1).toUpperCase()
-              )}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            className="size-10"
+            name={user.name}
+            fallbackClassName={cn(
+              "transition-colors",
+              isSelected && "bg-primary text-primary-foreground",
+            )}
+          >
+            {isSelected ? <Check className="size-5" /> : null}
+          </UserAvatar>
         </CardHeader>
         <CardContent className="w-full">
           <div className="flex flex-col gap-1">

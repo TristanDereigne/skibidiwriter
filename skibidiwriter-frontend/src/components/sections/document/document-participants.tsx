@@ -1,9 +1,5 @@
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarGroupCount,
-} from "@/components/ui/avatar";
+import UserAvatar from "@/components/shared/user-avatar";
+import { AvatarGroup, AvatarGroupCount } from "@/components/ui/avatar";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { useDocumentParticipants } from "../../../lib/document";
 import { participantColor } from "../../../lib/participants";
@@ -27,14 +23,14 @@ export default function DocumentParticipants({ documentId }: Readonly<Props>) {
   return (
     <AvatarGroup className="mr-2">
       {users.slice(0, MAX_VISIBLE).map((user) => (
-        <Avatar key={user.id} size="sm" title={user.name}>
-          <AvatarFallback
-            className="text-white"
-            style={{ backgroundColor: participantColor(user.id) }}
-          >
-            {user.name.slice(0, 1).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          key={user.id}
+          size="sm"
+          title={user.name}
+          name={user.name}
+          fallbackClassName="text-white"
+          fallbackStyle={{ backgroundColor: participantColor(user.id) }}
+        />
       ))}
       {overflow.length > 0 && (
         <AvatarGroupCount

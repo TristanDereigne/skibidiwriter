@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import UserAvatar from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { UserMinusIcon } from "lucide-react";
 import type { UserSummaryDTO } from "skibidiwriter-shared";
@@ -16,9 +16,7 @@ export default function ShareRecipient({
 }: Readonly<Props>) {
   return (
     <div className="flex items-center gap-3 p-1">
-      <Avatar size="sm">
-        <AvatarFallback>{user.name.slice(0, 1).toUpperCase()}</AvatarFallback>
-      </Avatar>
+      <UserAvatar size="sm" name={user.name} />
       <p className="min-w-0 flex-1 truncate font-medium">{user.name}</p>
       <Button
         variant="ghost"

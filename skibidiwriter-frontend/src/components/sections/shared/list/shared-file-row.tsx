@@ -1,5 +1,5 @@
 import { FILE_KIND_VIEW } from "@/components/shared/file-kind-view";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import UserAvatar from "@/components/shared/user-avatar";
 import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { useDownloadFile } from "@/hooks/use-files";
@@ -59,11 +59,7 @@ export default function SharedFileRow({ file }: Readonly<Props>) {
         </TableCell>
         <TableCell className="hidden sm:table-cell">
           <div className="flex items-center gap-2">
-            <Avatar size="sm">
-              <AvatarFallback>
-                {file.owner.name.slice(0, 1).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar size="sm" name={file.owner.name} />
             <span className="truncate">{file.owner.name}</span>
           </div>
         </TableCell>
