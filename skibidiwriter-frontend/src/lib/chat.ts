@@ -4,22 +4,24 @@ import {
   ServerEventType,
   type MessageDTO,
 } from "skibidiwriter-shared";
-import { realtime, useConnectionStatus } from "./realtime";
+import { realtime } from "./realtime";
 
-let messages: MessageDTO[] = [];
+const NO_MESSAGES: MessageDTO[] = [];
+
+const messagesByDocument = new Map<string, MessageDTO[]>();
 const subscribers = new Set<() => void>();
 
-function emit() {
+function setMessages(documentId: string, messages: MessageDTO[]) {
+  messagesByDocument.set(documentId, messages);
   for (const subscriber of subscribers) subscriber();
 }
 
 realtime.onEvent((event) => {
   if (event.type === ServerEventType.Message_History) {
-    messages = event.messages;
-    emit();
+    setMessages(event.documentId, event.messages);
   } else if (event.type === ServerEventType.Message_New) {
-    messages = [...messages, event.message];
-    emit();
+    const messages = messagesByDocument.get(event.documentId) ?? NO_MESSAGES;
+    setMessages(event.documentId, [...messages, event.message]);
   }
 });
 
@@ -30,16 +32,19 @@ const subscribe = (subscriber: () => void) => {
   };
 };
 
-const getMessages = () => messages;
-
-export function useSkibidiChat() {
-  const status = useConnectionStatus();
-  const currentMessages = useSyncExternalStore(subscribe, getMessages);
+export function useSkibidiChat(documentId: string) {
+  const messages = useSyncExternalStore(
+    subscribe,
+    () => messagesByDocument.get(documentId) ?? NO_MESSAGES,
+  );
 
   return {
-    status,
-    messages: currentMessages,
+    messages,
     sendMessage: (content: string) =>
-      realtime.send({ type: ClientEventType.Message_Create, content }),
+      realtime.send({
+        type: ClientEventType.Message_Create,
+        documentId,
+        content,
+      }),
   };
 }

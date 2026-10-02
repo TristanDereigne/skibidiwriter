@@ -2,7 +2,6 @@ import type { WSContext } from "hono/ws";
 import type { ServerEvent, UserSummaryDTO } from "skibidiwriter-shared";
 
 // Hono hands out a new WSContext per event, so connections are keyed by the underlying socket.
-const connections = new Map<unknown, WSContext>();
 const connectionUsers = new Map<unknown, string>();
 const rooms = new Map<string, Map<unknown, WSContext>>();
 const presence = new Map<string, Map<unknown, UserSummaryDTO>>();
@@ -10,12 +9,10 @@ const presence = new Map<string, Map<unknown, UserSummaryDTO>>();
 const keyOf = (ws: WSContext) => ws.raw ?? ws;
 
 export function addConnection(ws: WSContext, userId: string) {
-  connections.set(keyOf(ws), ws);
   connectionUsers.set(keyOf(ws), userId);
 }
 
 export function removeConnection(ws: WSContext) {
-  connections.delete(keyOf(ws));
   connectionUsers.delete(keyOf(ws));
 }
 
@@ -85,13 +82,6 @@ export function presentUsers(roomId: string): UserSummaryDTO[] {
 
 export function send(ws: WSContext, event: ServerEvent) {
   ws.send(JSON.stringify(event));
-}
-
-export function broadcast(event: ServerEvent, except?: WSContext) {
-  const payload = JSON.stringify(event);
-  for (const [key, connection] of connections) {
-    if (key !== (except && keyOf(except))) connection.send(payload);
-  }
 }
 
 export function broadcastToRoom(

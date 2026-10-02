@@ -17,10 +17,12 @@ export type ServerEventType =
 export type ServerEvent =
   | {
       type: typeof ServerEventType.Message_History;
+      documentId: string;
       messages: MessageDTO[];
     }
   | {
       type: typeof ServerEventType.Message_New;
+      documentId: string;
       message: MessageDTO;
     }
   | {

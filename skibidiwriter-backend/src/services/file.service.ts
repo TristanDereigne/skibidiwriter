@@ -2,6 +2,7 @@ import { db } from "@/libs/db";
 import { eqOrNull } from "@/libs/sql";
 import { fileTable, user } from "@/models";
 import { fileShareTable } from "@/models/file-share.model";
+import chatService from "@/services/chat.service";
 import { and, desc, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
 import {
   Snapshot,
@@ -320,6 +321,7 @@ async function forget(ids: string[]) {
     ids.map(async (id) => {
       const opened = openDocuments.get(id);
       openDocuments.delete(id);
+      chatService.clear(id);
 
       clearTimeout((await opened)?.persistTimer);
     }),

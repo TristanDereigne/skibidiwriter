@@ -15,6 +15,7 @@ export type ClientEventType =
 export const ClientEventSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(ClientEventType.Message_Create),
+    documentId: z.uuid(),
     content: z.string().trim().min(1).max(MESSAGE_MAX_LENGTH),
   }),
   z.object({

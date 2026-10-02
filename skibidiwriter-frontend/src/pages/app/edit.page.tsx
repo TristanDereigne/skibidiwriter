@@ -1,11 +1,12 @@
 import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
+import DocumentChat from "@/components/sections/document/document-chat";
 import DocumentEditor from "@/components/sections/document/document-editor";
 import DocumentParticipants from "@/components/sections/document/document-participants";
 import ShareDialog from "@/components/sections/share/share-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { DownloadIcon, UserPlusIcon } from "lucide-react";
+import { DownloadIcon, MessageSquareIcon, UserPlusIcon } from "lucide-react";
 import { useDownloadFile, useFile, useRenameFile } from "@/hooks/use-files";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { useFolderPath } from "@/hooks/use-folders";
@@ -17,7 +18,7 @@ import {
 } from "@/lib/realtime";
 import AppHeader from "@/layout/app-header.tsx";
 import { cn } from "cn";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ServerEventType } from "skibidiwriter-shared";
 
@@ -30,6 +31,9 @@ export const EditPage = () => {
   const status = useConnectionStatus();
   const navigate = useNavigate();
   const shareDialog = useDisclosure();
+  const [isChatOpen, setIsChatOpen] = useState(
+    () => globalThis.matchMedia("(min-width: 1024px)").matches,
+  );
   const documentRowId = document?.id;
   const documentName = document?.name;
 
@@ -69,6 +73,16 @@ export const EditPage = () => {
                 {CONNECTION_STATUS_LABELS[status]}
               </span>
             </Badge>
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground"
+              aria-label="Afficher le chat"
+              title="Afficher le chat"
+              onClick={() => setIsChatOpen((isOpen) => !isOpen)}
+            >
+              <MessageSquareIcon />
+            </Button>
             {document?.isOwner && (
               <Button
                 variant="ghost"
@@ -113,11 +127,22 @@ export const EditPage = () => {
           disclosure={shareDialog}
         />
       )}
-      <main className="mx-auto min-h-0 w-full max-w-3xl flex-1 px-6 py-8">
-        {documentId && (
-          <DocumentEditor key={documentId} documentId={documentId} />
+      <div className="flex min-h-0 flex-1">
+        <main className="min-h-0 flex-1 px-6 py-8">
+          <div className="mx-auto size-full max-w-3xl">
+            {documentId && (
+              <DocumentEditor key={documentId} documentId={documentId} />
+            )}
+          </div>
+        </main>
+        {documentId && isChatOpen && (
+          <DocumentChat
+            key={documentId}
+            documentId={documentId}
+            onClose={() => setIsChatOpen(false)}
+          />
         )}
-      </main>
+      </div>
     </>
   );
 };

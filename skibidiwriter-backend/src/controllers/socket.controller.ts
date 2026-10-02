@@ -1,6 +1,5 @@
 import {
   addConnection,
-  broadcast,
   broadcastToRoom,
   connectionsOf,
   joinRoom,
@@ -39,11 +38,6 @@ export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
     onOpen(_, ws) {
       connection = ws;
       addConnection(ws, user.id);
-
-      send(ws, {
-        type: ServerEventType.Message_History,
-        messages: chatService.history(),
-      });
     },
     async onMessage(rawEvent, ws) {
       const result = parseClientEvent(rawEvent.data);
@@ -98,9 +92,17 @@ async function handleClientEvent(
 ) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
-      const message = chatService.create(event.content);
+      if (!roomsOf(sender).includes(event.documentId)) {
+        return sendDocumentNotFound(sender);
+      }
 
-      broadcast({ type: ServerEventType.Message_New, message });
+      const message = chatService.create(event.documentId, user, event.content);
+
+      broadcastToRoom(event.documentId, {
+        type: ServerEventType.Message_New,
+        documentId: event.documentId,
+        message,
+      });
       break;
     }
     case ClientEventType.Document_Join: {
@@ -115,6 +117,11 @@ async function handleClientEvent(
         type: ServerEventType.Document_Operations,
         documentId: event.documentId,
         operations,
+      });
+      send(sender, {
+        type: ServerEventType.Message_History,
+        documentId: event.documentId,
+        messages: chatService.history(event.documentId),
       });
       break;
     }
