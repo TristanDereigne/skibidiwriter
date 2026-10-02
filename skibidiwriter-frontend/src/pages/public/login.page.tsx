@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 
 import { toast } from "@/components/ui/toast.tsx";
 import { useAuthContext } from "@/context/AuthContext.tsx";
-import { useState, type SetStateAction, useEffect } from "react";
+import { useState, type ChangeEvent, type SetStateAction } from "react";
 import { z } from "zod";
 import { Button } from "../../components/ui/button.tsx";
 import {
@@ -18,10 +18,10 @@ import { Input } from "../../components/ui/input.tsx";
 import { Label } from "../../components/ui/label.tsx";
 
 export const LoginPage = () => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
   const authContext = useAuthContext();
 
-  const registerSchema = z.object({
+  const loginSchema = z.object({
     email: z.email("Format d'email invalide"),
     password: z
       .string()
@@ -31,14 +31,7 @@ export const LoginPage = () => {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [is2FAEnabled, setIs2FAEnabled] = useState(false);
   const [totp, setTotp] = useState("");
-
-  useEffect(() => {
-    if (authContext?.is2FAAccount) {
-      setIs2FAEnabled(true);
-    }
-  }, [authContext?.is2FAAccount]);
 
   const [errors, setErrors] = useState<{
     email?: string;
@@ -56,14 +49,14 @@ export const LoginPage = () => {
     }
   };
 
-  const handleTotpChange = (e) => {
+  const handleTotpChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTotp(e.target.value);
   };
 
   const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
-    const result = registerSchema.safeParse({ email, password });
+    const result = loginSchema.safeParse({ email, password });
 
     if (!result.success) {
       const fieldErrors = z.flattenError(result.error).fieldErrors;
@@ -77,7 +70,7 @@ export const LoginPage = () => {
     setErrors({});
 
     try {
-      await authContext?.login(email, password);
+      await authContext.login(email, password);
     } catch (error) {
       toast.add({
         title: "Échec de l’authentification",
@@ -89,9 +82,8 @@ export const LoginPage = () => {
 
   const handle2FASubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
-    await authContext.verify2FA(totp);
-    if (authContext.is2FAEnabled) {
-      setIs2FAEnabled(false);
+    const isVerified = await authContext.verify2FA(totp);
+    if (isVerified) {
       authContext.setIs2FAAccount(false);
       navigate("/");
     } else {
@@ -110,7 +102,7 @@ export const LoginPage = () => {
       <div className={"text-center text-6xl font-bold max-w-md w-full"}>
         <h1 className={"text-[#432DD7]"}>Skibidi Writer.</h1>
       </div>
-      {!is2FAEnabled ? (
+      {!authContext.is2FAAccount ? (
         <Card className="w-full max-w-md shadow-xl shadow-[#6957DF]/10">
           <form
             action=""
@@ -200,7 +192,7 @@ export const LoginPage = () => {
               <div className={"mt-14"}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Code TOTP</Label>
+                    <Label htmlFor="totp">Code TOTP</Label>
                     <Input
                       id="totp"
                       type="text"

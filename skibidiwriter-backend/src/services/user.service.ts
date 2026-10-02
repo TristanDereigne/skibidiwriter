@@ -9,7 +9,7 @@ async function findUsersByName(
   excludedUserId: string,
 ) {
   return await db
-    .select()
+    .select({ id: user.id, name: user.name })
     .from(user)
     .where(and(ilike(user.name, `%${name}%`), ne(user.id, excludedUserId)))
     .orderBy(asc(user.name))
@@ -27,54 +27,30 @@ async function existAll(ids: string[]) {
   return rows.length === ids.length;
 }
 
-const updateUserEmail = async (oldEmail: string, email: string) => {
-  try {
-    await db.update(user).set({ email: email }).where(eq(user.email, oldEmail));
-  } catch (error) {
-    console.log("updateUserEmail error: ", error);
-    throw error;
-  }
-};
+async function updateUserEmail(oldEmail: string, email: string) {
+  await db.update(user).set({ email }).where(eq(user.email, oldEmail));
+}
 
-const getUsers = async () => {
-  try {
-    const response: UsersDto[] = await db
-      .select({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        banned: user.banned,
-      })
-      .from(user);
+async function getUsers(): Promise<UsersDto[]> {
+  return await db
+    .select({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      banned: user.banned,
+    })
+    .from(user);
+}
 
-    if (response) {
-      return response;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.log("getUsers error: ", error);
-    throw error;
-  }
-};
+async function checkTwoFactorEnabled(email: string) {
+  const [row] = await db
+    .select({ twoFactorEnabled: user.twoFactorEnabled })
+    .from(user)
+    .where(eq(user.email, email));
 
-const checkTwoFactorEnabled = async (email: string) => {
-  try {
-    const response: { twoFactorEnabled: boolean | null }[] = await db
-      .select({ twoFactorEnabled: user.twoFactorEnabled })
-      .from(user)
-      .where(eq(user.email, email));
-    if (response[0]) {
-      return response[0]?.twoFactorEnabled;
-    } else {
-      return null;
-    }
-  } catch (error) {
-    console.log("checkTwoFactorEnabled error: ", error);
-    throw error;
-  }
-};
+  return !!row?.twoFactorEnabled;
+}
 
 export default {
   updateUserEmail,

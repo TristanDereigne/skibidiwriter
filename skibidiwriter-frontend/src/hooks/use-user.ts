@@ -34,61 +34,39 @@ export function useUser() {
     email: string,
     password: string,
     name: string,
-    role: "user" | "admin" | ("user" | "admin")[] | undefined,
+    role: "user" | "admin",
   ) => {
     const { data: newUser, error } = await authClient.admin.createUser({
-      email: email,
-      password: password,
-      name: name,
-      role: role,
+      email,
+      password,
+      name,
+      role,
     });
 
-    if (error) {
-      console.error("Erreur createUser:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     return newUser.user;
   };
 
-  const deleteUser = async (user: UsersDto): Promise<boolean> => {
-    const { error } = await authClient.admin.removeUser({
-      userId: user.id,
-    });
+  const deleteUser = async (user: UsersDto) => {
+    const { error } = await authClient.admin.removeUser({ userId: user.id });
 
-    if (error) {
-      console.error("Erreur deleteUser:", error);
-      throw new Error(error.message);
-    }
-
-    return true;
+    if (error) throw new Error(error.message);
   };
 
-  const banUser = async (user: UsersDto, reason: string): Promise<boolean> => {
-    const { data, error } = await authClient.admin.banUser({
+  const banUser = async (user: UsersDto, reason: string) => {
+    const { error } = await authClient.admin.banUser({
       userId: user.id,
       banReason: reason,
     });
 
-    if (error) {
-      console.error("Erreur banUser:", error);
-      throw new Error(error.message);
-    }
-
-    return true;
+    if (error) throw new Error(error.message);
   };
 
-  const unbanUser = async (user: UsersDto): Promise<boolean> => {
-    const { error } = await authClient.admin.unbanUser({
-      userId: user.id,
-    });
+  const unbanUser = async (user: UsersDto) => {
+    const { error } = await authClient.admin.unbanUser({ userId: user.id });
 
-    if (error) {
-      console.error("Erreur unbanUser:", error);
-      throw new Error(error.message);
-    }
-
-    return true;
+    if (error) throw new Error(error.message);
   };
 
   return {

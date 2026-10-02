@@ -1,11 +1,11 @@
-import { useContext, useEffect, useState, type SetStateAction } from "react";
+import { useEffect, useState, type SetStateAction } from "react";
 import AppHeader from "@/layout/app-header.tsx";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { ProfileRounded } from "@/components/sections/profile/profile-rounded.tsx";
 import { Pencil, Save, UserGroup } from "lucide-react";
 import { Separator } from "@/components/ui/separator.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { AuthContext } from "@/context/AuthContext.tsx";
+import { useAuthContext } from "@/context/AuthContext.tsx";
 import { useNavigate } from "react-router";
 import { Input } from "@/components/ui/input.tsx";
 import { z } from "zod";
@@ -17,13 +17,12 @@ import { ProfileUserTable } from "@/components/sections/profile/profile-user-tab
 export const ProfilePage = () => {
   const navigate = useNavigate();
 
-  const authContext = useContext(AuthContext);
+  const authContext = useAuthContext();
   const userContext = useUserContext();
 
   const [isEditing, setEditing] = useState(false);
   const [emailValue, setEmailValue] = useState("");
   const [isTimeout, setIsTimeout] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   const [errors, setErrors] = useState<{
     email?: string;
@@ -39,16 +38,8 @@ export const ProfilePage = () => {
     }
   }, [userContext.email]);
 
-  useEffect(() => {
-    if (authContext?.isAdmin) {
-      setIsAdmin(true);
-    } else {
-      setIsAdmin(false);
-    }
-  }, [authContext?.isAdmin]);
-
   const handleDisconnect = () => {
-    authContext?.logout();
+    authContext.logout();
     navigate("/login");
   };
 
@@ -110,7 +101,7 @@ export const ProfilePage = () => {
           </div>
 
           <div className={"flex flex-row"}>
-            {isAdmin ? (
+            {authContext.isAdmin ? (
               <Badge className="bg-purple-50 text-[#432DD7] dark:bg-[#432DD7] dark:text-purple-300">
                 Admin
               </Badge>

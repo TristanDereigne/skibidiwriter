@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import type { User } from "better-auth";
 import { useUser } from "@/hooks/use-user.ts";
 
@@ -23,13 +23,13 @@ type UserContextType = {
     password: string,
     name: string,
     role: "user" | "admin",
-  ) => Promise<UserWithRole | null>;
-  deleteUser: (email: string) => Promise<boolean | undefined>;
-  banUser: (email: string, reason: string) => Promise<boolean | undefined>;
-  unbanUser: (email: string) => Promise<boolean | undefined>;
+  ) => Promise<UserWithRole>;
+  deleteUser: (email: string) => Promise<boolean>;
+  banUser: (email: string, reason: string) => Promise<boolean>;
+  unbanUser: (email: string) => Promise<boolean>;
 };
 
-export const UserContext = createContext<UserContextType | null>(null);
+const UserContext = createContext<UserContextType | null>(null);
 
 export function useUserContext() {
   const context = useContext(UserContext);
@@ -46,136 +46,66 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [userSince, setUserSince] = useState<string | null>(null);
   const [usersForAdmin, setUsersForAdmin] = useState<UsersDto[] | null>(null);
 
-  const updateEmail = async (email: string) => {
-    userHook.updateEmail.mutate(email, {
-      onSuccess: (response) => {
-        if (response.email) {
-          setEmail(response.email);
-        }
-      },
+  const updateEmail = (newEmail: string) => {
+    userHook.updateEmail.mutate(newEmail, {
+      onSuccess: (response) => setEmail(response.email),
       onError: (error) => {
         console.error("Error while updating the email :", error);
       },
     });
   };
 
-  const getUsersForAdmin = async () => {
+  const getUsersForAdmin = () => {
     userHook.getUsers.mutate(undefined, {
-      onSuccess: (response: UsersDto[]) => {
-        if (response) {
-          setUsersForAdmin(response);
-        }
-      },
+      onSuccess: setUsersForAdmin,
       onError: (error) => {
         console.error("Error while getting users for admin :", error);
       },
     });
   };
 
-  const createUser = async (
-    email: string,
-    password: string,
-    name: string,
-    role: "user" | "admin",
+  const createUser: UserContextType["createUser"] = async (
+    email,
+    password,
+    name,
+    role,
   ) => {
-    const newUser: UserWithRole = await userHook.createUser(
-      email,
-      password,
-      name,
-      role,
-    );
-    if (newUser) {
-      await getUsersForAdmin();
-      return newUser;
-    } else {
-      return null;
-    }
+    const newUser = await userHook.createUser(email, password, name, role);
+    getUsersForAdmin();
+    return newUser;
   };
 
-  const deleteUser = async (email: string) => {
-    if (usersForAdmin) {
-      const userToDelete = usersForAdmin.find(
-        (userInList) => userInList.email === email,
-      );
-      if (userToDelete) {
-        const isDeleted: boolean = await userHook.deleteUser(userToDelete);
-        if (isDeleted) {
-          await getUsersForAdmin();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+  const actOnUser = async (
+    email: string,
+    action: (target: UsersDto) => Promise<void>,
+  ) => {
+    const target = usersForAdmin?.find((member) => member.email === email);
+    if (!target) return false;
+
+    await action(target);
+    getUsersForAdmin();
+    return true;
   };
 
-  const banUser = async (email: string, reason: string) => {
-    if (usersForAdmin) {
-      const userToBan = usersForAdmin.find(
-        (userInList) => userInList.email === email,
-      );
-      if (userToBan) {
-        const isBanned: boolean = await userHook.banUser(userToBan, reason);
-        if (isBanned) {
-          await getUsersForAdmin();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+  const value: UserContextType = {
+    user,
+    username,
+    userSince,
+    email,
+    usersForAdmin,
+    setUsersForAdmin,
+    setUser,
+    setUsername,
+    setEmail,
+    setUserSince,
+    updateEmail,
+    getUsersForAdmin,
+    createUser,
+    deleteUser: (email) => actOnUser(email, userHook.deleteUser),
+    banUser: (email, reason) =>
+      actOnUser(email, (target) => userHook.banUser(target, reason)),
+    unbanUser: (email) => actOnUser(email, userHook.unbanUser),
   };
-
-  const unbanUser = async (email: string) => {
-    if (usersForAdmin) {
-      const userToUnban = usersForAdmin.find(
-        (userInList) => userInList.email === email,
-      );
-      if (userToUnban) {
-        const isUnbanned: boolean = await userHook.unbanUser(userToUnban);
-        if (isUnbanned) {
-          await getUsersForAdmin();
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  };
-
-  const value = useMemo<UserContextType>(
-    () => ({
-      user,
-      username,
-      userSince,
-      email,
-      usersForAdmin,
-      setUsersForAdmin,
-      setUser,
-      setUsername,
-      setEmail,
-      setUserSince,
-      updateEmail,
-      getUsersForAdmin,
-      createUser,
-      deleteUser,
-      banUser,
-      unbanUser,
-    }),
-    [user, email, usersForAdmin, setUser, setEmail],
-  );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };

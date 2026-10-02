@@ -1,119 +1,70 @@
-import { authClient } from "../lib/auth-client.ts";
 import { api } from "@/lib/api.ts";
+import { authClient } from "@/lib/auth-client.ts";
 import { useMutation } from "@tanstack/react-query";
 
-export type EnableTwoFactorResult = {
-  method: "totp";
-  totpURI: string;
-  backupCodes: string[];
-};
-
-export type TwoFactorEnabled = {
+type TwoFactorEnabled = {
   two_factor_enabled: boolean;
 };
 
-export type DisableTwoFactorResponse = {
-  data: { status: boolean } | null;
-  error: { code?: string; message?: string } | null;
-};
-
-export type VerifyResponse = {
-  data: { token: string; user: any } | null;
-  error: { code?: string; message?: string } | null;
-};
-
-export type Login2FAResponse = {
-  twoFactorRedirect: boolean;
-  twoFactorMethods: string[] | null;
-};
-
-export type IsAdminResponse = {
+type IsAdminResponse = {
   role: "user" | "admin";
 };
 
 export function useAuth() {
   const signUp = async (email: string, password: string, name: string) => {
     const { data, error } = await authClient.signUp.email({
-      email: email,
-      password: password,
-      name: name,
+      email,
+      password,
+      name,
     });
 
-    if (error) {
-      console.error("Erreur signup:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     return data;
   };
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await authClient.signIn.email({
-      email: email,
-      password: password,
-    });
+    const { data, error } = await authClient.signIn.email({ email, password });
 
-    if (error) {
-      console.error("Erreur signin:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
     return data;
   };
 
-  const enable2FA = async (
-    password: string,
-  ): Promise<EnableTwoFactorResult | undefined> => {
+  const enable2FA = async (password: string) => {
     const { data, error } = await authClient.twoFactor.enable({
-      password: password,
+      password,
       method: "totp",
     });
 
-    if (error) {
-      console.error("Error while enabling 2FA:", error);
-      throw new Error(error.message);
-    }
+    if (error) throw new Error(error.message);
 
-    if (data?.method === "totp") {
-      return data;
-    }
+    return data?.method === "totp" ? data.totpURI : undefined;
   };
 
-  const deactivate2FA = async (password: string): Promise<boolean> => {
-    const { data, error }: DisableTwoFactorResponse =
-      await authClient.twoFactor.disable({
-        password: password,
-      });
+  const deactivate2FA = async (password: string) => {
+    const { data, error } = await authClient.twoFactor.disable({ password });
 
     if (error) {
       console.error("Error while deactivating 2FA:", error);
       return false;
     }
 
-    if (data?.status) {
-      return data.status;
-    } else {
-      return false;
-    }
+    return !!data?.status;
   };
 
-  const verify2FA = async (codeOTP: string): Promise<boolean> => {
-    const { data, error }: VerifyResponse =
-      await authClient.twoFactor.verifyTotp({
-        code: codeOTP,
-        trustDevice: false,
-      });
+  const verify2FA = async (codeOTP: string) => {
+    const { data, error } = await authClient.twoFactor.verifyTotp({
+      code: codeOTP,
+      trustDevice: false,
+    });
 
     if (error) {
       console.error("Error while verifying 2FA:", error);
       return false;
     }
 
-    if (data?.token) {
-      return true;
-    } else {
-      return false;
-    }
+    return !!data?.token;
   };
 
   const check2FAEnabled = useMutation({
@@ -129,7 +80,7 @@ export function useAuth() {
   });
 
   const checkIsAdmin = useMutation({
-    mutationFn: async (): Promise<string> => {
+    mutationFn: async (): Promise<IsAdminResponse["role"]> => {
       const response = await api.users.admin.$get();
 
       if (!response.ok) {

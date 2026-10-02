@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router";
 
 import { toast } from "@/components/ui/toast.tsx";
-import { AuthContext } from "@/context/AuthContext.tsx";
-import { useContext, useState, type SetStateAction } from "react";
+import { useAuthContext } from "@/context/AuthContext.tsx";
+import { useState, type SetStateAction } from "react";
 import { UsernameSchema } from "skibidiwriter-shared";
 import { z } from "zod";
 import { Button } from "../../components/ui/button.tsx";
@@ -19,8 +19,8 @@ import { Input } from "../../components/ui/input.tsx";
 import { Label } from "../../components/ui/label.tsx";
 
 export const RegisterPage = () => {
-  let navigate = useNavigate();
-  const authContext = useContext(AuthContext);
+  const navigate = useNavigate();
+  const authContext = useAuthContext();
 
   const registerSchema = z.object({
     email: z.email("Format d'email invalide"),
@@ -79,7 +79,7 @@ export const RegisterPage = () => {
     setErrors({});
 
     try {
-      await authContext?.register(email, password, pseudo);
+      await authContext.register(email, password, pseudo);
     } catch (error) {
       toast.add({
         title: "Échec de l’authentification",

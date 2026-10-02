@@ -4,80 +4,43 @@ import type { AuthEnv } from "@/middleware/session.middleware";
 import userService from "@/services/user.service";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
-import { UsernameSearchSchema, type UsersDto } from "skibidiwriter-shared";
+import { ErrorCode, UsernameSearchSchema } from "skibidiwriter-shared";
 import z from "zod";
 
 const SearchQuerySchema = z.object({ search: UsernameSearchSchema });
+const UpdateEmailSchema = z.object({ email: z.email() });
 
 export const userController = new Hono<AuthEnv>()
-  .post("/email", async (ctx) => {
-    const user = ctx.get("user");
-    const body = await ctx.req.json();
+  .post("/email", validate("json", UpdateEmailSchema), async (ctx) => {
+    const { email } = ctx.req.valid("json");
+    const currentEmail = ctx.get("user").email;
 
-    const actualEmail: string = user.email;
-    const newEmail: string = body.email;
-
-    if (actualEmail == newEmail) {
+    if (email === currentEmail) {
       throw new HTTPException(409, { message: "Same email" });
     }
 
-    if (body.email && user) {
-      try {
-        await userService.updateUserEmail(actualEmail, newEmail);
-      } catch (error) {
-        return ctx.json({ statut: "error", message: error }, 500);
-      }
+    await userService.updateUserEmail(currentEmail, email);
 
-      return ctx.json({ statut: "success", email: newEmail }, 200);
-    } else {
-      return ctx.json({ statut: "Request is malformated" }, 400);
-    }
+    return ctx.json({ email });
   })
   .get("/authtwofactor", async (ctx) => {
-    const user = ctx.get("user");
-    const userEmail: string = user.email;
+    const twoFactorEnabled = await userService.checkTwoFactorEnabled(
+      ctx.get("user").email,
+    );
 
-    if (userEmail) {
-      const isTwoFactorEnabled: boolean | null | undefined =
-        await userService.checkTwoFactorEnabled(userEmail);
-
-      if (isTwoFactorEnabled) {
-        return ctx.json({ two_factor_enabled: true }, 200);
-      }
-
-      return ctx.json({ two_factor_enabled: false }, 200);
-    }
-
-    ctx.status(404);
+    return ctx.json({ two_factor_enabled: twoFactorEnabled });
   })
-  .get("/admin", async (ctx) => {
-    const user = ctx.get("user");
-    const isAdmin: boolean = user.role === "admin";
+  .get("/admin", (ctx) => {
+    const isAdmin = ctx.get("user").role === "admin";
 
-    if (isAdmin) {
-      ctx.status(200);
-      return ctx.json({ role: "admin" });
-    } else {
-      ctx.status(200);
-      return ctx.json({ role: "user" });
-    }
+    return ctx.json({ role: isAdmin ? "admin" : "user" });
   })
   .get("/users", async (ctx) => {
-    const user = ctx.get("user");
-    const isAdmin: boolean = user.role === "admin";
-
-    if (isAdmin) {
-      const users: UsersDto[] | null = await userService.getUsers();
-      if (users) {
-        ctx.status(200);
-        return ctx.json(users);
-      } else {
-        ctx.status(200);
-        return ctx.json([]);
-      }
-    } else {
-      ctx.status(401);
+    if (ctx.get("user").role !== "admin") {
+      return ctx.json({ code: ErrorCode.Auth_Unauthorized }, 403);
     }
+
+    return ctx.json(await userService.getUsers());
   })
   .get("/search", validate("query", SearchQuerySchema), async (ctx) => {
     const { search } = ctx.req.valid("query");
