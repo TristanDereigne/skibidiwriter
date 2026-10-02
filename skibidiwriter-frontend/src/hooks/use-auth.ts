@@ -75,7 +75,6 @@ export function useAuth() {
     }
 
     if (data?.method === "totp") {
-      console.log("2fa qrcode generated", data);
       return data;
     }
   };
@@ -92,7 +91,6 @@ export function useAuth() {
     }
 
     if (data?.status) {
-      console.log("2fa deactivated", data);
       return data.status;
     } else {
       return false;
@@ -112,7 +110,6 @@ export function useAuth() {
     }
 
     if (data?.token) {
-      console.log("data verify by 2fa otp", data);
       return true;
     } else {
       return false;

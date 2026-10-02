@@ -22,11 +22,21 @@ import type { UsersDto } from "skibidiwriter-shared";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
 import { ProfileAddMembers } from "@/components/sections/profile/profile-add-members.tsx";
+import { ProfileBanMembers } from "@/components/sections/profile/profile-ban-members.tsx";
+import { ProfileUnbanMembers } from "@/components/sections/profile/profile-unban-members.tsx";
 
 export const ProfileUserTable = () => {
   const userContext = useUserContext();
 
   const [users, setUsers] = useState<UsersDto[]>([]);
+  const [userToBan, setUserToBan] = useState<{
+    name: string;
+    email: string;
+  } | null>(null);
+  const [userToDeban, setUserToDeban] = useState<{
+    name: string;
+    email: string;
+  } | null>(null);
 
   useEffect(() => {
     if (userContext.usersForAdmin) {
@@ -70,33 +80,60 @@ export const ProfileUserTable = () => {
                     Vous
                   </Badge>
                 )}
+                {user.banned && (
+                  <Badge className="relative left-1 bg-purple-50 text-red-500 dark:bg-red-500 dark:text-white">
+                    Bannis
+                  </Badge>
+                )}
               </TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>
                 {user.role === "admin" ? "Admin" : "Membre"}
               </TableCell>
-              <TableCell className="text-right">
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button variant="ghost" size="icon" className="size-8">
-                        <MoreHorizontalIcon />
-                        <span className="sr-only">Open menu</span>
-                      </Button>
-                    }
-                  />
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Bannir</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => handleUserDelete(user.email)}
-                    >
-                      Supprimer
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
+              {user.email != userContext.email && (
+                <TableCell className="text-right">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      render={
+                        <Button variant="ghost" size="icon" className="size-8">
+                          <MoreHorizontalIcon />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent align="end">
+                      {user.banned ? (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            setUserToDeban({
+                              name: user.name,
+                              email: user.email,
+                            })
+                          }
+                        >
+                          Débannir
+                        </DropdownMenuItem>
+                      ) : (
+                        <DropdownMenuItem
+                          onClick={() =>
+                            setUserToBan({ name: user.name, email: user.email })
+                          }
+                        >
+                          Bannir
+                        </DropdownMenuItem>
+                      )}
+
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => handleUserDelete(user.email)}
+                      >
+                        Supprimer
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
@@ -109,6 +146,16 @@ export const ProfileUserTable = () => {
           </TableRow>
         </TableFooter>
       </Table>
+      <ProfileBanMembers
+        username={userToBan?.name || null}
+        email={userToBan?.email || ""}
+        onClose={() => setUserToBan(null)}
+      />
+      <ProfileUnbanMembers
+        username={userToDeban?.name || null}
+        email={userToDeban?.email || ""}
+        onClose={() => setUserToDeban(null)}
+      />
     </div>
   );
 };

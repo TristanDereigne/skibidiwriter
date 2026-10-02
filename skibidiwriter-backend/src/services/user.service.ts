@@ -44,6 +44,7 @@ const getUsers = async () => {
         name: user.name,
         email: user.email,
         role: user.role,
+        banned: user.banned,
       })
       .from(user);
 

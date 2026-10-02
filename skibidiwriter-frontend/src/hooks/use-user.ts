@@ -44,7 +44,7 @@ export function useUser() {
     });
 
     if (error) {
-      console.error("Erreur signin:", error);
+      console.error("Erreur createUser:", error);
       throw new Error(error.message);
     }
 
@@ -57,7 +57,34 @@ export function useUser() {
     });
 
     if (error) {
-      console.error("Erreur signin:", error);
+      console.error("Erreur deleteUser:", error);
+      throw new Error(error.message);
+    }
+
+    return true;
+  };
+
+  const banUser = async (user: UsersDto, reason: string): Promise<boolean> => {
+    const { data, error } = await authClient.admin.banUser({
+      userId: user.id,
+      banReason: reason,
+    });
+
+    if (error) {
+      console.error("Erreur banUser:", error);
+      throw new Error(error.message);
+    }
+
+    return true;
+  };
+
+  const unbanUser = async (user: UsersDto): Promise<boolean> => {
+    const { error } = await authClient.admin.unbanUser({
+      userId: user.id,
+    });
+
+    if (error) {
+      console.error("Erreur unbanUser:", error);
       throw new Error(error.message);
     }
 
@@ -69,5 +96,7 @@ export function useUser() {
     getUsers,
     createUser,
     deleteUser,
+    banUser,
+    unbanUser,
   };
 }

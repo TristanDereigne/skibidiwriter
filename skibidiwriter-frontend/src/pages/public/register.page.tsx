@@ -77,7 +77,6 @@ export const RegisterPage = () => {
     }
 
     setErrors({});
-    console.log("Données valides :", result.data);
 
     try {
       await authContext?.register(email, password, pseudo);

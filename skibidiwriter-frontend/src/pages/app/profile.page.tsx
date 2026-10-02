@@ -48,7 +48,6 @@ export const ProfilePage = () => {
   }, [authContext?.isAdmin]);
 
   const handleDisconnect = () => {
-    console.log("Disconnecting...");
     authContext?.logout();
     navigate("/login");
   };

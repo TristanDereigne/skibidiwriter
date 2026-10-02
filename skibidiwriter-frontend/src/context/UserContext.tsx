@@ -24,7 +24,9 @@ type UserContextType = {
     name: string,
     role: "user" | "admin",
   ) => Promise<UserWithRole | null>;
-  deleteUser: (email: string) => Promise<true | null | undefined>;
+  deleteUser: (email: string) => Promise<boolean | undefined>;
+  banUser: (email: string, reason: string) => Promise<boolean | undefined>;
+  unbanUser: (email: string) => Promise<boolean | undefined>;
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -101,11 +103,55 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
           await getUsersForAdmin();
           return true;
         } else {
-          return null;
+          return false;
         }
       } else {
-        return null;
+        return false;
       }
+    } else {
+      return false;
+    }
+  };
+
+  const banUser = async (email: string, reason: string) => {
+    if (usersForAdmin) {
+      const userToBan = usersForAdmin.find(
+        (userInList) => userInList.email === email,
+      );
+      if (userToBan) {
+        const isBanned: boolean = await userHook.banUser(userToBan, reason);
+        if (isBanned) {
+          await getUsersForAdmin();
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  };
+
+  const unbanUser = async (email: string) => {
+    if (usersForAdmin) {
+      const userToUnban = usersForAdmin.find(
+        (userInList) => userInList.email === email,
+      );
+      if (userToUnban) {
+        const isUnbanned: boolean = await userHook.unbanUser(userToUnban);
+        if (isUnbanned) {
+          await getUsersForAdmin();
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else {
+      return false;
     }
   };
 
@@ -125,6 +171,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       getUsersForAdmin,
       createUser,
       deleteUser,
+      banUser,
+      unbanUser,
     }),
     [user, email, usersForAdmin, setUser, setEmail],
   );
