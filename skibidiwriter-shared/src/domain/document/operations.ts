@@ -26,5 +26,5 @@ export type DocumentOperation = z.infer<typeof DocumentOperationSchema>;
 
 export interface Snapshot {
   sites: string[];
-  chars: [site: number, counter: number, value: string, isDeleted: boolean][];
+  runs: [site: number, counter: number, text: string, isDeleted: boolean][];
 }

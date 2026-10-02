@@ -108,22 +108,29 @@ export class TextCrdt {
 
   snapshot(): Snapshot {
     const sites = new Map<string, number>();
-    const chars: Snapshot["chars"] = [];
+    const runs: Snapshot["runs"] = [];
 
     for (let char = this.#head; char; char = char.next) {
       if (!sites.has(char.id.site)) sites.set(char.id.site, sites.size);
 
-      chars.push([
-        sites.get(char.id.site)!,
-        char.id.counter,
-        char.value,
-        char.isDeleted,
-      ]);
+      const site = sites.get(char.id.site)!;
+      const run = runs.at(-1);
+
+      if (
+        run &&
+        run[0] === site &&
+        run[1] + run[2].length === char.id.counter &&
+        run[3] === char.isDeleted
+      ) {
+        run[2] += char.value;
+      } else {
+        runs.push([site, char.id.counter, char.value, char.isDeleted]);
+      }
     }
 
     return {
       sites: [...sites.keys()],
-      chars,
+      runs,
     };
   }
 
@@ -184,13 +191,15 @@ export class TextCrdt {
     const operations: DocumentOperation[] = [];
     let after: CharId | null = null;
 
-    for (const [siteIndex, counter, value, isDeleted] of snapshot.chars) {
-      const id = { site: snapshot.sites[siteIndex]!, counter };
+    for (const [siteIndex, counter, text, isDeleted] of snapshot.runs) {
+      for (let i = 0; i < text.length; i++) {
+        const id = { site: snapshot.sites[siteIndex]!, counter: counter + i };
 
-      operations.push({ type: "insert", id, after, value });
-      if (isDeleted) operations.push({ type: "delete", id });
+        operations.push({ type: "insert", id, after, value: text[i]! });
+        if (isDeleted) operations.push({ type: "delete", id });
 
-      after = id;
+        after = id;
+      }
     }
 
     crdt.apply(operations);
