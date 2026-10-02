@@ -2,7 +2,7 @@ import { db } from "@/libs/db";
 import fileService from "@/services/file.service";
 import { fileTable, folderTable } from "@/models";
 import { eqOrNull } from "@/libs/sql";
-import { and, eq, ne, sql } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 
 function ownedBy(userId: string) {
   return eq(folderTable.ownerId, userId);
@@ -12,7 +12,8 @@ async function findInFolder(parentId: string | null, userId: string) {
   return await db
     .select()
     .from(folderTable)
-    .where(and(eqOrNull(folderTable.parentId, parentId), ownedBy(userId)));
+    .where(and(eqOrNull(folderTable.parentId, parentId), ownedBy(userId)))
+    .orderBy(asc(sql`lower(${folderTable.name})`));
 }
 
 async function findById(id: string, userId: string) {

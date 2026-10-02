@@ -3,7 +3,17 @@ import { eqOrNull } from "@/libs/sql";
 import { fileTable, user } from "@/models";
 import { fileShareTable } from "@/models/file-share.model";
 import chatService from "@/services/chat.service";
-import { and, desc, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  exists,
+  getColumns,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
 import {
   Snapshot,
   TextCrdt,
@@ -70,7 +80,8 @@ async function findInFolder(folderId: string | null, userId: string) {
   return await db
     .select(summarySelect)
     .from(fileTable)
-    .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)));
+    .where(and(eqOrNull(fileTable.folderId, folderId), ownedBy(userId)))
+    .orderBy(asc(sql`lower(${fileTable.name})`));
 }
 
 async function findSharedWith(userId: string) {
