@@ -1,12 +1,12 @@
 import { diffText } from "./diff";
-import type { CharId, DocumentOperation } from "./operations";
+import type { CharId, DocumentOperation, Snapshot } from "./operations";
 
-type Char = {
+interface Char {
   id: CharId;
   value: string;
-  deleted: boolean;
+  isDeleted: boolean;
   next: Char | null;
-};
+}
 
 function compareIds(a: CharId, b: CharId): number {
   if (a.counter !== b.counter) return a.counter - b.counter;
@@ -35,7 +35,7 @@ export class TextCrdt {
     let text = "";
 
     for (let char = this.#head; char; char = char.next) {
-      if (!char.deleted) text += char.value;
+      if (!char.isDeleted) text += char.value;
     }
 
     return text;
@@ -52,9 +52,9 @@ export class TextCrdt {
       char && remaining > 0;
       char = char.next
     ) {
-      if (char.deleted) continue;
+      if (char.isDeleted) continue;
 
-      char.deleted = true;
+      char.isDeleted = true;
       operations.push({ type: "delete", id: char.id });
       remaining--;
     }
@@ -96,7 +96,7 @@ export class TextCrdt {
         value: char.value,
       });
 
-      if (char.deleted) {
+      if (char.isDeleted) {
         operations.push({ type: "delete", id: char.id });
       }
 
@@ -106,11 +106,32 @@ export class TextCrdt {
     return operations;
   }
 
+  snapshot(): Snapshot {
+    const sites = new Map<string, number>();
+    const chars: Snapshot["chars"] = [];
+
+    for (let char = this.#head; char; char = char.next) {
+      if (!sites.has(char.id.site)) sites.set(char.id.site, sites.size);
+
+      chars.push([
+        sites.get(char.id.site)!,
+        char.id.counter,
+        char.value,
+        char.isDeleted,
+      ]);
+    }
+
+    return {
+      sites: [...sites.keys()],
+      chars,
+    };
+  }
+
   #visibleAt(index: number): Char | null {
     let remaining = index;
 
     for (let char = this.#head; char && remaining >= 0; char = char.next) {
-      if (char.deleted) continue;
+      if (char.isDeleted) continue;
       if (remaining === 0) return char;
       remaining--;
     }
@@ -137,7 +158,7 @@ export class TextCrdt {
       next = next.next;
     }
 
-    const char: Char = { id, value, deleted: false, next };
+    const char: Char = { id, value, isDeleted: false, next };
     if (previous) previous.next = char;
     else this.#head = char;
 
@@ -151,10 +172,29 @@ export class TextCrdt {
     id,
   }: Extract<DocumentOperation, { type: "delete" }>): boolean {
     const char = this.#chars.get(idKey(id));
-    if (!char || char.deleted) return false;
+    if (!char || char.isDeleted) return false;
 
-    char.deleted = true;
+    char.isDeleted = true;
 
     return true;
+  }
+
+  static fromSnapshot(site: string, snapshot: Snapshot): TextCrdt {
+    const crdt = new TextCrdt(site);
+    const operations: DocumentOperation[] = [];
+    let after: CharId | null = null;
+
+    for (const [siteIndex, counter, value, isDeleted] of snapshot.chars) {
+      const id = { site: snapshot.sites[siteIndex]!, counter };
+
+      operations.push({ type: "insert", id, after, value });
+      if (isDeleted) operations.push({ type: "delete", id });
+
+      after = id;
+    }
+
+    crdt.apply(operations);
+
+    return crdt;
   }
 }

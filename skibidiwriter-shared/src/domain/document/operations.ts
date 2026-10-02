@@ -23,3 +23,8 @@ export const DocumentOperationSchema = z.discriminatedUnion("type", [
   }),
 ]);
 export type DocumentOperation = z.infer<typeof DocumentOperationSchema>;
+
+export interface Snapshot {
+  sites: string[];
+  chars: [site: number, counter: number, value: string, isDeleted: boolean][];
+}
