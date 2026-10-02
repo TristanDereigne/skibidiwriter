@@ -6,6 +6,9 @@ import {
 } from "skibidiwriter-shared";
 import { realtime } from "./realtime";
 
+export const CHAT_TOAST_TIMEOUT = 4000;
+
+const PREVIEW_LENGTH = 80;
 const NO_MESSAGES: MessageDTO[] = [];
 
 const messagesByDocument = new Map<string, MessageDTO[]>();
@@ -37,6 +40,12 @@ const subscribe = (subscriber: () => void) => {
     subscribers.delete(subscriber);
   };
 };
+
+export function messagePreview(content: string) {
+  return content.length > PREVIEW_LENGTH
+    ? `${content.slice(0, PREVIEW_LENGTH)}…`
+    : content;
+}
 
 export function markChatRead(documentId: string) {
   readCountByDocument.set(

@@ -13,6 +13,7 @@ import {
 } from "@/libs/socket";
 import chatService from "@/services/chat.service";
 import fileService from "@/services/file.service";
+import notificationService from "@/services/notification.service";
 import type { AuthEnv } from "@/middleware/session.middleware";
 import { upgradeWebSocket } from "@hono/bun";
 import type { Context } from "hono";
@@ -21,8 +22,10 @@ import {
   ClientEventSchema,
   ClientEventType,
   ErrorCode,
+  NotificationType,
   ServerEventType,
   type ClientEvent,
+  type MessageDTO,
   type UserSummaryDTO,
 } from "skibidiwriter-shared";
 
@@ -38,6 +41,10 @@ export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
     onOpen(_, ws) {
       connection = ws;
       addConnection(ws, user.id);
+
+      notificationService
+        .deliverPending(ws, user.id)
+        .catch((error) => console.error("Pending notifications failed", error));
     },
     async onMessage(rawEvent, ws) {
       const result = parseClientEvent(rawEvent.data);
@@ -103,6 +110,7 @@ async function handleClientEvent(
         documentId: event.documentId,
         message,
       });
+      await notifyAbsentParticipants(event.documentId, message);
       break;
     }
     case ClientEventType.Document_Join: {
@@ -163,6 +171,26 @@ async function handleClientEvent(
       }
       break;
     }
+  }
+}
+
+async function notifyAbsentParticipants(
+  documentId: string,
+  message: MessageDTO,
+) {
+  const file = await fileService.participants(documentId);
+  if (!file) return;
+
+  for (const userId of file.userIds) {
+    if (userId === message.author.id) continue;
+    if (connectionsOf(documentId, userId).length > 0) continue;
+
+    await notificationService.notify(userId, {
+      type: NotificationType.Message_Received,
+      fileId: documentId,
+      fileName: file.name,
+      message,
+    });
   }
 }
 

@@ -1,6 +1,5 @@
 import { Navigate, Outlet } from "react-router";
 import { useAuthContext } from "@/context/AuthContext.tsx";
-import { Toaster } from "@/components/ui/toast.tsx";
 
 export default function Public() {
   const { isLoggedIn, isPending } = useAuthContext();
@@ -8,10 +7,5 @@ export default function Public() {
   if (isPending) return null;
   if (isLoggedIn) return <Navigate to="/" replace />;
 
-  return (
-    <>
-      <Outlet />
-      <Toaster />
-    </>
-  );
+  return <Outlet />;
 }

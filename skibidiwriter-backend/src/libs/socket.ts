@@ -16,6 +16,12 @@ export function removeConnection(ws: WSContext) {
   connections.delete(keyOf(ws));
 }
 
+export function isConnected(userId: string): boolean {
+  return connections
+    .values()
+    .some((connection) => connection.userId === userId);
+}
+
 export function joinRoom(ws: WSContext, roomId: string) {
   let room = rooms.get(roomId);
   if (!room) {

@@ -67,6 +67,24 @@ async function hasAccess(id: string, userId: string) {
   return !!row;
 }
 
+async function participants(id: string) {
+  const [file] = await db
+    .select({ name: fileTable.name, ownerId: fileTable.ownerId })
+    .from(fileTable)
+    .where(eq(fileTable.id, id));
+  if (!file) return null;
+
+  const shares = await db
+    .select({ userId: fileShareTable.userId })
+    .from(fileShareTable)
+    .where(eq(fileShareTable.fileId, id));
+
+  const userIds = shares.map((share) => share.userId);
+  if (file.ownerId) userIds.push(file.ownerId);
+
+  return { name: file.name, userIds };
+}
+
 async function isOwner(id: string, userId: string) {
   const [row] = await db
     .select({ id: fileTable.id })
@@ -342,6 +360,7 @@ async function forget(ids: string[]) {
 export default {
   hasAccess,
   isOwner,
+  participants,
   findInFolder,
   findSharedWith,
   findById,

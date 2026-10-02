@@ -4,6 +4,7 @@ import { toFileShareDTO, toSharedFileDTO } from "@/mappers/file-share.mapper";
 import type { AuthEnv } from "@/middleware/session.middleware";
 import fileShareService from "@/services/file-share.service";
 import fileService from "@/services/file.service";
+import notificationService from "@/services/notification.service";
 import userService from "@/services/user.service";
 import { toUserSummaryDTO } from "@/mappers/user.mapper";
 import { evictUser } from "./socket.controller";
@@ -52,14 +53,11 @@ export const fileShareController = new Hono<AuthEnv>()
     const rows = await fileShareService.createMany(fileId, recipientIds);
 
     for (const row of rows) {
-      sendToUser(row.userId, {
-        type: ServerEventType.Notification,
-        notification: {
-          type: NotificationType.File_Shared,
-          fileId,
-          fileName: file.name,
-          sharedBy: { id: userId, name: ctx.get("user").name },
-        },
+      await notificationService.notify(row.userId, {
+        type: NotificationType.File_Shared,
+        fileId,
+        fileName: file.name,
+        sharedBy: { id: userId, name: ctx.get("user").name },
       });
     }
 
@@ -76,6 +74,7 @@ export const fileShareController = new Hono<AuthEnv>()
       return ctx.json({ code: ErrorCode.FileShare_NotFound }, 404);
 
     evictUser(id, userId);
+    await notificationService.discard(userId, id);
     sendToUser(userId, {
       type: ServerEventType.Notification,
       notification: { type: NotificationType.File_Unshared, fileId: id },
