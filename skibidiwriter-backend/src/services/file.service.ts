@@ -247,7 +247,7 @@ async function content(id: string, userId: string) {
     return {
       name: row.name,
       mimeType: row.mimeType,
-      data: row.data ?? Buffer.alloc(0),
+      data: row.data!,
     };
   }
 
