@@ -3,6 +3,7 @@ import type { User } from "better-auth";
 import { useUser } from "@/hooks/use-user.ts";
 
 import { type UsersDto } from "skibidiwriter-shared";
+import type { UserWithRole } from "better-auth/client/plugins";
 
 type UserContextType = {
   user: User | null;
@@ -17,6 +18,13 @@ type UserContextType = {
   setUserSince: (userSince: string | null) => void;
   updateEmail: (email: string) => void;
   getUsersForAdmin: () => void;
+  createUser: (
+    email: string,
+    password: string,
+    name: string,
+    role: "user" | "admin",
+  ) => Promise<UserWithRole | null>;
+  deleteUser: (email: string) => Promise<true | null | undefined>;
 };
 
 export const UserContext = createContext<UserContextType | null>(null);
@@ -62,6 +70,45 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
+  const createUser = async (
+    email: string,
+    password: string,
+    name: string,
+    role: "user" | "admin",
+  ) => {
+    const newUser: UserWithRole = await userHook.createUser(
+      email,
+      password,
+      name,
+      role,
+    );
+    if (newUser) {
+      await getUsersForAdmin();
+      return newUser;
+    } else {
+      return null;
+    }
+  };
+
+  const deleteUser = async (email: string) => {
+    if (usersForAdmin) {
+      const userToDelete = usersForAdmin.find(
+        (userInList) => userInList.email === email,
+      );
+      if (userToDelete) {
+        const isDeleted: boolean = await userHook.deleteUser(userToDelete);
+        if (isDeleted) {
+          await getUsersForAdmin();
+          return true;
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    }
+  };
+
   const value = useMemo<UserContextType>(
     () => ({
       user,
@@ -76,6 +123,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
       setUserSince,
       updateEmail,
       getUsersForAdmin,
+      createUser,
+      deleteUser,
     }),
     [user, email, usersForAdmin, setUser, setEmail],
   );

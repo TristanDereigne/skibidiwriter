@@ -21,14 +21,12 @@ import { useEffect, useState } from "react";
 import type { UsersDto } from "skibidiwriter-shared";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
-import {ProfileAddMembers} from "@/components/sections/profile/profile-add-members.tsx";
+import { ProfileAddMembers } from "@/components/sections/profile/profile-add-members.tsx";
 
 export const ProfileUserTable = () => {
   const userContext = useUserContext();
 
   const [users, setUsers] = useState<UsersDto[]>([]);
-
-  const addNewAccount = () => {};
 
   useEffect(() => {
     if (userContext.usersForAdmin) {
@@ -37,7 +35,6 @@ export const ProfileUserTable = () => {
         const index = userMembers.findIndex(
           (member) => member.email === userContext.email,
         );
-        console.log(index);
         if (index !== -1) {
           const [me] = userMembers.splice(index, 1);
           userMembers.unshift(me);
@@ -48,6 +45,10 @@ export const ProfileUserTable = () => {
       setUsers([]);
     }
   }, [userContext.usersForAdmin]);
+
+  const handleUserDelete = async (email: string) => {
+    await userContext.deleteUser(email);
+  };
 
   return (
     <div className="max-h-72 overflow-y-auto border border-purple rounded-sm">
@@ -85,10 +86,13 @@ export const ProfileUserTable = () => {
                     }
                   />
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit</DropdownMenuItem>
+                    <DropdownMenuItem>Bannir</DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem variant="destructive">
-                      Delete
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => handleUserDelete(user.email)}
+                    >
+                      Supprimer
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
