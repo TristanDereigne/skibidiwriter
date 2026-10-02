@@ -57,7 +57,7 @@ export const fileShareController = new Hono<AuthEnv>()
         type: NotificationType.File_Shared,
         fileId,
         fileName: file.name,
-        sharedBy: { id: userId, name: ctx.get("user").name },
+        sharedBy: toUserSummaryDTO(ctx.get("user")),
       });
     }
 

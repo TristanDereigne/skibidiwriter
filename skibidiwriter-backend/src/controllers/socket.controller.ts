@@ -2,6 +2,7 @@ import {
   addConnection,
   broadcastToRoom,
   connectionsOf,
+  isInRoom,
   joinRoom,
   leaveRoom,
   markAbsent,
@@ -11,6 +12,7 @@ import {
   roomsOf,
   send,
 } from "@/libs/socket";
+import { toUserSummaryDTO } from "@/mappers/user.mapper";
 import chatService from "@/services/chat.service";
 import fileService from "@/services/file.service";
 import notificationService from "@/services/notification.service";
@@ -30,10 +32,7 @@ import {
 } from "skibidiwriter-shared";
 
 export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
-  const user: UserSummaryDTO = {
-    id: ctx.get("userId"),
-    name: ctx.get("user").name,
-  };
+  const user = toUserSummaryDTO(ctx.get("user"));
   let connection: WSContext | undefined;
   let queue: Promise<void> = Promise.resolve();
 
@@ -99,7 +98,7 @@ async function handleClientEvent(
 ) {
   switch (event.type) {
     case ClientEventType.Message_Create: {
-      if (!roomsOf(sender).includes(event.documentId)) {
+      if (!isInRoom(sender, event.documentId)) {
         return sendDocumentNotFound(sender);
       }
 
@@ -134,13 +133,13 @@ async function handleClientEvent(
       break;
     }
     case ClientEventType.Document_Leave: {
-      if (roomsOf(sender).includes(event.documentId)) {
+      if (isInRoom(sender, event.documentId)) {
         leaveDocument(sender, event.documentId);
       }
       break;
     }
     case ClientEventType.Document_Operations: {
-      if (!roomsOf(sender).includes(event.documentId)) {
+      if (!isInRoom(sender, event.documentId)) {
         return sendDocumentNotFound(sender);
       }
 
@@ -164,7 +163,7 @@ async function handleClientEvent(
       break;
     }
     case ClientEventType.Document_Present: {
-      if (!roomsOf(sender).includes(event.documentId)) return;
+      if (!isInRoom(sender, event.documentId)) return;
 
       if (markPresent(event.documentId, sender, user)) {
         broadcastParticipants(event.documentId);

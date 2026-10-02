@@ -49,6 +49,10 @@ export function roomsOf(ws: WSContext): string[] {
   return [...rooms].filter(([, room]) => room.has(key)).map(([id]) => id);
 }
 
+export function isInRoom(ws: WSContext, roomId: string): boolean {
+  return rooms.get(roomId)?.has(keyOf(ws)) ?? false;
+}
+
 export function connectionsOf(roomId: string, userId: string): WSContext[] {
   return [...(rooms.get(roomId) ?? [])]
     .filter(([key]) => connections.get(key)?.userId === userId)
