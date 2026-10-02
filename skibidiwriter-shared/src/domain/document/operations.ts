@@ -1,8 +1,12 @@
 import z from "zod";
 
 export const CharIdSchema = z.object({
-  site: z.string(),
-  counter: z.number().int().nonnegative(),
+  site: z.string().min(1).max(64),
+  counter: z
+    .number()
+    .int()
+    .nonnegative()
+    .max(2 ** 31 - 1),
 });
 export type CharId = z.infer<typeof CharIdSchema>;
 
