@@ -21,14 +21,12 @@ import { useEffect, useState } from "react";
 import type { UsersDto } from "skibidiwriter-shared";
 import { useUserContext } from "@/context/UserContext.tsx";
 import { Badge } from "@/components/ui/badge.tsx";
-import {ProfileAddMembers} from "@/components/sections/profile/profile-add-members.tsx";
+import { ProfileAddMembers } from "@/components/sections/profile/profile-add-members.tsx";
 
 export const ProfileUserTable = () => {
   const userContext = useUserContext();
 
   const [users, setUsers] = useState<UsersDto[]>([]);
-
-  const addNewAccount = () => {};
 
   useEffect(() => {
     if (userContext.usersForAdmin) {
@@ -37,7 +35,6 @@ export const ProfileUserTable = () => {
         const index = userMembers.findIndex(
           (member) => member.email === userContext.email,
         );
-        console.log(index);
         if (index !== -1) {
           const [me] = userMembers.splice(index, 1);
           userMembers.unshift(me);
