@@ -8,6 +8,7 @@ export const ServerEventType = {
   Message_New: "message_new",
   Document_Operations: "document_operations",
   Document_Participants: "document_participants",
+  Document_Revoked: "document_revoked",
   Error: "error",
 } as const;
 export type ServerEventType =
@@ -31,6 +32,10 @@ export type ServerEvent =
       type: typeof ServerEventType.Document_Participants;
       documentId: string;
       participants: UserSummaryDTO[];
+    }
+  | {
+      type: typeof ServerEventType.Document_Revoked;
+      documentId: string;
     }
   | {
       type: typeof ServerEventType.Error;

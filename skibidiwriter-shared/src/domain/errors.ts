@@ -6,6 +6,7 @@ export const ErrorCode = {
   File_NameInvalid: "file/name-invalid",
   User_NotFound: "user/not-found",
   FileShare_SelfShare: "file-share/self-share",
+  FileShare_NotFound: "file-share/not-found",
   Folder_NotFound: "folder/not-found",
   Folder_ParentNotFound: "folder/parent-not-found",
   Folder_MoveIntoItself: "folder/move-into-itself",
