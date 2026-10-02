@@ -1,15 +1,32 @@
 import type { WSContext } from "hono/ws";
 import type { ServerEvent, UserSummaryDTO } from "skibidiwriter-shared";
 
-// Hono hands out a new WSContext per event, so connections are keyed by the underlying socket.
-const connections = new Map<unknown, { ws: WSContext; userId: string }>();
+const connections = new Map<
+  unknown,
+  { ws: WSContext; userId: string; sessionId: string }
+>();
 const rooms = new Map<string, Map<unknown, WSContext>>();
 const presence = new Map<string, Map<unknown, UserSummaryDTO>>();
 
 const keyOf = (ws: WSContext) => ws.raw ?? ws;
 
-export function addConnection(ws: WSContext, userId: string) {
-  connections.set(keyOf(ws), { ws, userId });
+const SESSION_ENDED_CLOSE_CODE = 1008;
+
+export function addConnection(
+  ws: WSContext,
+  userId: string,
+  sessionId: string,
+) {
+  connections.set(keyOf(ws), { ws, userId, sessionId });
+}
+
+export function closeSession(sessionId: string) {
+  const ended = [...connections.values()].filter(
+    (connection) => connection.sessionId === sessionId,
+  );
+
+  for (const { ws } of ended)
+    ws.close(SESSION_ENDED_CLOSE_CODE, "Session ended");
 }
 
 export function removeConnection(ws: WSContext) {

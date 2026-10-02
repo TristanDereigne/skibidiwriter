@@ -1,4 +1,5 @@
 import { env } from "@/libs/env";
+import { closeSession } from "@/libs/socket";
 import * as schemas from "@/models";
 
 import { betterAuth } from "better-auth";
@@ -21,6 +22,13 @@ export const auth = betterAuth({
     schema: schemas,
   }),
   databaseHooks: {
+    session: {
+      delete: {
+        after: async (session) => {
+          closeSession(session.id);
+        },
+      },
+    },
     user: {
       create: {
         before: async (newUser) => {

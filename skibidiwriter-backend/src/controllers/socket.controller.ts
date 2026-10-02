@@ -33,13 +33,14 @@ import {
 
 export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
   const user = toUserSummaryDTO(ctx.get("user"));
+  const sessionId = ctx.get("sessionId");
   let connection: WSContext | undefined;
   let queue: Promise<void> = Promise.resolve();
 
   return {
     onOpen(_, ws) {
       connection = ws;
-      addConnection(ws, user.id);
+      addConnection(ws, user.id, sessionId);
 
       notificationService
         .deliverPending(ws, user.id)

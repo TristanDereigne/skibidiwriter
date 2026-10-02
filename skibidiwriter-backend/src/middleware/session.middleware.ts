@@ -6,16 +6,21 @@ export type AuthEnv = {
   Variables: {
     user: typeof auth.$Infer.Session.user;
     userId: string;
+    sessionId: string;
   };
 };
 
-export const sessionMiddleware = createMiddleware<AuthEnv>(async (c, next) => {
-  const session = await auth.api.getSession({
-    headers: c.req.raw.headers,
-  });
-  if (!session) return c.json({ code: ErrorCode.Auth_Unauthorized }, 401);
+export const sessionMiddleware = createMiddleware<AuthEnv>(
+  async (ctx, next) => {
+    const session = await auth.api.getSession({
+      headers: ctx.req.raw.headers,
+    });
+    if (!session) return ctx.json({ code: ErrorCode.Auth_Unauthorized }, 401);
 
-  c.set("user", session.user);
-  c.set("userId", session.user.id);
-  await next();
-});
+    ctx.set("user", session.user);
+    ctx.set("userId", session.user.id);
+    ctx.set("sessionId", session.session.id);
+
+    await next();
+  },
+);
