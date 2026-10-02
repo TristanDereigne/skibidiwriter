@@ -12,6 +12,12 @@ export const dateTimeFormat = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+export function formatMonthYear(date: Date) {
+  const text = date.toLocaleString("fr-FR", { month: "long", year: "numeric" });
+
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
 const BYTE_UNITS = ["o", "Ko", "Mo", "Go"];
 
 export function formatBytes(bytes: number) {

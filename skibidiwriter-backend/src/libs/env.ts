@@ -6,10 +6,8 @@ dotenv.config({
 import { z } from "zod";
 
 const schema = z.object({
-  NODE_ENV: z.enum(["production", "development"]).default("development"),
   PORT: z.coerce.number(),
   DATABASE_URL: z.url(),
-  FRONTEND_URL: z.url(),
   FRONTEND_URL_NO_SLASH: z.url(),
   ADMIN_ID: z.string(),
 });

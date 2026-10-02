@@ -10,7 +10,7 @@ import {
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useDebounced } from "@/hooks/use-debounched";
+import { useDebounced } from "@/hooks/use-debounced";
 import {
   useFileRecipients,
   useRevokeFileShare,

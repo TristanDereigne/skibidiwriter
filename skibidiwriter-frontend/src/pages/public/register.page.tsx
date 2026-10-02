@@ -199,9 +199,6 @@ export const RegisterPage = () => {
             <Button type="submit" className="w-full">
               S'enregistrer
             </Button>
-            <Button variant="outline" className="w-full">
-              S'enregistrer avec Google
-            </Button>
           </CardFooter>
         </form>
       </Card>

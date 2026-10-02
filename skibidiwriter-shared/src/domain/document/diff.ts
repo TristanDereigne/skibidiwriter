@@ -1,4 +1,4 @@
-export interface TextChange {
+interface TextChange {
   start: number;
   deleteCount: number;
   insert: string;

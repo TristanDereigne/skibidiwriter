@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm/_relations";
 import {
   boolean,
   index,
@@ -98,22 +97,3 @@ export const twoFactor = pgTable("two_factor", {
   failedVerificationCount: integer("failed_verification_count").notNull(),
   lockedUntil: timestamp("locked_until", { precision: 6, withTimezone: true }),
 });
-
-export const userRelations = relations(user, ({ many }) => ({
-  sessions: many(session),
-  accounts: many(account),
-}));
-
-export const sessionRelations = relations(session, ({ one }) => ({
-  user: one(user, {
-    fields: [session.userId],
-    references: [user.id],
-  }),
-}));
-
-export const accountRelations = relations(account, ({ one }) => ({
-  user: one(user, {
-    fields: [account.userId],
-    references: [user.id],
-  }),
-}));

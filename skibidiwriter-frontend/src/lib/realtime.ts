@@ -8,7 +8,7 @@ import {
 import { api } from "./api";
 import { getErrorMessage } from "./errors";
 
-export type ConnectionStatus = "connecting" | "connected" | "disconnected";
+type ConnectionStatus = "connecting" | "connected" | "disconnected";
 
 export const CONNECTION_STATUS_LABELS: Record<ConnectionStatus, string> = {
   connecting: "Connexion…",

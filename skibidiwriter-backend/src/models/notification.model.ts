@@ -25,5 +25,3 @@ export const notificationTable = pgTable(
   },
   (table) => [index("notification_user_idx").on(table.userId, table.createdAt)],
 );
-
-export type NotificationRow = typeof notificationTable.$inferSelect;

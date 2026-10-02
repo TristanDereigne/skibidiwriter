@@ -1,7 +1,7 @@
 import type { Disclosure } from "@/hooks/use-disclosure";
 import { createContext, useContext } from "react";
 
-export interface ExplorerItemContextValue {
+interface ExplorerItemContextValue {
   name: string;
   isJustCreated: boolean;
   isRenaming: boolean;

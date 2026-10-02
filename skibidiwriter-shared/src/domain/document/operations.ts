@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const CharIdSchema = z.object({
+const CharIdSchema = z.object({
   site: z.string().min(1).max(64),
   counter: z
     .number()
