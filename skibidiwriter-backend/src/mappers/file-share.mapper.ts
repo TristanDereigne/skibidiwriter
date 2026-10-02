@@ -11,7 +11,7 @@ export function toFileShareDTO(row: FileShareRow): FileShareDTO {
 }
 
 interface SharedFileRow {
-  file: Omit<FileRow, "data" | "operations">;
+  file: Omit<FileRow, "data" | "snapshot">;
   owner: Pick<UserRow, "id" | "name">;
   sharedAt: Date;
 }

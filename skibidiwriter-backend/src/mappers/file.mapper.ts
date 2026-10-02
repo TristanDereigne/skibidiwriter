@@ -1,7 +1,7 @@
 import type { FileRow } from "@/models";
 import type { FileDetailDTO, FileDTO } from "skibidiwriter-shared";
 
-export function toFileDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
+export function toFileDTO(row: Omit<FileRow, "data" | "snapshot">): FileDTO {
   return {
     id: row.id,
     name: row.name,
@@ -15,7 +15,7 @@ export function toFileDTO(row: Omit<FileRow, "data" | "operations">): FileDTO {
 }
 
 export function toFileDetailDTO(
-  row: Omit<FileRow, "data" | "operations">,
+  row: Omit<FileRow, "data" | "snapshot">,
   userId: string,
 ): FileDetailDTO {
   const isOwner = row.ownerId === userId;
