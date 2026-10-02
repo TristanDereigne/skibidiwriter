@@ -42,7 +42,6 @@ export const auth = betterAuth({
     admin({
       defaultRole: "user",
       adminRoles: ["admin"],
-      adminUserIds: [env.ADMIN_ID],
     }),
   ],
 });
