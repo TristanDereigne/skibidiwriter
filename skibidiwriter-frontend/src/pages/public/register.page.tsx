@@ -137,7 +137,7 @@ export const RegisterPage = () => {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="email">Pseudo</Label>
+                  <Label htmlFor="pseudo">Pseudo</Label>
                   <Input
                     id="pseudo"
                     type="text"
@@ -162,7 +162,7 @@ export const RegisterPage = () => {
                 </div>
                 <div className="grid gap-2">
                   <div className="flex items-center">
-                    <Label htmlFor="password">
+                    <Label htmlFor="verifyPassword">
                       Confirmation du mot de passe
                     </Label>
                   </div>

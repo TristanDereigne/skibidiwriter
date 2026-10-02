@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import type { UsersDto } from "skibidiwriter-shared";
 import { useUserContext } from "@/context/UserContext.tsx";
@@ -28,7 +28,6 @@ import { ProfileUnbanMembers } from "@/components/sections/profile/profile-unban
 export const ProfileUserTable = () => {
   const userContext = useUserContext();
 
-  const [users, setUsers] = useState<UsersDto[]>([]);
   const [userToBan, setUserToBan] = useState<{
     name: string;
     email: string;
@@ -38,23 +37,11 @@ export const ProfileUserTable = () => {
     email: string;
   } | null>(null);
 
-  useEffect(() => {
-    if (userContext.usersForAdmin) {
-      let userMembers = userContext.usersForAdmin;
-      if (userContext?.email) {
-        const index = userMembers.findIndex(
-          (member) => member.email === userContext.email,
-        );
-        if (index !== -1) {
-          const [me] = userMembers.splice(index, 1);
-          userMembers.unshift(me);
-        }
-      }
-      setUsers(userContext.usersForAdmin);
-    } else {
-      setUsers([]);
-    }
-  }, [userContext.usersForAdmin]);
+  const members = userContext.usersForAdmin ?? [];
+  const me = members.find((member) => member.email === userContext.email);
+  const users = me
+    ? [me, ...members.filter((member) => member !== me)]
+    : members;
 
   const handleUserDelete = async (email: string) => {
     await userContext.deleteUser(email);

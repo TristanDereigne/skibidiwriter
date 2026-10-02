@@ -9,7 +9,8 @@ import {
 import { Field } from "@/components/ui/field.tsx";
 import { Input } from "@/components/ui/input.tsx";
 import { Button } from "@/components/ui/button.tsx";
-import { useState } from "react";
+import { useState, type SubmitEventHandler } from "react";
+import { toast } from "@/components/ui/toast.tsx";
 import { useUserContext } from "@/context/UserContext.tsx";
 import {
   Select,
@@ -28,7 +29,7 @@ export const ProfileAddMembers = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
-  const [role, setRole] = useState<"user" | "admin" | undefined>("user");
+  const [role, setRole] = useState<"user" | "admin">("user");
   const [roleInput, setRoleInput] = useState("");
 
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,8 +50,8 @@ export const ProfileAddMembers = () => {
     setPasswordConfirm(e.target.value);
   };
 
-  const handleRoleChange = (role: string) => {
-    setRoleInput(role);
+  const handleRoleChange = (role: string | null) => {
+    setRoleInput(role ?? "");
     if (role === "Membre") {
       setRole("user");
     } else {
@@ -58,17 +59,35 @@ export const ProfileAddMembers = () => {
     }
   };
 
-  const handleAddMember = async (e) => {
+  const handleAddMember: SubmitEventHandler = async (e) => {
     e.preventDefault();
-    if (role) {
-      await userContext.createUser(email, password, name, role);
+
+    if (password !== passwordConfirm) {
+      toast.add({
+        title: "Les mots de passe ne correspondent pas",
+        type: "error",
+      });
+      return;
     }
+
+    try {
+      await userContext.createUser(email, password, name, role);
+    } catch (error) {
+      toast.add({
+        title: "Échec de la création du membre",
+        description: error instanceof Error ? error.message : undefined,
+        type: "error",
+      });
+      return;
+    }
+
     setIsOpen(false);
     setName("");
     setEmail("");
     setPassword("");
-    setRoleInput("");
     setPasswordConfirm("");
+    setRole("user");
+    setRoleInput("");
   };
 
   return (
