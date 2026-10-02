@@ -26,7 +26,7 @@ export function useNotifications() {
 
         toast.add({
           title: "Nouveau partage",
-          description: `${notification.sharedBy.name} a partagé « ${notification.fileName} » avec vous`,
+          description: `${notification.sharedBy.name} a partagé "${notification.fileName}" avec vous`,
           type: "info",
           actionProps: {
             children: "Voir",

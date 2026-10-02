@@ -12,6 +12,7 @@ import { useDownloadFile, useFile, useRenameFile } from "@/hooks/use-files";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { useFolderPath } from "@/hooks/use-folders";
 import { sharedPath } from "@/lib/paths";
+import { isDesktop } from "@/lib/viewport";
 import {
   CONNECTION_STATUS_LABELS,
   realtime,
@@ -19,7 +20,7 @@ import {
 } from "@/lib/realtime";
 import AppHeader from "@/layout/app-header.tsx";
 import { cn } from "cn";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { ServerEventType } from "skibidiwriter-shared";
 
@@ -32,9 +33,8 @@ export const EditPage = () => {
   const status = useConnectionStatus();
   const navigate = useNavigate();
   const shareDialog = useDisclosure();
-  const [isChatOpen, setIsChatOpen] = useState(
-    () => globalThis.matchMedia("(min-width: 1024px)").matches,
-  );
+  const [isChatOpen, setIsChatOpen] = useState(isDesktop);
+  const toggleChat = useCallback(() => setIsChatOpen((isOpen) => !isOpen), []);
   const documentRowId = document?.id;
   const documentName = document?.name;
 
@@ -78,7 +78,7 @@ export const EditPage = () => {
               <ChatToggle
                 documentId={documentId}
                 isOpen={isChatOpen}
-                onToggle={() => setIsChatOpen((isOpen) => !isOpen)}
+                onToggle={toggleChat}
               />
             )}
             {document?.isOwner && (

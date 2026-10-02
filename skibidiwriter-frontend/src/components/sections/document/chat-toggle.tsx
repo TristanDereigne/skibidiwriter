@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { useChatToasts } from "@/hooks/use-chat-toasts";
 import { markChatRead, useUnreadMessages } from "@/lib/chat";
 import { MessageSquareIcon } from "lucide-react";
 import { useEffect } from "react";
@@ -15,6 +16,7 @@ export default function ChatToggle({
   onToggle,
 }: Readonly<Props>) {
   const unread = useUnreadMessages(documentId);
+  useChatToasts(documentId, isOpen, onToggle);
 
   useEffect(() => {
     if (isOpen && unread > 0) markChatRead(documentId);
