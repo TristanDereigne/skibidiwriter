@@ -3,9 +3,11 @@ import { api, errorMessage } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CreateFileSharesDTO } from "skibidiwriter-shared";
 
+export const RECEIVED_SHARES_QUERY_KEY = ["file-shares", "received"];
+
 export function useSharedFiles() {
   return useQuery({
-    queryKey: ["file-shares", "received"],
+    queryKey: RECEIVED_SHARES_QUERY_KEY,
     queryFn: async () => {
       const res = await api["file-shares"].$get();
       if (!res.ok)

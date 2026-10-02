@@ -76,6 +76,10 @@ export const fileShareController = new Hono<AuthEnv>()
       return ctx.json({ code: ErrorCode.FileShare_NotFound }, 404);
 
     evictUser(id, userId);
+    sendToUser(userId, {
+      type: ServerEventType.Notification,
+      notification: { type: NotificationType.File_Unshared, fileId: id },
+    });
 
     return ctx.body(null, 204);
   });
