@@ -24,7 +24,7 @@ export const app = new Hono()
       credentials: true,
       allowHeaders: ["Content-Type", "Authorization"],
       exposeHeaders: ["Content-Disposition"],
-      allowMethods: ["POST", "GET", "PATCH", "OPTIONS", "DELETE"],
+      allowMethods: ["POST", "GET", "PUT", "PATCH", "OPTIONS", "DELETE"],
     }),
   )
   .get("/ws", sessionMiddleware, socketController)

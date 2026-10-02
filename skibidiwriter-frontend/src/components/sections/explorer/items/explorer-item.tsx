@@ -21,6 +21,7 @@ interface Props {
   onPrefetch?: () => void;
   onRename: (name: string) => void;
   onDownload?: () => void;
+  onReplace?: () => void;
 }
 
 export default function ExplorerItem({
@@ -35,6 +36,7 @@ export default function ExplorerItem({
   onPrefetch,
   onRename,
   onDownload,
+  onReplace,
 }: Readonly<Props>) {
   const { isJustCreated, isRenaming, startRenaming, deleteDialog } =
     useExplorerItem();
@@ -86,7 +88,11 @@ export default function ExplorerItem({
           onRename={onRename}
         />
       </ContextMenuTrigger>
-      <ExplorerItemMenu isShareable={isShareable} onDownload={onDownload} />
+      <ExplorerItemMenu
+        isShareable={isShareable}
+        onDownload={onDownload}
+        onReplace={onReplace}
+      />
     </ContextMenu>
   );
 }

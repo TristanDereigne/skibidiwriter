@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/toast";
 import { api, unwrap } from "@/lib/api";
 import { saveBlob } from "@/lib/download";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { MAX_FILE_SIZE_BYTES } from "skibidiwriter-shared";
 
 export const FILES_QUERY_KEY = ["files"];
 
@@ -32,6 +33,17 @@ export function useFile(id: string | undefined) {
       return await res.json();
     },
   });
+}
+
+export async function findFileByName(name: string, folderId: string | null) {
+  const res = await unwrap(
+    api.files.$get({ query: folderId ? { folderId } : {} }),
+    "Échec de la recherche du fichier",
+  );
+  const files = await res.json();
+  const key = name.toLowerCase();
+
+  return files.find((file) => file.name.toLowerCase() === key);
 }
 
 function useInvalidateFiles() {
@@ -92,6 +104,38 @@ export function useUploadFile() {
       return await res.json();
     },
     onSuccess: invalidate,
+  });
+}
+
+export function useReplaceFile() {
+  const invalidate = useInvalidateFiles();
+
+  return useMutation({
+    mutationFn: async ({ id, file }: { id: string; file: File }) => {
+      if (file.size > MAX_FILE_SIZE_BYTES)
+        throw new Error(
+          `Fichier trop volumineux (max. ${MAX_FILE_SIZE_BYTES / (1024 * 1024)} Mo)`,
+        );
+
+      const res = await unwrap(
+        api.files[":id"].content.$put({
+          param: { id },
+          form: { file },
+        }),
+        "Échec du remplacement du fichier",
+      );
+
+      return await res.json();
+    },
+    onSuccess: (file) => {
+      invalidate();
+      toast.add({
+        title: "Fichier remplacé",
+        description: file.name,
+        type: "success",
+      });
+    },
+    onError: toastError("Remplacement impossible"),
   });
 }
 

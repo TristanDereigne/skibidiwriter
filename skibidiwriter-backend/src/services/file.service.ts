@@ -221,6 +221,27 @@ async function createUpload(
   return (await findOwnedById(row!.id, userId))!;
 }
 
+async function replaceUpload(
+  id: string,
+  file: { mimeType: string; data: Buffer },
+  userId: string,
+) {
+  const [row] = await db
+    .update(fileTable)
+    .set({
+      ...file,
+      sizeBytes: file.data.length,
+      lastModifiedById: userId,
+    })
+    .where(
+      and(eq(fileTable.id, id), ownedBy(userId), eq(fileTable.kind, "upload")),
+    )
+    .returning({ id: fileTable.id });
+  if (!row) return;
+
+  return await findOwnedById(row.id, userId);
+}
+
 async function rename(id: string, name: string, userId: string) {
   const [row] = await db
     .update(fileTable)
@@ -395,6 +416,7 @@ export default {
   isNameTaken,
   createDocument,
   createUpload,
+  replaceUpload,
   rename,
   move,
   remove,

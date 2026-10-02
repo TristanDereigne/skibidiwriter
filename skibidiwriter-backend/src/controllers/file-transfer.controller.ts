@@ -20,6 +20,13 @@ const UploadFormSchema = z.object({
   folderId: z.uuid().optional(),
 });
 
+const ReplaceFormSchema = z.object({ file: z.instanceof(File) });
+
+const uploadBodyLimit = bodyLimit({
+  maxSize: MAX_FILE_SIZE_BYTES + MULTIPART_OVERHEAD,
+  onError: (ctx) => ctx.json({ code: ErrorCode.File_TooLarge }, 413),
+});
+
 function toMimeType(type: string) {
   const essence = type.split(";")[0]!.trim().toLowerCase();
 
@@ -41,12 +48,42 @@ export const fileTransferController = new Hono<AuthEnv>()
       "Content-Security-Policy": "sandbox",
     });
   })
+  .put(
+    "/:id/content",
+    uploadBodyLimit,
+    validate("param", IdParamSchema),
+    validate("form", ReplaceFormSchema),
+    async (ctx) => {
+      const userId = ctx.get("userId");
+      const { id } = ctx.req.valid("param");
+      const { file } = ctx.req.valid("form");
+
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        return ctx.json({ code: ErrorCode.File_TooLarge }, 413);
+      }
+
+      const existing = await fileService.findOwnedById(id, userId);
+      if (!existing) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
+      if (existing.kind !== "upload") {
+        return ctx.json({ code: ErrorCode.File_NotReplaceable }, 409);
+      }
+
+      const row = await fileService.replaceUpload(
+        id,
+        {
+          mimeType: toMimeType(file.type),
+          data: Buffer.from(await file.arrayBuffer()),
+        },
+        userId,
+      );
+      if (!row) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
+
+      return ctx.json(toFileDTO(row), 200);
+    },
+  )
   .post(
     "/",
-    bodyLimit({
-      maxSize: MAX_FILE_SIZE_BYTES + MULTIPART_OVERHEAD,
-      onError: (ctx) => ctx.json({ code: ErrorCode.File_TooLarge }, 413),
-    }),
+    uploadBodyLimit,
     validate("form", UploadFormSchema),
     async (ctx) => {
       const userId = ctx.get("userId");

@@ -6,6 +6,8 @@ const ERROR_MESSAGES: Record<ErrorCode, string> = {
   [ErrorCode.File_NotFound]: "Fichier introuvable",
   [ErrorCode.File_TooLarge]: "Fichier trop volumineux",
   [ErrorCode.File_NameInvalid]: "Nom de fichier invalide",
+  [ErrorCode.File_NotReplaceable]:
+    "Seuls les fichiers non textuels peuvent être remplacés",
   [ErrorCode.User_NotFound]: "Utilisateur introuvable",
   [ErrorCode.FileShare_SelfShare]:
     "Impossible de partager un fichier avec vous-même",

@@ -6,10 +6,14 @@ import {
 import { toast } from "@/components/ui/toast";
 import {
   DEFAULT_DOCUMENT_NAME,
+  findFileByName,
   useCreateDocument,
+  useReplaceFile,
   useUploadFile,
 } from "@/hooks/use-files";
+import { ApiError } from "@/lib/api";
 import {
+  ErrorCode,
   MAX_DOCUMENT_CONTENT_LENGTH,
   MAX_FILE_SIZE_BYTES,
 } from "skibidiwriter-shared";
@@ -38,6 +42,7 @@ function isTextFile(file: File) {
 export function useUploadFiles(folderId: string | null) {
   const { mutateAsync: createDocument } = useCreateDocument();
   const { mutateAsync: uploadFile } = useUploadFile();
+  const { mutate: replaceFile } = useReplaceFile();
 
   async function upload(file: File) {
     const id = toast.add({
@@ -82,18 +87,38 @@ export function useUploadFiles(folderId: string | null) {
         timeout: 4000,
       });
     } catch (error) {
+      const isNameConflict =
+        error instanceof ApiError && error.code === ErrorCode.Name_AlreadyInUse;
+      const existing = isNameConflict
+        ? await findFileByName(file.name.trim().slice(0, 255), folderId).catch(
+            () => undefined,
+          )
+        : undefined;
+
+      const actionProps = isNameConflict
+        ? existing?.kind === "upload"
+          ? {
+              children: "Remplacer",
+              onClick: () => {
+                toast.close(id);
+                replaceFile({ id: existing.id, file });
+              },
+            }
+          : undefined
+        : {
+            children: "Réessayer",
+            onClick: () => {
+              toast.close(id);
+              void upload(file);
+            },
+          };
+
       toast.update(id, {
         description:
           error instanceof Error ? error.message : "Échec du téléversement",
         type: "error",
         timeout: 0,
-        actionProps: {
-          children: "Réessayer",
-          onClick: () => {
-            toast.close(id);
-            void upload(file);
-          },
-        },
+        actionProps,
       });
     }
   }
