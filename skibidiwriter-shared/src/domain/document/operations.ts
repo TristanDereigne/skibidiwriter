@@ -1,8 +1,12 @@
 import z from "zod";
 
 export const CharIdSchema = z.object({
-  site: z.string(),
-  counter: z.number().int().nonnegative(),
+  site: z.string().min(1).max(64),
+  counter: z
+    .number()
+    .int()
+    .nonnegative()
+    .max(2 ** 31 - 1),
 });
 export type CharId = z.infer<typeof CharIdSchema>;
 
@@ -19,3 +23,8 @@ export const DocumentOperationSchema = z.discriminatedUnion("type", [
   }),
 ]);
 export type DocumentOperation = z.infer<typeof DocumentOperationSchema>;
+
+export interface Snapshot {
+  sites: string[];
+  chars: [site: number, counter: number, value: string, isDeleted: boolean][];
+}

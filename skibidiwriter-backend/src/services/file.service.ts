@@ -3,7 +3,11 @@ import { eqOrNull } from "@/libs/sql";
 import { fileTable, user } from "@/models";
 import { fileShareTable } from "@/models/file-share.model";
 import { and, desc, eq, exists, getColumns, ne, or, sql } from "drizzle-orm";
-import { TextCrdt, type DocumentOperation } from "skibidiwriter-shared";
+import {
+  Snapshot,
+  TextCrdt,
+  type DocumentOperation,
+} from "skibidiwriter-shared";
 
 const PERSIST_DELAY = 500;
 const DOCUMENT_MIME_TYPE = "text/markdown";
@@ -18,7 +22,7 @@ const releasing = new Map<string, Promise<void>>();
 
 const {
   data: _data,
-  operations: _operations,
+  snapshot: _snapshot,
   ...summarySelect
 } = getColumns(fileTable);
 
@@ -128,7 +132,7 @@ async function createDocument(
   content?: string,
 ) {
   const crdt = new TextCrdt("server");
-  const operations = content ? crdt.setText(content) : [];
+  if (content) crdt.setText(content);
 
   const [row] = await db
     .insert(fileTable)
@@ -138,7 +142,7 @@ async function createDocument(
       mimeType: DOCUMENT_MIME_TYPE,
       sizeBytes: Buffer.byteLength(content ?? ""),
       folderId,
-      operations,
+      snapshot: crdt.snapshot(),
       ownerId: userId,
     })
     .returning(summarySelect);
@@ -203,7 +207,7 @@ async function content(id: string, userId: string) {
       kind: fileTable.kind,
       mimeType: fileTable.mimeType,
       data: fileTable.data,
-      operations: fileTable.operations,
+      snapshot: fileTable.snapshot,
     })
     .from(fileTable)
     .where(and(eq(fileTable.id, id), accessibleTo(userId)));
@@ -218,7 +222,7 @@ async function content(id: string, userId: string) {
   }
 
   const opened = await openDocuments.get(id);
-  const text = opened?.crdt.text ?? replay(row.operations).text;
+  const text = opened?.crdt.text ?? replay(row.snapshot).text;
 
   return {
     name: /\.(md|markdown|txt)$/i.test(row.name) ? row.name : `${row.name}.md`,
@@ -227,11 +231,10 @@ async function content(id: string, userId: string) {
   };
 }
 
-function replay(operations: DocumentOperation[] | null) {
-  const crdt = new TextCrdt("server");
-  crdt.apply(operations ?? []);
+function replay(stored: Snapshot | null) {
+  if (!stored) return new TextCrdt("server");
 
-  return crdt;
+  return TextCrdt.fromSnapshot("server", stored);
 }
 
 function open(id: string) {
@@ -255,7 +258,7 @@ async function load(id: string): Promise<OpenDocument | null> {
     return null;
   }
 
-  return { crdt: replay(row.operations) };
+  return { crdt: replay(row.snapshot) };
 }
 
 async function persist(id: string, document: OpenDocument) {
@@ -265,7 +268,7 @@ async function persist(id: string, document: OpenDocument) {
   await db
     .update(fileTable)
     .set({
-      operations: document.crdt.toOperations(),
+      snapshot: document.crdt.snapshot(),
       sizeBytes: Buffer.byteLength(document.crdt.text),
     })
     .where(eq(fileTable.id, id));
