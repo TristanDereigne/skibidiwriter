@@ -3,17 +3,20 @@ import type { ServerEvent, UserSummaryDTO } from "skibidiwriter-shared";
 
 // Hono hands out a new WSContext per event, so connections are keyed by the underlying socket.
 const connections = new Map<unknown, WSContext>();
+const connectionUsers = new Map<unknown, string>();
 const rooms = new Map<string, Map<unknown, WSContext>>();
 const presence = new Map<string, Map<unknown, UserSummaryDTO>>();
 
 const keyOf = (ws: WSContext) => ws.raw ?? ws;
 
-export function addConnection(ws: WSContext) {
+export function addConnection(ws: WSContext, userId: string) {
   connections.set(keyOf(ws), ws);
+  connectionUsers.set(keyOf(ws), userId);
 }
 
 export function removeConnection(ws: WSContext) {
   connections.delete(keyOf(ws));
+  connectionUsers.delete(keyOf(ws));
 }
 
 export function joinRoom(ws: WSContext, roomId: string) {
@@ -41,6 +44,12 @@ export function roomsOf(ws: WSContext): string[] {
   const key = keyOf(ws);
 
   return [...rooms].filter(([, room]) => room.has(key)).map(([id]) => id);
+}
+
+export function connectionsOf(roomId: string, userId: string): WSContext[] {
+  return [...(rooms.get(roomId) ?? [])]
+    .filter(([key]) => connectionUsers.get(key) === userId)
+    .map(([, ws]) => ws);
 }
 
 export function markPresent(

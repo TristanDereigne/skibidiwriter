@@ -2,6 +2,7 @@ import {
   addConnection,
   broadcast,
   broadcastToRoom,
+  connectionsOf,
   joinRoom,
   leaveRoom,
   markAbsent,
@@ -37,7 +38,7 @@ export const socketController = upgradeWebSocket((ctx: Context<AuthEnv>) => {
   return {
     onOpen(_, ws) {
       connection = ws;
-      addConnection(ws);
+      addConnection(ws, user.id);
 
       send(ws, {
         type: ServerEventType.Message_History,
@@ -164,6 +165,13 @@ function leaveDocument(connection: WSContext, documentId: string) {
 
   if (wasPresent) broadcastParticipants(documentId);
   if (isEmpty) void fileService.release(documentId);
+}
+
+export function evictUser(documentId: string, userId: string) {
+  for (const connection of connectionsOf(documentId, userId)) {
+    leaveDocument(connection, documentId);
+    send(connection, { type: ServerEventType.Document_Revoked, documentId });
+  }
 }
 
 function broadcastParticipants(documentId: string) {

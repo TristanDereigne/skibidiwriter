@@ -9,21 +9,20 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { Check } from "lucide-react";
 import type { UserSummaryDTO } from "skibidiwriter-shared";
-import { useExplorerItem } from "../context/use-explorer-item";
 
 interface Props {
+  fileName: string;
   user: UserSummaryDTO;
   isSelected: boolean;
   onToggle: () => void;
 }
 
-export default function ExplorerShareUserOption({
+export default function ShareUserOption({
+  fileName,
   user,
   isSelected,
   onToggle,
 }: Readonly<Props>) {
-  const { name } = useExplorerItem();
-
   return (
     <label>
       <Card
@@ -54,7 +53,7 @@ export default function ExplorerShareUserOption({
           <div className="flex flex-col gap-1">
             <p className="font-semibold">{user.name}</p>
             <p className="text-muted-foreground">
-              Partager "{name}" avec {user.name}
+              Partager "{fileName}" avec {user.name}
             </p>
           </div>
         </CardContent>

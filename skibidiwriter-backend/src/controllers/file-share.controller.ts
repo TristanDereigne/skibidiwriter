@@ -1,17 +1,32 @@
-import { validate } from "@/libs/validation";
+import { IdParamSchema, validate } from "@/libs/validation";
 import { toFileShareDTO, toSharedFileDTO } from "@/mappers/file-share.mapper";
 import type { AuthEnv } from "@/middleware/session.middleware";
 import fileShareService from "@/services/file-share.service";
 import fileService from "@/services/file.service";
 import userService from "@/services/user.service";
+import { toUserSummaryDTO } from "@/mappers/user.mapper";
+import { evictUser } from "./socket.controller";
 import { Hono } from "hono";
 import { CreateFileSharesSchema, ErrorCode } from "skibidiwriter-shared";
+import z from "zod";
+
+const RevokeParamSchema = z.object({ id: z.uuid(), userId: z.string() });
 
 export const fileShareController = new Hono<AuthEnv>()
   .get("/", async (ctx) => {
     const rows = await fileService.findSharedWith(ctx.get("userId"));
 
     return ctx.json(rows.map(toSharedFileDTO));
+  })
+  .get("/:id", validate("param", IdParamSchema), async (ctx) => {
+    const { id } = ctx.req.valid("param");
+
+    const isOwner = await fileService.isOwner(id, ctx.get("userId"));
+    if (!isOwner) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
+
+    const rows = await fileShareService.findRecipients(id);
+
+    return ctx.json(rows.map(toUserSummaryDTO));
   })
   .post("/", validate("json", CreateFileSharesSchema), async (ctx) => {
     const userId = ctx.get("userId");
@@ -31,4 +46,18 @@ export const fileShareController = new Hono<AuthEnv>()
     const rows = await fileShareService.createMany(fileId, recipientIds);
 
     return ctx.json(rows.map(toFileShareDTO), 201);
+  })
+  .delete("/:id/:userId", validate("param", RevokeParamSchema), async (ctx) => {
+    const { id, userId } = ctx.req.valid("param");
+
+    const isOwner = await fileService.isOwner(id, ctx.get("userId"));
+    if (!isOwner) return ctx.json({ code: ErrorCode.File_NotFound }, 404);
+
+    const isRevoked = await fileShareService.remove(id, userId);
+    if (!isRevoked)
+      return ctx.json({ code: ErrorCode.FileShare_NotFound }, 404);
+
+    evictUser(id, userId);
+
+    return ctx.body(null, 204);
   });
