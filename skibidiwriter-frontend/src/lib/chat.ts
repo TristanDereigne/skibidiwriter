@@ -9,15 +9,21 @@ import { realtime } from "./realtime";
 const NO_MESSAGES: MessageDTO[] = [];
 
 const messagesByDocument = new Map<string, MessageDTO[]>();
+const readCountByDocument = new Map<string, number>();
 const subscribers = new Set<() => void>();
+
+function emit() {
+  for (const subscriber of subscribers) subscriber();
+}
 
 function setMessages(documentId: string, messages: MessageDTO[]) {
   messagesByDocument.set(documentId, messages);
-  for (const subscriber of subscribers) subscriber();
+  emit();
 }
 
 realtime.onEvent((event) => {
   if (event.type === ServerEventType.Message_History) {
+    readCountByDocument.set(event.documentId, event.messages.length);
     setMessages(event.documentId, event.messages);
   } else if (event.type === ServerEventType.Message_New) {
     const messages = messagesByDocument.get(event.documentId) ?? NO_MESSAGES;
@@ -31,6 +37,23 @@ const subscribe = (subscriber: () => void) => {
     subscribers.delete(subscriber);
   };
 };
+
+export function markChatRead(documentId: string) {
+  readCountByDocument.set(
+    documentId,
+    messagesByDocument.get(documentId)?.length ?? 0,
+  );
+  emit();
+}
+
+export function useUnreadMessages(documentId: string) {
+  return useSyncExternalStore(
+    subscribe,
+    () =>
+      (messagesByDocument.get(documentId)?.length ?? 0) -
+      (readCountByDocument.get(documentId) ?? 0),
+  );
+}
 
 export function useSkibidiChat(documentId: string) {
   const messages = useSyncExternalStore(

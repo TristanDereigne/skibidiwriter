@@ -1,4 +1,5 @@
 import TrailBreadcrumb from "@/components/sections/header/trail-breadcrumb.tsx";
+import ChatToggle from "@/components/sections/document/chat-toggle";
 import DocumentChat from "@/components/sections/document/document-chat";
 import DocumentEditor from "@/components/sections/document/document-editor";
 import DocumentParticipants from "@/components/sections/document/document-participants";
@@ -6,7 +7,7 @@ import ShareDialog from "@/components/sections/share/share-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/toast";
-import { DownloadIcon, MessageSquareIcon, UserPlusIcon } from "lucide-react";
+import { DownloadIcon, UserPlusIcon } from "lucide-react";
 import { useDownloadFile, useFile, useRenameFile } from "@/hooks/use-files";
 import { useDisclosure } from "@/hooks/use-disclosure";
 import { useFolderPath } from "@/hooks/use-folders";
@@ -73,16 +74,13 @@ export const EditPage = () => {
                 {CONNECTION_STATUS_LABELS[status]}
               </span>
             </Badge>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-muted-foreground"
-              aria-label="Afficher le chat"
-              title="Afficher le chat"
-              onClick={() => setIsChatOpen((isOpen) => !isOpen)}
-            >
-              <MessageSquareIcon />
-            </Button>
+            {documentId && (
+              <ChatToggle
+                documentId={documentId}
+                isOpen={isChatOpen}
+                onToggle={() => setIsChatOpen((isOpen) => !isOpen)}
+              />
+            )}
             {document?.isOwner && (
               <Button
                 variant="ghost"

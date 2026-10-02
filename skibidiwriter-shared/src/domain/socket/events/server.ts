@@ -1,11 +1,13 @@
 import type { ErrorCode } from "../../errors";
 import type { DocumentOperation } from "../../document/operations";
 import type { MessageDTO } from "../../messages/dtos";
+import type { NotificationDTO } from "../../notifications/dtos";
 import type { UserSummaryDTO } from "../../user/dtos";
 
 export const ServerEventType = {
   Message_History: "message_history",
   Message_New: "message_new",
+  Notification: "notification",
   Document_Operations: "document_operations",
   Document_Participants: "document_participants",
   Document_Revoked: "document_revoked",
@@ -24,6 +26,10 @@ export type ServerEvent =
       type: typeof ServerEventType.Message_New;
       documentId: string;
       message: MessageDTO;
+    }
+  | {
+      type: typeof ServerEventType.Notification;
+      notification: NotificationDTO;
     }
   | {
       type: typeof ServerEventType.Document_Operations;
