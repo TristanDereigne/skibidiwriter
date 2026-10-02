@@ -1,5 +1,5 @@
 import { toast } from "@/components/ui/toast";
-import { api, errorMessage } from "@/lib/api";
+import { api, unwrap } from "@/lib/api";
 import { saveBlob } from "@/lib/download";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -58,13 +58,12 @@ export function useCreateDocument() {
       folderId: string | null;
       content?: string;
     }) => {
-      const res = await api.files.documents.$post({
-        json: { name, folderId, content },
-      });
-      if (!res.ok)
-        throw new Error(
-          await errorMessage(res, "Échec de la création du document"),
-        );
+      const res = await unwrap(
+        api.files.documents.$post({
+          json: { name, folderId, content },
+        }),
+        "Échec de la création du document",
+      );
 
       return await res.json();
     },
@@ -83,11 +82,12 @@ export function useUploadFile() {
       file: File;
       folderId: string | null;
     }) => {
-      const res = await api.files.$post({
-        form: folderId ? { file, folderId } : { file },
-      });
-      if (!res.ok)
-        throw new Error(await errorMessage(res, "Échec du téléversement"));
+      const res = await unwrap(
+        api.files.$post({
+          form: folderId ? { file, folderId } : { file },
+        }),
+        "Échec du téléversement",
+      );
 
       return await res.json();
     },
@@ -100,14 +100,13 @@ export function useRenameFile() {
 
   return useMutation({
     mutationFn: async ({ id, name }: { id: string; name: string }) => {
-      const res = await api.files[":id"].$patch({
-        param: { id },
-        json: { name },
-      });
-      if (!res.ok)
-        throw new Error(
-          await errorMessage(res, "Échec du renommage du fichier"),
-        );
+      const res = await unwrap(
+        api.files[":id"].$patch({
+          param: { id },
+          json: { name },
+        }),
+        "Échec du renommage du fichier",
+      );
 
       return await res.json();
     },
@@ -127,14 +126,13 @@ export function useMoveFile() {
       id: string;
       folderId: string | null;
     }) => {
-      const res = await api.files[":id"].move.$patch({
-        param: { id },
-        json: { folderId },
-      });
-      if (!res.ok)
-        throw new Error(
-          await errorMessage(res, "Échec du déplacement du fichier"),
-        );
+      const res = await unwrap(
+        api.files[":id"].move.$patch({
+          param: { id },
+          json: { folderId },
+        }),
+        "Échec du déplacement du fichier",
+      );
 
       return await res.json();
     },

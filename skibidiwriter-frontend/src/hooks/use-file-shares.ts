@@ -1,5 +1,5 @@
 import { toast } from "@/components/ui/toast";
-import { api, errorMessage } from "@/lib/api";
+import { api, unwrap } from "@/lib/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CreateFileSharesDTO } from "skibidiwriter-shared";
 
@@ -9,11 +9,10 @@ export function useSharedFiles() {
   return useQuery({
     queryKey: RECEIVED_SHARES_QUERY_KEY,
     queryFn: async () => {
-      const res = await api["file-shares"].$get();
-      if (!res.ok)
-        throw new Error(
-          await errorMessage(res, "Échec du chargement des fichiers partagés"),
-        );
+      const res = await unwrap(
+        api["file-shares"].$get(),
+        "Échec du chargement des fichiers partagés",
+      );
 
       return await res.json();
     },
@@ -27,13 +26,12 @@ export function useFileRecipients(fileId: string, enabled: boolean) {
     queryKey: recipientsKey(fileId),
     enabled,
     queryFn: async () => {
-      const res = await api["file-shares"][":id"].$get({
-        param: { id: fileId },
-      });
-      if (!res.ok)
-        throw new Error(
-          await errorMessage(res, "Échec du chargement des partages"),
-        );
+      const res = await unwrap(
+        api["file-shares"][":id"].$get({
+          param: { id: fileId },
+        }),
+        "Échec du chargement des partages",
+      );
 
       return await res.json();
     },
@@ -45,11 +43,12 @@ export function useRevokeFileShare(fileId: string) {
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      const res = await api["file-shares"][":id"][":userId"].$delete({
-        param: { id: fileId, userId },
-      });
-      if (!res.ok)
-        throw new Error(await errorMessage(res, "Échec du retrait de l'accès"));
+      await unwrap(
+        api["file-shares"][":id"][":userId"].$delete({
+          param: { id: fileId, userId },
+        }),
+        "Échec du retrait de l'accès",
+      );
     },
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: recipientsKey(fileId) }),
@@ -67,9 +66,10 @@ export function useShareFile() {
 
   return useMutation({
     mutationFn: async (input: CreateFileSharesDTO) => {
-      const res = await api["file-shares"].$post({ json: input });
-      if (!res.ok)
-        throw new Error(await errorMessage(res, "Échec du partage du fichier"));
+      const res = await unwrap(
+        api["file-shares"].$post({ json: input }),
+        "Échec du partage du fichier",
+      );
 
       return await res.json();
     },

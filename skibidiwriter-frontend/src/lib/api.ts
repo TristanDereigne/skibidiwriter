@@ -12,3 +12,13 @@ export async function errorMessage(res: Response, fallback: string) {
 
   return getErrorMessage(body?.code, fallback);
 }
+
+export async function unwrap<T extends Response>(
+  request: Promise<T>,
+  fallback: string,
+) {
+  const res = await request;
+  if (!res.ok) throw new Error(await errorMessage(res, fallback));
+
+  return res as Exclude<T, { ok: false }>;
+}
